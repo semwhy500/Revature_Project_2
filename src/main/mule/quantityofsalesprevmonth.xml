@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
     <apikit:config name="quantityofsalesprevmonth-config" api="quantityofsalesprevmonth.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <flow name="quantityofsalesprevmonth-main">
+    <flow name="previousMonthSalesQuantity">
         <http:listener path="/api/*" config-ref="HTTP_Listener_config">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
@@ -93,34 +93,24 @@ output application/json
             </on-error-propagate>
         </error-handler>
     </flow>
-    <flow name="quantityofsalesprevmonth-console">
-        <http:listener path="/console/*" config-ref="HTTP_Listener_config">
-            <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
-            </http:response>
-            <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body><![CDATA[#[payload]]]></http:body>
-                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
-            </http:error-response>
-        </http:listener>
-        <apikit:console config-ref="quantityofsalesprevmonth-config" />
-        <error-handler>
-            <on-error-propagate type="APIKIT:NOT_FOUND">
-                <ee:transform>
-                    <ee:message>
-                        <ee:set-payload><![CDATA[%dw 2.0
+    <flow name="GET:DoTW">
+		<ee:transform>
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-{message: "Resource not found"}]]></ee:set-payload>
-                    </ee:message>
-                    <ee:variables>
-                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
-                    </ee:variables>
-                </ee:transform>
-            </on-error-propagate>
-        </error-handler>
+{
+  totalQuantityofSales: {
+    "type": "application/json",
+    example: {
+      totalAmt: 4385
+    }
+  }
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
     </flow>
-    <flow name="get:\totalQuantityPrevMonth\DoTW:quantityofsalesprevmonth-config">
+    <flow name="GET:MONTH">
         <ee:transform>
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
@@ -137,7 +127,7 @@ output application/json
             </ee:message>
         </ee:transform>
     </flow>
-    <flow name="get:\totalQuantityPrevMonth\month:quantityofsalesprevmonth-config">
+    <flow name="GET:PRODUCT_ID">
         <ee:transform>
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
@@ -154,7 +144,7 @@ output application/json
             </ee:message>
         </ee:transform>
     </flow>
-    <flow name="get:\totalQuantityPrevMonth\productId:quantityofsalesprevmonth-config">
+    <flow name="GET:STORE_ID">
         <ee:transform>
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0
@@ -171,41 +161,7 @@ output application/json
             </ee:message>
         </ee:transform>
     </flow>
-    <flow name="get:\totalQuantityPrevMonth\store:quantityofsalesprevmonth-config">
-        <ee:transform>
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  totalQuantityofSales: {
-    "type": "application/json",
-    example: {
-      totalAmt: 4385
-    }
-  }
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-    </flow>
-    <flow name="get:\totalQuantityPrevMonth:quantityofsalesprevmonth-config">
-        <ee:transform>
-            <ee:message>
-                <ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-{
-  totalQuantityofSales: {
-    "type": "application/json",
-    example: {
-      totalAmt: 4385
-    }
-  }
-}]]></ee:set-payload>
-            </ee:message>
-        </ee:transform>
-    </flow>
-    <flow name="get:\totalQuantityPrevMonth\year:quantityofsalesprevmonth-config">
+    <flow name="GET:TOTALQUANTITY">
         <ee:transform>
             <ee:message>
                 <ee:set-payload><![CDATA[%dw 2.0

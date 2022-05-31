@@ -15,13 +15,10 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 			<route >
 				<flow-ref doc:name="apiflow" doc:id="3a023ed1-4c67-48dd-9f71-7c5d0e8af352" name="apiflow"/>
 			</route>
-			<route >
-				<flow-ref doc:name="dbflow" doc:id="5b66711c-e763-4751-8d94-a150585f1f65" name="dbflow"/>
-			</route>
 		</scatter-gather>
 	</flow>
 	<flow name="csvflow" doc:id="012e2d70-8f43-4346-9414-6a3585413c70" >
-		<file:read doc:name="orders.csv" doc:id="79d3a6a0-813e-480b-aa4e-61297770ec91" path="../orderfeature/src/main/resources/p3_data/orderInput.csv" config-ref="File_Config" />
+		<file:read doc:name="orders.csv" doc:id="79d3a6a0-813e-480b-aa4e-61297770ec91" path="orderInput.csv" config-ref="File_Config" />
 		<ee:transform doc:name="CSV to JSON" doc:id="3011d5e1-3a73-41a3-8e72-8c2870893a63">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
@@ -32,7 +29,7 @@ payload]]></ee:set-payload>
 				</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="e230cec8-5b16-44c0-9270-ffffe100e208" />
 	</flow>
-	<flow name="apiflow" doc:id="f8656d45-383d-46e9-9fe9-2d530f9d1796" >
+	<flow name="apiflow" doc:id="f8656d45-383d-46e9-9fe9-2d530f9d1796">
 		<http:request method="GET" doc:name="swagger API" doc:id="2fd0f5db-536b-4460-b6c9-4413db200c80" config-ref="HTTP_Request_configuration" path="/order/date" targetValue="#[%dw 2.0 output application/xml --- payload]">
 					<http:query-params><![CDATA[#[output application/json
 ---
@@ -48,20 +45,5 @@ payload]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="e2f1637d-021f-43af-b0d6-1eebd07a9c0c" />
-	</flow>
-	<flow name="dbflow" doc:id="9f3bc851-2569-4703-8cf9-f6b3ba686388" >
-		<db:select doc:name="RDS AWS db" doc:id="d00d509d-8490-407a-86d4-424aea225e7e">
-					<db:sql><![CDATA[SELECT * FROM]]></db:sql>
-				</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="02a7675a-1b09-4567-ab65-aaa945b4fa72">
-					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0
-output application/java
----
-{
-}]]></ee:set-payload>
-					</ee:message>
-				</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="ef873881-183a-4284-81ea-88063a807cf5" />
 	</flow>
 </mule>
