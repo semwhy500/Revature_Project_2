@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="b8bec7c0-4941-4b2f-a5ae-40e757801e72" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="allOrders" doc:id="ebaec7ac-b46e-4862-b27d-2914de6020f6" >
+		<http:listener doc:name="GET /orders" doc:id="1b1ac2f0-e28a-43e8-a56f-9cf6c28bd32c" config-ref="HTTP_Listener_config" path="/orders" allowedMethods="GET" />
+		<scatter-gather doc:name="Scatter-Gather" doc:id="a0ca9067-de0c-4402-8c5f-758c3771e510">
+			<route>
+				<flow-ref doc:name="csvflow" doc:id="cf0158ad-97b9-4f03-895a-1a8bb77225cc" name="csvorders" />
+			</route>
+			<route>
+				<flow-ref doc:name="dbflow" doc:id="5b66711c-e763-4751-8d94-a150585f1f65" name="dborders" />
+			</route>
+			<route >
+				<flow-ref doc:name="API orders" doc:id="a9f6bec5-0b43-4f96-a357-95b6f8ebf023" name="apiorders"/>
+			</route>
+		</scatter-gather>
+		<logger level="INFO" doc:name="Logger" doc:id="4222dcc5-3e65-46d0-b4c1-7ed54c408fe7" message="#[payload]"/>
+	</flow>
+	<flow name="allTransactions" doc:id="2280caa5-3b36-4ee1-94f6-f78e44ccef04" >
+		<http:listener doc:name="GET /transactions" doc:id="8d97256f-23aa-4a6f-9794-f8ed4e8a7475" config-ref="HTTP_Listener_config" path="/transactions" />
+		<scatter-gather doc:name="Scatter-Gather" doc:id="9e0fd69c-dd8a-4816-862a-70678832cc31">
+			<route>
+				<flow-ref doc:name="csv Transactions" doc:id="c9d519ce-99b9-424b-abea-62dabf005892" name="csvtransactions" />
+			</route>
+			<route>
+				<flow-ref doc:name="db Transactions" doc:id="9ae32e60-a629-4cad-9300-4aa9046c65a0" name="dbtransactions" />
+			</route>
+			<route>
+				<flow-ref doc:name="api Transactions" doc:id="8332264d-6c70-4a78-b0e0-5b70d614cd99" name="apitransactions" />
+			</route>
+		</scatter-gather>
+		<logger level="INFO" doc:name="Logger" doc:id="5bfc9236-c578-4e97-b91b-70dbc584f4f5" />
+	</flow>
+	<flow name="allProducts" doc:id="b9f37c20-c28f-4efc-a94d-3874fbd54849" >
+		<http:listener doc:name="GET /products" doc:id="0ac3da2a-2a11-4378-b24e-f160512f4f4b" config-ref="HTTP_Listener_config" path="/products" />
+		<scatter-gather doc:name="Copy_of_Scatter-Gather" doc:id="a63e372c-3af1-450c-be73-c6e50fac0022" >
+			<route >
+				<flow-ref doc:name="csv Products" doc:id="435d8089-6597-425b-9de8-1d8bf33b2e4b" name="csvproducts" />
+			</route>
+			<route >
+				<flow-ref doc:name="db Products" doc:id="92626061-b940-42e2-a9af-a0680be34fe3" name="dbproducts" />
+			</route>
+			<route >
+				<flow-ref doc:name="api Products" doc:id="a8f51b26-0733-4448-b169-1ca363ae7708" name="apiproducts" />
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="9384647e-fad8-4318-815f-4888d7d368cd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload distinctBy $]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="c4c0d456-07c4-4b18-b8d3-00a91adb2527" />
+	</flow>
+	<flow name="transactionSuccessful" doc:id="a7bd0d90-f667-456e-b91d-f26fc971f46d" >
+		<http:listener doc:name="Log Transactions" doc:id="80a90b3f-6af6-447f-8c99-a9213303f89b" config-ref="HTTP_Listener_config" path="/log"/>
+		<flow-ref doc:name="Scatter Gather Transactions" doc:id="f4a1cb50-1de4-4d70-9bff-908beeedd6cd" name="allTransactions" />
+		<foreach doc:name="For Each" doc:id="4aed2011-8dbe-4a5a-9fef-0965551a8d1e" collection="#[dw::Core::entriesOf(payload)]">
+			<choice doc:name="Choice" doc:id="6620c798-6df8-4b21-ace3-e874347a2919">
+				<when expression='#[payload.payment_txn_success == "true"]'>
+					<file:write doc:name="Write Successful Transactions " doc:id="f836d2cb-c107-4156-96d0-91ef3f787430" config-ref="File_Config" path="H:\AnypointStudio\cohort_project\src\main\resources\p3_data\successfultransactions.json" mode="APPEND" />
+				</when>
+				<otherwise >
+					<file:write doc:name="Write Unsuccessful Transactions" doc:id="5b400378-f847-4dab-9e4d-045a0e645f38" path="H:\AnypointStudio\cohort_project\src\main\resources\p3_data\unsuccessfultransactions.json" mode="APPEND"/>
+				</otherwise>
+			</choice>
+		</foreach>
+		<ee:transform doc:name="Transform Message" doc:id="7957dbe7-b8a8-4916-ac8e-80d165f23022" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="csvorders" doc:id="012e2d70-8f43-4346-9414-6a3585413c70" >
+		<file:read doc:name="orders.csv" doc:id="79d3a6a0-813e-480b-aa4e-61297770ec91" path="H:\AnypointStudio\cohort_project\src\main\resources\p3_data\ordersInput.csv" config-ref="File_Config" />
+		<ee:transform doc:name="CSV to JSON" doc:id="3011d5e1-3a73-41a3-8e72-8c2870893a63">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e230cec8-5b16-44c0-9270-ffffe100e208" />
+	</flow>
+	<flow name="apiorders" doc:id="f8656d45-383d-46e9-9fe9-2d530f9d1796" >
+		<http:listener doc:name="get /apiorders" doc:id="2cd1f99d-1df0-42db-942a-78ec4c62fc0d" config-ref="HTTP_Listener_config" path="/apiorders" allowedMethods="GET"/>
+		<http:request method="GET" doc:name="swagger API" doc:id="2fd0f5db-536b-4460-b6c9-4413db200c80" config-ref="HTTP_Request_configuration" path="/order" targetValue="#[%dw 2.0 output application/xml --- payload]">
+					<http:query-params><![CDATA[#[output application/json
+---
+{
+	"end_date" : "2022-04-28",
+	"start_date" : "2022-04-01"
+}]]]></http:query-params>
+				</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="5295711c-7ff9-4479-82ce-9870e8edc6af" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ((item, index) -> {
+order_id: item.id,
+qty: item.quantity,
+datetime: item.date,
+store_id: item.storeId,
+product_id: item.product.id,
+txn_id: item.transaction.id
+})
+	
+	
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e2f1637d-021f-43af-b0d6-1eebd07a9c0c" message="#[payload]"/>
+	</flow>
+	<flow name="dborders" doc:id="9f3bc851-2569-4703-8cf9-f6b3ba686388" >
+		<db:select doc:name="RDS AWS db" doc:id="d00d509d-8490-407a-86d4-424aea225e7e" config-ref="Database_Config">
+					<db:sql><![CDATA[SELECT * FROM orders]]></db:sql>
+				</db:select>
+		<ee:transform doc:name="Java to JSON" doc:id="02a7675a-1b09-4567-ab65-aaa945b4fa72">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="ef873881-183a-4284-81ea-88063a807cf5" message="#[payload]"/>
+	</flow>
+	<flow name="csvtransactions" doc:id="586283f6-520c-4e44-9801-17a3b79ac2ab" >
+		<http:listener doc:name="Copy_of_Copy_of_testlistener" doc:id="8bb77cc6-fee6-4172-a3ec-d406d253014c" config-ref="HTTP_Listener_config" path="/test3" />
+		<file:read doc:name="transactionsInput.csv" doc:id="6b571a31-e6b7-41c5-9a30-1328f3a28bb7" config-ref="File_Config" path="H:\AnypointStudio\cohort_project\src\main\resources\p3_data\transactionsInput.csv"/>
+		<ee:transform doc:name="CSV to JSON" doc:id="ad5f32cb-75df-4755-a534-3202c0b57b3d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload
+	]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="78a1c9ee-8558-4265-b694-29d6fe9ae3c9" />
+	</flow>
+	<flow name="dbtransactions" doc:id="8e9b78a0-4766-4a7a-81b6-cd28e66d2baf" >
+		<http:listener doc:name="Copy_of_testlistener" doc:id="1fb8b807-9fe2-4ff5-bf8d-c46dea2e6bc3" config-ref="HTTP_Listener_config" path="/test2" />
+		<db:select doc:name="Copy_of_RDS AWS db" doc:id="1ce82eeb-e78f-4cc5-8713-4c43b13f9ebf" config-ref="Database_Config">
+			<db:sql><![CDATA[SELECT * FROM transactions]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Java to JSON" doc:id="dbd77a0b-588f-4e7e-b99d-467bf3bad1c4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload
+	]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="5759e743-ed0c-4797-b066-a6f46902ff8c" message="#[payload]" />
+	</flow>
+	<flow name="apitransactions" doc:id="c2bfddc7-5d4c-40a5-ab72-bb0de89d51e8" >
+		<http:listener doc:name="Copy_of_Copy_of_testlistener" doc:id="98847700-5a28-4799-8548-3e66408c5592" config-ref="HTTP_Listener_config" path="/test4" />
+		<http:request method="GET" doc:name="swagger API" doc:id="05595186-214d-4f75-8cd1-0c9fb97446bf" config-ref="HTTP_Request_configuration" path="/transaction" targetValue="#[%dw 2.0 output application/xml --- payload]" >
+			<http:query-params ><![CDATA[#[output application/json
+---
+{
+	"end_date" : "2022-04-28",
+	"start_date" : "2022-04-01"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Transform Message" doc:id="7a169fa1-17f8-4594-a8ac-1794da56b538" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ((item, index) -> {
+payment_type: item.paymentType,
+payment_txn_success: item.success,
+customer_id: item.customer.id,
+txn_id: item.id
+})
+	
+	
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="06a3ce18-bb21-45dd-aab5-9aa824306893" message="#[payload]" />
+	</flow>
+	<flow name="apiproducts" doc:id="44a405dd-521b-4d21-96d1-4a616fe9bc00" >
+		<http:listener doc:name="Copy_of_Copy_of_Copy_of_testlistener" doc:id="92e2236f-d2d8-4c6d-be65-b4abc74a249a" config-ref="HTTP_Listener_config" path="/test5" />
+		<http:request method="GET" doc:name="swagger API" doc:id="6cea212b-7720-4a6e-8823-634a823b8b0a" config-ref="HTTP_Request_configuration" path="/product" targetValue="#[%dw 2.0 output application/xml --- payload]" >
+			<http:query-params ><![CDATA[#[output application/json
+---
+{
+	"end_date" : "2022-04-28",
+	"start_date" : "2022-04-01"
+}]]]></http:query-params>
+		</http:request>
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="35a3d83e-2f50-45ed-9ddc-fa3771deb8e1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ((item, index) -> {
+product_id: item.id,
+product_name: item.name,
+price: item.price
+
+
+})
+	
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="80d9a04b-b0e1-4e0d-8201-31b256ef19d3" message="#[payload]" />
+	</flow>
+	<flow name="dbproducts" doc:id="cab23636-e700-46ec-ae99-00ce8317e744" >
+		<http:listener doc:name="Copy_of_Copy_of_testlistener" doc:id="d33b2022-8368-44ba-9215-d96a34a21c5d" config-ref="HTTP_Listener_config" path="/test6" />
+		<db:select doc:name="RDS AWS db" doc:id="47947b40-d624-416e-9a32-d541a5f530d7" config-ref="Database_Config" >
+			<db:sql ><![CDATA[SELECT * FROM product]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Java to JSON" doc:id="4d85b07d-a62e-407e-b16e-08acbe0f4a56" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload
+	]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="dea40d58-4c48-43c8-b5ff-f721ae4f77df" message="#[payload]" />
+	</flow>
+	<flow name="csvproducts" doc:id="2323967e-2655-4718-ab75-b70cd2103f28" >
+		<http:listener doc:name="Copy_of_Copy_of_Copy_of_testlistener" doc:id="dfed8e67-dfed-4b82-a9da-59d408d8f777" config-ref="HTTP_Listener_config" path="/test7" />
+		<file:read doc:name="productsInput.csv" doc:id="a43881f4-dae1-4c19-bdd8-401230e6c0f9" config-ref="File_Config" path="H:\AnypointStudio\cohort_project\src\main\resources\p3_data\productsInput.csv" />
+		<ee:transform doc:name="CSV to JSON" doc:id="6f85ae60-b71e-4287-a217-502f5b84b4d6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="7cf3f46a-1d3d-4e4e-8904-0a9bb312edad" />
+	</flow>
+</mule>
