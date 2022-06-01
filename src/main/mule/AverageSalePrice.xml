@@ -24,6 +24,22 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 				<flow-ref doc:name="API ORDERS" doc:id="a9f6bec5-0b43-4f96-a357-95b6f8ebf023" name="apiorders"/>
 			</route>
 		</scatter-gather>
+		<ee:transform doc:name="FLATTEN PAYLOAD" doc:id="96cc9940-6ba0-4011-8961-1ff54ca97f76">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+flatten(payload..payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="JAVA to JSON" doc:id="b36673b1-ca3e-4cf3-aa1c-7c10adcf285b">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="4222dcc5-3e65-46d0-b4c1-7ed54c408fe7" message="#[payload]"/>
 	</flow>
 	<flow name="allTransactions" doc:id="2280caa5-3b36-4ee1-94f6-f78e44ccef04" >
@@ -39,9 +55,9 @@ http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mu
 				<flow-ref doc:name="API TRANSACTIONS" doc:id="8332264d-6c70-4a78-b0e0-5b70d614cd99" name="apitransactions" />
 			</route>
 		</scatter-gather>
-		<ee:transform doc:name="FLATTEN PAYLOAD" doc:id="96cc9940-6ba0-4011-8961-1ff54ca97f76" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<ee:transform doc:name="FLATTEN PAYLOAD" doc:id="1e243dbc-755a-48be-92ad-acd0cea771b0">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/java
 ---
 flatten(payload..payload)]]></ee:set-payload>
@@ -134,7 +150,7 @@ payload]]></ee:set-payload>
 	"start_date" : "2022-04-01"
 }]]]></http:query-params>
 				</http:request>
-		<ee:transform doc:name="Transform Message" doc:id="5295711c-7ff9-4479-82ce-9870e8edc6af" >
+		<ee:transform doc:name="JAVA to JSON" doc:id="5295711c-7ff9-4479-82ce-9870e8edc6af" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -160,7 +176,7 @@ txn_id: item.transaction.id
 		<db:select doc:name="RDS AWS db" doc:id="d00d509d-8490-407a-86d4-424aea225e7e" config-ref="Database_Config">
 					<db:sql><![CDATA[SELECT * FROM orders]]></db:sql>
 				</db:select>
-		<ee:transform doc:name="Java to JSON" doc:id="02a7675a-1b09-4567-ab65-aaa945b4fa72">
+		<ee:transform doc:name="JAVA to JSON" doc:id="02a7675a-1b09-4567-ab65-aaa945b4fa72">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -186,10 +202,10 @@ payload
 	</flow>
 	<flow name="dbtransactions" doc:id="8e9b78a0-4766-4a7a-81b6-cd28e66d2baf" >
 		<http:listener doc:name="GET /dbtransactions" doc:id="1fb8b807-9fe2-4ff5-bf8d-c46dea2e6bc3" config-ref="HTTP_Listener_config" path="/dbtransactions" />
-		<db:select doc:name="Copy_of_RDS AWS db" doc:id="1ce82eeb-e78f-4cc5-8713-4c43b13f9ebf" config-ref="Database_Config">
+		<db:select doc:name="RDS AWS db" doc:id="1ce82eeb-e78f-4cc5-8713-4c43b13f9ebf" config-ref="Database_Config">
 			<db:sql><![CDATA[SELECT * FROM transactions]]></db:sql>
 		</db:select>
-		<ee:transform doc:name="Java to JSON" doc:id="dbd77a0b-588f-4e7e-b99d-467bf3bad1c4" >
+		<ee:transform doc:name="JAVA to JSON" doc:id="dbd77a0b-588f-4e7e-b99d-467bf3bad1c4" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -214,7 +230,7 @@ txn_id: item.payment_txn_id
 	"start_date" : "2022-04-01"
 }]]]></http:query-params>
 		</http:request>
-		<ee:transform doc:name="Transform Message" doc:id="7a169fa1-17f8-4594-a8ac-1794da56b538" >
+		<ee:transform doc:name="JAVA to JSON" doc:id="7a169fa1-17f8-4594-a8ac-1794da56b538" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -234,7 +250,7 @@ txn_id: item.id
 		<logger level="INFO" doc:name="Logger" doc:id="06a3ce18-bb21-45dd-aab5-9aa824306893" message="#[payload]" />
 	</flow>
 	<flow name="apiproducts" doc:id="44a405dd-521b-4d21-96d1-4a616fe9bc00" >
-		<http:listener doc:name="Copy_of_Copy_of_Copy_of_testlistener" doc:id="92e2236f-d2d8-4c6d-be65-b4abc74a249a" config-ref="HTTP_Listener_config" path="/test5" />
+		<http:listener doc:name="GET  /apitproducts" doc:id="92e2236f-d2d8-4c6d-be65-b4abc74a249a" config-ref="HTTP_Listener_config" path="/apiproducts" />
 		<http:request method="GET" doc:name="swagger API" doc:id="6cea212b-7720-4a6e-8823-634a823b8b0a" config-ref="HTTP_Request_configuration" path="/product" targetValue="#[%dw 2.0 output application/xml --- payload]" >
 			<http:query-params ><![CDATA[#[output application/json
 ---
@@ -243,7 +259,7 @@ txn_id: item.id
 	"start_date" : "2022-04-01"
 }]]]></http:query-params>
 		</http:request>
-		<ee:transform doc:name="Copy_of_Transform Message" doc:id="35a3d83e-2f50-45ed-9ddc-fa3771deb8e1" >
+		<ee:transform doc:name="JAVA to JSON" doc:id="35a3d83e-2f50-45ed-9ddc-fa3771deb8e1" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -260,14 +276,14 @@ price: item.price
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="80d9a04b-b0e1-4e0d-8201-31b256ef19d3" message="#[payload]" />
+		<logger level="INFO" doc:name="Logger" doc:id="80d9a04b-b0e1-4e0d-8201-31b256ef19d3" message="#[payload]" />
 	</flow>
 	<flow name="dbproducts" doc:id="cab23636-e700-46ec-ae99-00ce8317e744" >
 		<http:listener doc:name="GET /dbproducts" doc:id="d33b2022-8368-44ba-9215-d96a34a21c5d" config-ref="HTTP_Listener_config" path="/dbproducts" />
 		<db:select doc:name="RDS AWS db" doc:id="47947b40-d624-416e-9a32-d541a5f530d7" config-ref="Database_Config" >
 			<db:sql ><![CDATA[SELECT * FROM product]]></db:sql>
 		</db:select>
-		<ee:transform doc:name="Java to JSON" doc:id="4d85b07d-a62e-407e-b16e-08acbe0f4a56" >
+		<ee:transform doc:name="JAVA to JSON" doc:id="4d85b07d-a62e-407e-b16e-08acbe0f4a56" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -289,13 +305,13 @@ output application/json
 payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="7cf3f46a-1d3d-4e4e-8904-0a9bb312edad" />
+		<logger level="INFO" doc:name="Logger" doc:id="7cf3f46a-1d3d-4e4e-8904-0a9bb312edad" />
 	</flow>
 	<flow name="TransactionSuccessMetrics" doc:id="7e877e18-bf29-4f2e-87eb-7b382562ddc8" >
 		<http:listener doc:name="GET /transactionsuccess" doc:id="e64b6d93-f298-401f-a5ae-63f612cf9459" config-ref="HTTP_Listener_config" path="/transactionsuccess" />
 		<flow-ref doc:name="Scatter Gather Transactions" doc:id="bf931c32-b2b5-4c97-a637-15ab1fedb00e" name="allTransactions" />
 		<set-variable value="#[sizeOf(payload) as Number]" doc:name="Set Variable Payload Size" doc:id="287ec126-ce1e-4847-925e-d30a5bfb9c4d" variableName="payloadsize" />
-		<ee:transform doc:name="Transform Payload to Readable" doc:id="15859030-affd-498e-9dc5-9dfe542b4b0f" >
+		<ee:transform doc:name="Transform Payload to Readable Format" doc:id="15859030-affd-498e-9dc5-9dfe542b4b0f" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0import java!java::lang::System
 
