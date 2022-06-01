@@ -10,10 +10,13 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<http:listener doc:name="Listener" doc:id="cbba68aa-85ba-44f4-85fc-9f645f01e38d" config-ref="HTTP_Listener_config" path="/scatter"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="cf6fdb60-c5f8-4a08-b564-f8cb47264ca7" >
 			<route >
-				<flow-ref doc:name="csvFlowReference" doc:id="5f3a2d73-a29f-42d3-9726-bda23c8ec390" name="csvFlow"/>
+				<flow-ref doc:name="ordersCSVFlowRef" doc:id="5f3a2d73-a29f-42d3-9726-bda23c8ec390" name="ordersCSVFlow"/>
 			</route>
 			<route >
-				<flow-ref doc:name="apiFlowReference" doc:id="decfe692-ad22-4ea4-b2ad-9e9f6ef8f29a" name="apiFlow"/>
+				<flow-ref doc:name="productsCSVFlowRef" doc:id="16250363-b79b-48aa-a639-ce6049fca2c1" name="productsCSVFlow"/>
+			</route>
+			<route >
+				<flow-ref doc:name="transactionsCSVFlowRef" doc:id="a0299563-e3bf-4489-81aa-beb5e2cc2f3c" name="transactionsCSVFlow"/>
 			</route>
 		</scatter-gather>
 		<ee:transform doc:name="Transform Message" doc:id="84def99d-18b2-4c83-a529-1007f750b59e" >
@@ -30,18 +33,6 @@ payload]]></ee:set-payload>
 		<http:listener doc:name="Listener" doc:id="aadae3f3-5e6c-4015-a435-b28afa8aa75d" config-ref="HTTP_Listener_config" path="/hello"/>
 		<set-payload value="hello world" doc:name="Set Payload" doc:id="7e56a8d5-81a8-40fb-a9db-a2ab1f3e782e" />
 	</flow>
-	<flow name="csvFlow" doc:id="5630baea-c3f2-40f6-bd89-de1942dac0ae" >
-		<file:read doc:name="Read" doc:id="973218f9-ce41-40e2-b87e-1eecae0963da" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Orders.csv"/>
-		<ee:transform doc:name="Transform Message" doc:id="f579f233-a765-4d8b-9187-304109caa334" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="4e22176d-8be3-42b9-bf7f-0279a61a4510" />
-	</flow>
 	<flow name="apiFlow" doc:id="e908a1d1-908a-40e8-aa32-526535ac4f64" >
 		<http:request method="GET" doc:name="Request" doc:id="91955e42-70d0-45e3-9646-ac9086dc2d12" config-ref="HTTP_Request_configuration" path="/order"/>
 		<ee:transform doc:name="Transform Message" doc:id="0f60fd38-62b8-4e4b-af09-bccb73c935f4" >
@@ -53,5 +44,41 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="aa43048f-896e-412d-8450-885ef0e634a9" />
+	</flow>
+	<flow name="ordersCSVFlow" doc:id="5630baea-c3f2-40f6-bd89-de1942dac0ae">
+		<file:read doc:name="readOrdersCSV" doc:id="973218f9-ce41-40e2-b87e-1eecae0963da" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Orders.csv" />
+		<ee:transform doc:name="Transform Message" doc:id="f579f233-a765-4d8b-9187-304109caa334">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4e22176d-8be3-42b9-bf7f-0279a61a4510" message="#[payload]"/>
+	</flow>
+	<flow name="productsCSVFlow" doc:id="c31ef09c-35cb-4c01-b05a-ee4f6a3d2e27" >
+		<file:read doc:name="readProductsCSV" doc:id="b8c75dd9-5c37-4a2b-a703-e11c9bfbb88d" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Products.csv" />
+		<ee:transform doc:name="Transform Message" doc:id="5fb61567-25e8-4be3-abf1-301006ed157b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="69ed7360-a096-4c3c-a51e-a5ae6cdfec02" message="#[payload]"/>
+	</flow>
+	<flow name="transactionsCSVFlow" doc:id="bc31397d-f46f-4bca-ba27-3ad8e90ca0ad" >
+		<file:read doc:name="readTransactionsCSV" doc:id="688c792f-3299-45e2-b4ee-c2aad7dbc1cd" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Transactions.csv" />
+		<ee:transform doc:name="Transform Message" doc:id="1ee0395a-14c5-4414-b4f8-ad1675e458e3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="7bfcf043-8ceb-4065-a7d2-ff74e096fadc" message="#[payload]"/>
 	</flow>
 </mule>
