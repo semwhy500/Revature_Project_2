@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="scatter-gather-testFlow3" doc:id="d7f5a5c1-cd2b-45bb-a7b2-8a627ac09c67" >
+		<http:listener doc:name="Listener" doc:id="cbba68aa-85ba-44f4-85fc-9f645f01e38d" config-ref="HTTP_Listener_config" path="/scatter"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="cf6fdb60-c5f8-4a08-b564-f8cb47264ca7" >
+			<route >
+				<flow-ref doc:name="csvFlowReference" doc:id="5f3a2d73-a29f-42d3-9726-bda23c8ec390" name="csvFlow"/>
+			</route>
+			<route >
+				<flow-ref doc:name="apiFlowReference" doc:id="decfe692-ad22-4ea4-b2ad-9e9f6ef8f29a" name="apiFlow"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="84def99d-18b2-4c83-a529-1007f750b59e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b72581fd-2d56-4a5d-a4ed-1e1e2eef73ff" />
+	</flow>
+	<flow name="helloFlow" doc:id="625d821d-0e98-4015-beee-2c5876694459" >
+		<http:listener doc:name="Listener" doc:id="aadae3f3-5e6c-4015-a435-b28afa8aa75d" config-ref="HTTP_Listener_config" path="/hello"/>
+		<set-payload value="hello world" doc:name="Set Payload" doc:id="7e56a8d5-81a8-40fb-a9db-a2ab1f3e782e" />
+	</flow>
+	<flow name="csvFlow" doc:id="5630baea-c3f2-40f6-bd89-de1942dac0ae" >
+		<http:listener doc:name="Listener" doc:id="3808a4b6-3661-406a-9c6d-0b93c868d85a" config-ref="HTTP_Listener_config" path="/csv"/>
+		<file:read doc:name="Read" doc:id="973218f9-ce41-40e2-b87e-1eecae0963da" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Orders.csv"/>
+		<ee:transform doc:name="Transform Message" doc:id="f579f233-a765-4d8b-9187-304109caa334" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4e22176d-8be3-42b9-bf7f-0279a61a4510" />
+	</flow>
+	<flow name="apiFlow" doc:id="e908a1d1-908a-40e8-aa32-526535ac4f64" >
+		<http:listener doc:name="Listener" doc:id="fb30f9e3-c16f-41e5-ab9d-ba0d736132f0" config-ref="HTTP_Listener_config" path="/api"/>
+		<http:request method="GET" doc:name="Request" doc:id="91955e42-70d0-45e3-9646-ac9086dc2d12" config-ref="HTTP_Request_configuration" path="/order"/>
+		<ee:transform doc:name="Transform Message" doc:id="0f60fd38-62b8-4e4b-af09-bccb73c935f4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="aa43048f-896e-412d-8450-885ef0e634a9" />
+	</flow>
+</mule>

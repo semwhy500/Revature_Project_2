@@ -1,13 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
-    <http:listener-config name="totalincomeperpreviousmonthbystore-httpListenerConfig">
-        <http:listener-connection host="0.0.0.0" port="8081" />
-    </http:listener-config>
-    <apikit:config name="totalincomeperpreviousmonthbystore-config" api="totalincomeperpreviousmonthbystore.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
-    <file:config name="File_Config" doc:name="File Config" doc:id="9e98e264-da23-4097-b1e5-af7b22d8de19" >
-		<file:connection workingDir="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\data\csvs for p3" />
-	</file:config>
 	<flow name="getDataFromAPIFlow" doc:id="e2bfdbdb-8d6d-468f-ad4c-b264b29e5c71" >
 		<ee:transform doc:name="Transform Message" doc:id="a4ef738d-9821-47e1-8dc1-25e7d24341dd" >
 			<ee:message >
@@ -20,7 +13,7 @@ output application/java
 		</ee:transform>
 	</flow>
 	<flow name="getDataFromCSVsFlow" doc:id="22e2345c-36c6-4192-8df3-d990f30a4820" >
-		<file:read doc:name="readFromCSVs" doc:id="c6d09037-b73a-4bcd-a828-7e94fc1d165d" config-ref="File_Config" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\data\csvs for p3\Orders.csv"/>
+		<file:read doc:name="readFromCSVs" doc:id="c6d09037-b73a-4bcd-a828-7e94fc1d165d" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\data\csvs for p3\Orders.csv"/>
 		<ee:transform doc:name="Transform Message" doc:id="fd92b3f7-cd72-466a-b67f-9f0175d0239d" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -32,16 +25,16 @@ payload]]></ee:set-payload>
 		<logger level="INFO" doc:name="Logger" doc:id="d492889e-a724-42a7-be83-bbc4d4e7983d" message="#[payload]"/>
 	</flow>
 	<flow name="totalincomeperpreviousmonthbystore-main">
-        <http:listener config-ref="totalincomeperpreviousmonthbystore-httpListenerConfig" path="/api/*">
+        <http:listener path="/api/*" config-ref="HTTP_Listener_config">
             <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
             <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
-        <apikit:router config-ref="totalincomeperpreviousmonthbystore-config" />
+        <apikit:router config-ref="totalincomeperpreviousmonthbystore-config"/>
         <error-handler>
             <on-error-propagate type="APIKIT:BAD_REQUEST">
                 <ee:transform>
@@ -124,16 +117,16 @@ output application/json
         </error-handler>
     </flow>
     <flow name="totalincomeperpreviousmonthbystore-console">
-        <http:listener config-ref="totalincomeperpreviousmonthbystore-httpListenerConfig" path="/console/*">
+        <http:listener path="/console/*" config-ref="HTTP_Listener_config">
             <http:response statusCode="#[vars.httpStatus default 200]">
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
             <http:error-response statusCode="#[vars.httpStatus default 500]">
-                <http:body>#[payload]</http:body>
-                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
-        <apikit:console config-ref="totalincomeperpreviousmonthbystore-config" />
+        <apikit:console config-ref="totalincomeperpreviousmonthbystore-config"/>
         <error-handler>
             <on-error-propagate type="APIKIT:NOT_FOUND">
                 <ee:transform>
