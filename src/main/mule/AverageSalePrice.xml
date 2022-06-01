@@ -70,10 +70,10 @@ payload distinctBy $]]></ee:set-payload>
 		<foreach doc:name="For Each" doc:id="4aed2011-8dbe-4a5a-9fef-0965551a8d1e" collection="#[dw::Core::entriesOf(payload)]">
 			<choice doc:name="Choice" doc:id="6620c798-6df8-4b21-ace3-e874347a2919">
 				<when expression='#[payload.payment_txn_success == "true"]'>
-					<file:write doc:name="Write Successful Transactions " doc:id="f836d2cb-c107-4156-96d0-91ef3f787430" config-ref="File_Config" path="H:\AnypointStudio\cohort_project\src\main\resources\p3_data\successfultransactions.json" mode="APPEND" />
+					<file:write doc:name="Write Successful Transactions " doc:id="f836d2cb-c107-4156-96d0-91ef3f787430" config-ref="File_Config" path="H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\successfultransactions.json" mode="APPEND" />
 				</when>
 				<otherwise >
-					<file:write doc:name="Write Unsuccessful Transactions" doc:id="5b400378-f847-4dab-9e4d-045a0e645f38" path="H:\AnypointStudio\cohort_project\src\main\resources\p3_data\unsuccessfultransactions.json" mode="APPEND"/>
+					<file:write doc:name="Write Unsuccessful Transactions" doc:id="5b400378-f847-4dab-9e4d-045a0e645f38" path="H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\unsuccessfultransactions.json" mode="APPEND"/>
 				</otherwise>
 			</choice>
 		</foreach>
@@ -88,7 +88,7 @@ output application/java
 		</ee:transform>
 	</flow>
 	<flow name="csvorders" doc:id="012e2d70-8f43-4346-9414-6a3585413c70" >
-		<file:read doc:name="orders.csv" doc:id="79d3a6a0-813e-480b-aa4e-61297770ec91" path="H:\AnypointStudio\cohort_project\src\main\resources\p3_data\ordersInput.csv" config-ref="File_Config" />
+		<file:read doc:name="orders.csv" doc:id="79d3a6a0-813e-480b-aa4e-61297770ec91" path="H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\ordersInput.csv" config-ref="File_Config" />
 		<ee:transform doc:name="CSV to JSON" doc:id="3011d5e1-3a73-41a3-8e72-8c2870893a63">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
@@ -146,7 +146,7 @@ payload]]></ee:set-payload>
 	</flow>
 	<flow name="csvtransactions" doc:id="586283f6-520c-4e44-9801-17a3b79ac2ab" >
 		<http:listener doc:name="Copy_of_Copy_of_testlistener" doc:id="8bb77cc6-fee6-4172-a3ec-d406d253014c" config-ref="HTTP_Listener_config" path="/test3" />
-		<file:read doc:name="transactionsInput.csv" doc:id="6b571a31-e6b7-41c5-9a30-1328f3a28bb7" config-ref="File_Config" path="H:\AnypointStudio\cohort_project\src\main\resources\p3_data\transactionsInput.csv"/>
+		<file:read doc:name="transactionsInput.csv" doc:id="6b571a31-e6b7-41c5-9a30-1328f3a28bb7" config-ref="File_Config" path="H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\transactionsInput.csv"/>
 		<ee:transform doc:name="CSV to JSON" doc:id="ad5f32cb-75df-4755-a534-3202c0b57b3d" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -250,7 +250,7 @@ payload
 	</flow>
 	<flow name="csvproducts" doc:id="2323967e-2655-4718-ab75-b70cd2103f28" >
 		<http:listener doc:name="Copy_of_Copy_of_Copy_of_testlistener" doc:id="dfed8e67-dfed-4b82-a9da-59d408d8f777" config-ref="HTTP_Listener_config" path="/test7" />
-		<file:read doc:name="productsInput.csv" doc:id="a43881f4-dae1-4c19-bdd8-401230e6c0f9" config-ref="File_Config" path="H:\AnypointStudio\cohort_project\src\main\resources\p3_data\productsInput.csv" />
+		<file:read doc:name="productsInput.csv" doc:id="a43881f4-dae1-4c19-bdd8-401230e6c0f9" config-ref="File_Config" path="H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\productsInput.csv" />
 		<ee:transform doc:name="CSV to JSON" doc:id="6f85ae60-b71e-4287-a217-502f5b84b4d6" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0

@@ -1,0 +1,20 @@
+{
+    "id": "628d4960f032395bc2000082",
+    "quantity": 3,
+    "date": "2022-04-04",
+    "storeId": 2,
+    "product": {
+      "id": "238ca68c-4383-4064-82a1-4de02bfc5c2a",
+      "name": "Nantucket Orange Juice",
+      "price": 65.28
+    },
+    "transaction": {
+      "id": "628d4937f0323958d000007e",
+      "paymentType": null,
+      "success": false,
+      "customer": {
+        "id": "fa2e14a7-4851-496d-8dcd-89827f239d0d",
+        "name": "Benoit Parren"
+      }
+    }
+  }
