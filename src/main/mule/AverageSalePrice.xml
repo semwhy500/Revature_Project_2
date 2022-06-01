@@ -299,7 +299,7 @@ payload]]></ee:set-payload>
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0import java!java::lang::System
 
-output application/json
+output application/java
 ---
 "Successful transaction rate for all transactions: " 
 ++ (sizeOf(payload filter $.payment_txn_success == "true") as Number / vars.payloadsize) as Number as String {format: "#,###.0#%"}
