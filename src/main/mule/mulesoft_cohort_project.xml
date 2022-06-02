@@ -12,4 +12,7 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 	<flow name="mulesoft_cohort_projectFlow1" doc:id="6714f26c-85c2-49f9-859d-68083e537a9f" >
 		<file:read doc:name="Read" doc:id="4ad9360c-bcaa-49a2-87ee-ffe2aaabee2f" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Orders.csv"/>
 	</flow>
+	<flow name="mulesoft_cohort_projectFlow2" doc:id="935175fc-d4e5-4a47-ad4b-16cc659d6765" >
+		<http:request method="GET" doc:name="Request" doc:id="cb60d940-75b4-49fb-8d94-e37871a0ef72" config-ref="HTTP_Request_configuration" path="/test"/>
+	</flow>
 </mule>

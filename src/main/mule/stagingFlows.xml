@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<flow name="mulesoft_cohort_projectFlow" doc:id="e40a116f-1374-4dba-a7e6-b7bad19f29a7" >
+		<http:listener doc:name="Listener" doc:id="b460368f-2c29-4d16-86b8-fb11a1593820" config-ref="HTTP_Listener_config" path="/listen" />
+		<set-payload value="hello" doc:name="Set Payload" doc:id="c73bcd29-3ebd-4f09-800c-1dcad25ca512" />
+	</flow>
+	<flow name="mulesoft_cohort_projectFlow1" doc:id="06dc478d-4806-4f3e-be73-784547c37029" >
+		<file:read doc:name="Read" doc:id="6ea49af0-1bdf-432f-b04c-be1cae02c6f2" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Orders.csv" />
+	</flow>
+	<flow name="mulesoft_cohort_projectFlow2" doc:id="32abfb4b-4b8b-43d1-b8c7-4a99eb9b8ede" >
+		<http:request method="GET" doc:name="Request" doc:id="4bebf63e-59aa-4d6b-87b7-f3d4090cc31f" config-ref="HTTP_Request_configuration" path="/test" />
+	</flow>
+</mule>
