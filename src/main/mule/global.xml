@@ -9,7 +9,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="57c63cb8-56fe-489d-a488-4cc620b680dd" basePath="/api" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
-	<file:config name="File_Config1" doc:name="File Config" doc:id="b706fa8a-bca9-4a13-b74d-42fe041f5d21" >
+	<file:config name="File_Config" doc:name="File Config" doc:id="b706fa8a-bca9-4a13-b74d-42fe041f5d21" >
 		<file:connection workingDir="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3" />
 	</file:config>
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="9ce901b6-3fb3-4100-bad4-a4f303c84ec1" >

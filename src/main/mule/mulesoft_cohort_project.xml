@@ -1,16 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns="http://www.mulesoft.org/schema/mule/core"
-	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
-http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	<flow name="mulesoft_cohort_projectFlow" doc:id="b7fc3139-5a77-4818-9040-99e497c7e729" >
 		<http:listener doc:name="Listener" doc:id="7ac44c09-4f41-4223-9d0e-c4dae438b311" config-ref="HTTP_Listener_config" path="/listen"/>
 		<set-payload value="hello" doc:name="Set Payload" doc:id="b65602b2-60b2-40df-8b87-673df97fc5d8" />
 	</flow>
 	<flow name="mulesoft_cohort_projectFlow1" doc:id="6714f26c-85c2-49f9-859d-68083e537a9f" >
-		<file:read doc:name="Read" doc:id="4ad9360c-bcaa-49a2-87ee-ffe2aaabee2f" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Orders.csv"/>
+		<file:read doc:name="Read" doc:id="4ad9360c-bcaa-49a2-87ee-ffe2aaabee2f" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Orders.csv" config-ref="File_Config"/>
+	</flow>
+	<flow name="mulesoft_cohort_projectFlow3" doc:id="70cad139-3eab-494a-be9e-2be6d2ea3b8a" >
+		<db:select doc:name="Select" doc:id="5e15cba8-e4d0-4e95-acb1-2460db737c49" />
 	</flow>
 	<flow name="mulesoft_cohort_projectFlow2" doc:id="935175fc-d4e5-4a47-ad4b-16cc659d6765" >
 		<http:request method="GET" doc:name="Request" doc:id="cb60d940-75b4-49fb-8d94-e37871a0ef72" config-ref="HTTP_Request_configuration" path="/test"/>
