@@ -1,0 +1,97 @@
+#%RAML 1.0
+title: historicsalesAPI
+
+description: This is the Historic Data API to manage viewing income and sales of data from previous years. Sales can be viewed by product or by store, and income can be viewed by store.
+
+/historicSalesByStore:
+  get:
+    description: This method is to retreive the historic sales by store from the RDB in ascending order. 
+    queryParameters:
+      id:
+        required: true
+        example: "1"
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              [
+                {
+                  "store_id": 2,
+                  "datetime": "2021-01-01T00:00:00",
+                  "price": 97.85,
+                  "qty": 7,
+                  "product_id": "a87fd952-3957-4359-96de-f10836089777",
+                  "total_sales_of_day": 684.95
+                },
+                {
+                  "store_id": 2,
+                  "datetime": "2021-01-01T00:00:00",
+                  "price": 37.99,
+                  "qty": 1,
+                  "product_id": "3cdd05bf-91cf-42f3-ae67-14afa69665d1",
+                  "total_sales_of_day": 37.99
+                },
+                {
+                  "store_id": 2,
+                  "datetime": "2021-01-02T00:00:00",
+                  "price": 54.35,
+                  "qty": 5,
+                  "product_id": "ae7a3f83-3705-4cff-b99d-8fbe13523167",
+                  "total_sales_of_day": 271.75
+                }
+              ]
+      500:
+        body:
+          application/json:
+            example: "Internal Error"
+    
+/historicSalesByProduct:
+  get:
+    description: This method is to retreive the historic sales by product from the RDB in ascending order. 
+    queryParameters:
+      id:
+        required: true
+        example: "3cfaabec-45fa-40c4-bb32-1da6fb20abb8"
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              {
+                "store_id": 1,
+                "datetime": "2021-01-01T00:00:00",
+                "price": 41.61,
+                "qty": 3,
+                "product_id": "3cfaabec-45fa-40c4-bb32-1da6fb20abb8",
+                "total_sales_of_day": 124.83
+              }
+      500:
+        body:
+          application/json:
+            example: "Internal Error"
+    
+/historicIncomeByStore:
+  get:
+    description: This method is to retreive the historic income by store from the RDB in ascending order.
+    queryParameters:
+      id:
+        required: true
+        example: "3cfaabec-45fa-40c4-bb32-1da6fb20abb8"
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              {
+                "store_id": 1,
+                "datetime": "2021-01-01T00:00:00",
+                "total_sales_of_day": 124.83
+              }
+      500:
+        body:
+          application/json:
+            example: "Internal Error" 
+
+
+            
