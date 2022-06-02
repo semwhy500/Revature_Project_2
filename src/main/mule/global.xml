@@ -15,4 +15,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="9ce901b6-3fb3-4100-bad4-a4f303c84ec1" >
 		<http:request-connection host="184.72.81.235" port="8080" />
 	</http:request-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="bff1a115-daf1-4265-af25-7ce60169d9db" >
+		<db:generic-connection url="jdbc:postgresql://grocery-api-historic.cvtq9j4axrge.us-east-1.rds.amazonaws.com:5432/" driverClassName="org.postgresql.Driver" user="postgres" password="password" />
+	</db:config>
 </mule>
