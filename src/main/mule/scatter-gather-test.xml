@@ -27,7 +27,7 @@ payload]]></ee:set-payload>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="cf6fdb60-c5f8-4a08-b564-f8cb47264ca7" >
 			<route >
 				<flow-ref doc:name="ordersCSVFlowRef" doc:id="5f3a2d73-a29f-42d3-9726-bda23c8ec390" name="ordersCSVFlow"/>
-				<set-variable value="#[payload]" doc:name="ordersCSV" doc:id="35e01c75-ff05-4596-9347-e2c223b6bcaa" variableName="ordersCSV"/>
+				<set-variable value="#[payload]" doc:name="ordersCSV" doc:id="35e01c75-ff05-4596-9347-e2c223b6bcaa" variableName="ordersCSV" />
 			</route>
 			<route >
 				<flow-ref doc:name="productsCSVFlowRef" doc:id="16250363-b79b-48aa-a639-ce6049fca2c1" name="productsCSVFlow"/>
