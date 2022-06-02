@@ -27,12 +27,15 @@ payload]]></ee:set-payload>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="cf6fdb60-c5f8-4a08-b564-f8cb47264ca7" >
 			<route >
 				<flow-ref doc:name="ordersCSVFlowRef" doc:id="5f3a2d73-a29f-42d3-9726-bda23c8ec390" name="ordersCSVFlow"/>
+				<set-variable value="#[payload]" doc:name="ordersCSV" doc:id="35e01c75-ff05-4596-9347-e2c223b6bcaa" variableName="ordersCSV"/>
 			</route>
 			<route >
 				<flow-ref doc:name="productsCSVFlowRef" doc:id="16250363-b79b-48aa-a639-ce6049fca2c1" name="productsCSVFlow"/>
+				<set-variable value="#[payload]" doc:name="productsCSV" doc:id="48e42fbe-87cb-420f-a9f4-04454eacaf98" variableName="productsCSV"/>
 			</route>
 			<route >
 				<flow-ref doc:name="transactionsCSVFlowRef" doc:id="a0299563-e3bf-4489-81aa-beb5e2cc2f3c" name="transactionsCSVFlow"/>
+				<set-variable value="payload" doc:name="transcationsCSV" doc:id="673bed6e-6abb-4696-8133-2606c40c60a2" variableName="transcationsCSV"/>
 			</route>
 		</scatter-gather>
 		<ee:transform doc:name="Transform Message" doc:id="84def99d-18b2-4c83-a529-1007f750b59e" >
@@ -40,7 +43,7 @@ payload]]></ee:set-payload>
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+vars.ordersCSV ++ vars.productsCSV ++ vars.ordersCSV]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="b72581fd-2d56-4a5d-a4ed-1e1e2eef73ff" />
