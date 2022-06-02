@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/m
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
 	<file:config name="File_Config" doc:name="File Config" doc:id="d4a35a24-48b9-4125-9c64-8544f78d054e" >
-		<file:connection workingDir="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\data\csvs for p3" />
+		<file:connection workingDir="C:\Users\holly\AnypointStudio\studio-workspace\mulesoft_cohort_project_hollys\src\main\resources\data\csvs for p3" />
 	</file:config>
 	<apikit:config outboundHeadersMapName="outboundHeadersMapName" httpStatusVarName="httpStatus" doc:name="Router" doc:id="e5509876-91ff-47ae-9494-9816d0ba7512" name="totalincomeperpreviousmonthbystore-config" api="totalincomeperpreviousmonthbystore.raml"/>
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="f1af2bbf-8f32-4701-a254-1d55190b0493" >
