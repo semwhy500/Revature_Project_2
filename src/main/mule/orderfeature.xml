@@ -18,15 +18,25 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		</scatter-gather>
 	</flow>
 	<flow name="csvflow" doc:id="012e2d70-8f43-4346-9414-6a3585413c70" >
-		<file:read doc:name="orders.csv" doc:id="79d3a6a0-813e-480b-aa4e-61297770ec91" path="orderInput.csv" config-ref="File_Config" />
+		<file:read doc:name="orders.csv" doc:id="79d3a6a0-813e-480b-aa4e-61297770ec91" path="orders.csv" config-ref="File_Config"/>
 		<ee:transform doc:name="CSV to JSON" doc:id="3011d5e1-3a73-41a3-8e72-8c2870893a63">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+payload map(value, index) ->
+{
+	order_id: value.order_id,
+	quantity: value.qty,
+	date: value.datetime as Date {format : "M/d/yyyy"}
+		as String {format: "yyyy-MM-dd"},
+	store_id: value.store_id,
+	product_id: value.product_id,
+	txn_id: value.txn_id
+}]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
+		<set-payload value="#[payload filter((value, index)-&gt; value.date.month == now().month - 1 )]" doc:name="Set Payload" doc:id="4e610412-0046-40b8-ba95-cda95a69781c" />
 		<logger level="INFO" doc:name="Logger" doc:id="e230cec8-5b16-44c0-9270-ffffe100e208" />
 	</flow>
 	<flow name="apiflow" doc:id="f8656d45-383d-46e9-9fe9-2d530f9d1796">
@@ -34,13 +44,16 @@ payload]]></ee:set-payload>
 					<http:query-params><![CDATA[#[output application/json
 ---
 {
-	"end_date" : "2022-04-28",
-	"start_date" : "2022-04-01"
+	"end_date" : "2022-05-31",
+	"start_date" : "2022-05-01"
 }]]]></http:query-params>
 				</http:request>
 		<ee:transform doc:name="Transform Message" doc:id="db2b9213-a051-4b0e-8f4b-8f2060089444">
 					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0 output application/java --- payload
+						<ee:set-payload><![CDATA[%dw 2.0 
+output application/json 
+--- 
+payload 
 ]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>

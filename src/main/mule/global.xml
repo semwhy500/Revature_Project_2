@@ -14,6 +14,6 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	</http:listener-config>
 	
 	<file:config name="File_Config" doc:name="File Config" doc:id="f0c692f2-6150-4b4b-b0c4-28a1a720c8e3">
-		<file:connection workingDir="C:\Users\blee1\AnypointStudio\studio-workspace\orderfeature\src\main\resources\p3_data" />
+		<file:connection workingDir="C:\Users\blee1\Documents\rev_p3\mulesoft_cohort_project\src\main\resources\p3_data" />
 	</file:config>
 </mule>
