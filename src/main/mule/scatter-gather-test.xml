@@ -11,7 +11,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<set-payload value="hello world" doc:name="Set Payloadd" doc:id="7e56a8d5-81a8-40fb-a9db-a2ab1f3e782e" />
 	</flow>
 	<flow name="ordersCSVFlow" doc:id="5630baea-c3f2-40f6-bd89-de1942dac0ae">
-		<file:read doc:name="readOrdersCSV" doc:id="973218f9-ce41-40e2-b87e-1eecae0963da" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Orders.csv" />
+		<file:read doc:id="7536d789-5aac-4814-b8e2-ac4dcafce602" doc:name="" config-ref="File_Config" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\data\csvs for p3\Orders.csv"/>
 		<ee:transform doc:name="Transform Message" doc:id="f579f233-a765-4d8b-9187-304109caa334">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -21,6 +21,9 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="4e22176d-8be3-42b9-bf7f-0279a61a4510" message="#[payload]"/>
+	</flow>
+	<flow name="scatter-gather-testFlow1" doc:id="0780211d-a278-43cf-ad25-2a99ffa5486f" >
+		<file:read doc:id="5f79b9cc-6e52-407e-9632-cebceb2b9b03" />
 	</flow>
 	<flow name="productsCSVFlow" doc:id="c31ef09c-35cb-4c01-b05a-ee4f6a3d2e27" >
 		<file:read doc:name="readProductsCSV" doc:id="b8c75dd9-5c37-4a2b-a703-e11c9bfbb88d" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Products.csv" />
