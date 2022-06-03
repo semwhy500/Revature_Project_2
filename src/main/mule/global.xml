@@ -27,6 +27,6 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	</db:config>
 </http:request-config>
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="a4715123-d1dd-466b-96e9-62875b486231" >
-		<db:generic-connection url="jdbc:postgresql://grocery-api-historic.cvtq9j4axrge.us-east-1.rds.amazonaws.com:5432/" driverClassName="postgresql" user="postgres" password="password" />
+		<db:generic-connection url="jdbc:postgresql://grocery-api-historic.cvtq9j4axrge.us-east-1.rds.amazonaws.com:5432/" driverClassName="org.postgresql.Driver" user="postgres" password="password" />
 	</db:config>
 </mule>
