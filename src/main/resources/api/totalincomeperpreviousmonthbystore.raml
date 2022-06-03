@@ -1,0 +1,77 @@
+#%RAML 1.0
+title: Total Income Per Previous Month By Store
+# .../totalQuantityPrevMonth/month?month=1 
+/totalIncome:
+  description: The endpoint that will get total income per previous month
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/TotalIncomePerPreviousMonth.raml
+  /month:
+    get:
+      queryParameters:
+        month:
+          type: number
+          description: the total income of that month, January = 1, February = 2, etc.
+          example: 1
+          required: false
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/TotalIncomePerPreviousMonth.raml
+  /year:
+    get:
+      queryParameters: 
+        year:
+          type: number
+          description: the total income of that year
+          example: 2022
+          required: false
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/TotalIncomePerPreviousMonth.raml
+  /store_id:
+    get:
+      queryParameters:
+        store_id:
+          type: number
+          description: the total income of that store id.
+          example: 1
+          required: false
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/TotalIncomePerPreviousMonth.raml
+  /product_id:
+    get:
+      queryParameters:
+        productID:
+          type: string
+          description: Product's ID
+          example: 168feb7b-a977-4538-898c-4050a75c047d
+          required: false
+          minLength: 1
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/TotalIncomePerPreviousMonth.raml
+  /weekday:
+    get:
+      queryParameters: 
+        weekday:
+          type: string
+          description: any day, Monday through Sunday and Mon through Sun. This resource returns the sum of all prices within the previous month that were recorded for the specified weekday. 
+          example: Saturday
+          required: false
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/TotalIncomePerPreviousMonth.raml

@@ -49,9 +49,9 @@
 			<classifier>mule-plugin</classifier>
 		</dependency>
 		<dependency>
-			<groupId>org.mule.connectors</groupId>
-			<artifactId>mule-http-connector</artifactId>
-			<version>1.5.6</version>
+			<groupId>org.mule.modules</groupId>
+			<artifactId>mule-apikit-module</artifactId>
+			<version>1.6.0</version>
 			<classifier>mule-plugin</classifier>
 		</dependency>
 		<dependency>
@@ -70,6 +70,10 @@
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<version>42.3.6</version>
+		</dependency>
+			<artifactId>mule-http-connector</artifactId>
+			<version>1.7.1</version>
+			<classifier>mule-plugin</classifier>
 		</dependency>
 	</dependencies>
 

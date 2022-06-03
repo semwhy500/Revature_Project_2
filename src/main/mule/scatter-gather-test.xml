@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="helloFlow" doc:id="625d821d-0e98-4015-beee-2c5876694459">
+		<http:listener doc:name="Listener" doc:id="aadae3f3-5e6c-4015-a435-b28afa8aa75d" config-ref="HTTP_Listener_config" path="/hello" />
+		<set-payload value="hello world" doc:name="Set Payloadd" doc:id="7e56a8d5-81a8-40fb-a9db-a2ab1f3e782e" />
+	</flow>
+	<flow name="ordersCSVFlow" doc:id="5630baea-c3f2-40f6-bd89-de1942dac0ae">
+		<file:read doc:name="readOrdersCSV" doc:id="973218f9-ce41-40e2-b87e-1eecae0963da" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Orders.csv" />
+		<ee:transform doc:name="Transform Message" doc:id="f579f233-a765-4d8b-9187-304109caa334">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="4e22176d-8be3-42b9-bf7f-0279a61a4510" message="#[payload]"/>
+	</flow>
+	<flow name="productsCSVFlow" doc:id="c31ef09c-35cb-4c01-b05a-ee4f6a3d2e27" >
+		<file:read doc:name="readProductsCSV" doc:id="b8c75dd9-5c37-4a2b-a703-e11c9bfbb88d" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Products.csv" />
+		<ee:transform doc:name="Transform Message" doc:id="5fb61567-25e8-4be3-abf1-301006ed157b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="69ed7360-a096-4c3c-a51e-a5ae6cdfec02" message="#[payload]"/>
+	</flow>
+	<flow name="transactionsCSVFlow" doc:id="bc31397d-f46f-4bca-ba27-3ad8e90ca0ad" >
+		<file:read doc:name="readTransactionsCSV" doc:id="688c792f-3299-45e2-b4ee-c2aad7dbc1cd" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Transactions.csv" />
+		<ee:transform doc:name="Transform Message" doc:id="1ee0395a-14c5-4414-b4f8-ad1675e458e3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="7bfcf043-8ceb-4065-a7d2-ff74e096fadc" message="#[payload]"/>
+	</flow>
+	<flow name="csv-scatter-gather-testFlow" doc:id="d7f5a5c1-cd2b-45bb-a7b2-8a627ac09c67">
+		<scatter-gather doc:name="Scatter-Gather" doc:id="cf6fdb60-c5f8-4a08-b564-f8cb47264ca7">
+			<route>
+				<flow-ref doc:name="ordersCSVFlowRef" doc:id="5f3a2d73-a29f-42d3-9726-bda23c8ec390" name="ordersCSVFlow" />
+				<set-variable value="#[payload]" doc:name="ordersCSV" doc:id="35e01c75-ff05-4596-9347-e2c223b6bcaa" variableName="ordersCSV" />
+			</route>
+			<route>
+				<flow-ref doc:name="productsCSVFlowRef" doc:id="16250363-b79b-48aa-a639-ce6049fca2c1" name="productsCSVFlow" />
+				<set-variable value="#[payload]" doc:name="productsCSV" doc:id="48e42fbe-87cb-420f-a9f4-04454eacaf98" variableName="productsCSV" />
+			</route>
+			<route>
+				<flow-ref doc:name="transactionsCSVFlowRef" doc:id="a0299563-e3bf-4489-81aa-beb5e2cc2f3c" name="transactionsCSVFlow" />
+				<set-variable value="payload" doc:name="transcationsCSV" doc:id="673bed6e-6abb-4696-8133-2606c40c60a2" variableName="transcationsCSV" />
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="84def99d-18b2-4c83-a529-1007f750b59e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.ordersCSV ++ vars.productsCSV ++ vars.ordersCSV]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="b72581fd-2d56-4a5d-a4ed-1e1e2eef73ff" />
+	</flow>
+	<flow name="orderAPIFlow" doc:id="e908a1d1-908a-40e8-aa32-526535ac4f64">
+		<http:request method="GET" doc:name="Request" doc:id="91955e42-70d0-45e3-9646-ac9086dc2d12" config-ref="HTTP_Request_configuration" path="/order" />
+		<ee:transform doc:name="Transform Message" doc:id="0f60fd38-62b8-4e4b-af09-bccb73c935f4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="aa43048f-896e-412d-8450-885ef0e634a9" />
+	</flow>
+	<flow name="productAPIFlow" doc:id="ec5eeca6-cf6c-46ea-9774-e72964cd1819">
+		<http:request method="GET" doc:name="Request" doc:id="aa97cea1-d4da-4081-8bdf-ea6857a5d32c" config-ref="HTTP_Request_configuration" path="/product" />
+		<ee:transform doc:name="Transform Message" doc:id="d3e75af4-1a2f-4770-bc6e-2b85de1d4809">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="8677f42f-efee-4482-98fc-be3939b82395" />
+	</flow>
+	<flow name="transactionAPIFlow" doc:id="c8c76d47-51ef-45bf-902b-fb5896c236e7" >
+		<http:request method="GET" doc:name="Request" doc:id="fe41ca36-7a0f-4273-97c1-052f997220b4" config-ref="HTTP_Request_configuration" path="/transaction" />
+		<ee:transform doc:name="Transform Message" doc:id="2906972a-f5a9-4310-962e-5540d6361390" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="8b304c0d-dc6c-4973-b7d3-c777bca8e472" />
+	</flow>
+	<flow name="scatter-gather-testFlow" doc:id="360cc0ea-989d-4cd2-9406-89f11541235e" >
+		<http:listener doc:name="Listener" doc:id="1f2a1bd1-868e-454b-a403-72bf4912f2e2" config-ref="HTTP_Listener_config" path="/scatterAPI"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="985e58fb-cf18-4844-94d8-2bdff1271cbd" >
+			<route >
+				<flow-ref doc:name="ordersAPIFlowRef" doc:id="04417184-5857-440d-8851-1e4b9651893b" name="orderAPIFlow"/>
+				<set-variable value="#[payload]" doc:name="ordersAPI" doc:id="8cec160d-1c49-4023-8986-577ceb116267" variableName="ordersAPI"/>
+			</route>
+			<route >
+				<flow-ref doc:name="productsAPIFlowRef" doc:id="cc98687c-19ff-420f-af04-585ee4afb288" name="productAPIFlow"/>
+				<set-variable value="#[payload]" doc:name="productsAPI" doc:id="06264edd-93be-4ee0-b95b-0404d6966c26" variableName="productsAPI"/>
+			</route>
+			<route >
+				<flow-ref doc:name="transactionsAPIFlowRef" doc:id="55f8a386-60c2-4a70-82c1-94334a9fc77b" name="transactionAPIFlow"/>
+				<set-variable value="#[payload]" doc:name="transactionAPI" doc:id="3921ccdd-227e-4287-9d31-00cda6b21841" variableName="transactionAPI"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="16ac0f29-674e-46dd-ad91-12e47775cf85" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.ordersAPI ++ vars.productsAPI ++ vars.transactionAPI]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

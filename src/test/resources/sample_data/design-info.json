@@ -1,0 +1,8 @@
+{
+  "sampleData": {
+    "84def99d-18b2-4c83-a529-1007f750b59e": {
+      "vars-ordersCSV": "sample_data/defaultbinarytype.json",
+      "vars-productsCSV": "sample_data/defaultbinarytype_1.json"
+    }
+  }
+}
