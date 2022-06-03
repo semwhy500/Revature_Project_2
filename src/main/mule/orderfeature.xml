@@ -49,13 +49,7 @@ payload map(value, index) ->
 		<logger level="INFO" doc:name="Logger" doc:id="e230cec8-5b16-44c0-9270-ffffe100e208" />
 	</flow>
 	<flow name="apiflow" doc:id="f8656d45-383d-46e9-9fe9-2d530f9d1796">
-		<http:request method="GET" doc:name="PrevMonthOrders" doc:id="2fd0f5db-536b-4460-b6c9-4413db200c80" config-ref="HTTP_Request_configuration" path="/order/date" targetValue="#[%dw 2.0 output application/xml --- payload]">
-					<http:query-params><![CDATA[#[output application/java
----
-{
-	"end_date" : "2022-05-31",
-	"start_date" : "2022-05-01"
-}]]]></http:query-params>
+		<http:request method="GET" doc:name="PrevMonthOrders" doc:id="2fd0f5db-536b-4460-b6c9-4413db200c80" path="/order/date?start_date=2022-05-01&amp;end_date=2022-05-31" targetValue="#[%dw 2.0 output application/xml --- payload]" config-ref="HTTP_Request_configuration">
 				</http:request>
 		<ee:transform doc:name="Transform Message" doc:id="db2b9213-a051-4b0e-8f4b-8f2060089444">
 					<ee:message>

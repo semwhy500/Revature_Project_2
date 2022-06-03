@@ -7,23 +7,8 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
 http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd">
-	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2e4a73b1-69bd-4bd1-b834-434c1d039a66" basePath="/dotw" >
-		<http:listener-connection host="0.0.0.0" port="8089" />
-	</http:listener-config>
-	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="21895066-8472-4d2a-81cb-772436ac5219" basePath="/dotw" >
-		<http:request-connection host="localhost" port="8089" />
-	</http:request-config>
-	<file:config name="File_Config" doc:name="File Config" doc:id="f7554ec3-ca94-4187-9079-ebe795b8a822" />
-	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="5735b073-ce45-4d2e-9bc3-9190c5cea588" >
-		<http:request-connection host="184.72.81.235" port="8080" />
-	</http:request-config>
-	<vm:config name="VM_Config" doc:name="VM Config" doc:id="fbac1b5c-8e1a-4176-b938-84ec24d938ea">
-		<vm:queues >
-			<vm:queue queueName="api" />
-		</vm:queues>
-	</vm:config>
 	<flow name="flow.xmlFlow" doc:id="cdc383c7-409d-4cff-af86-8a15430394fd" >
-		<http:listener doc:name="Listener" doc:id="31f7135a-d699-4f8a-b319-3b9796289d7e" config-ref="HTTP_Listener_config3" path="/dotw?dotw={dotw}" allowedMethods="GET"/>
+		<http:listener doc:name="Listener" doc:id="31f7135a-d699-4f8a-b319-3b9796289d7e" config-ref="HTTP_Listener_config" path="/api/totalQuantitySalesPrevMonth/dotw?dotw={dotw}" allowedMethods="GET"/>
 		<set-variable value="#[message.attributes.queryParams.dotw]" doc:name="Set Variable" doc:id="099690eb-5541-411f-b6c1-52dbb69c3363" variableName="dayWeek"/>
 		<flow-ref doc:name="Flow Reference" doc:id="106b89e1-cfbf-4902-adb8-466c944b1414" name="orderfeatureFlow"/>
 		<ee:transform doc:name="Transform Message" doc:id="cddec68d-bc3d-4f95-a6fe-3abbc296d6b1" >

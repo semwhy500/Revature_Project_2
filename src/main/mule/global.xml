@@ -7,9 +7,9 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="50443993-b888-4fa2-b3ae-8207797261c3">
-		<http:request-connection host="184.72.81.235" port="8080" />
+		<http:request-connection host="grocery-api-2131013402.us-east-1.elb.amazonaws.com" />
 	</http:request-config>
-	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="b4cc428f-f047-4dc8-b537-bcba02d6a593" >
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="b4cc428f-f047-4dc8-b537-bcba02d6a593">
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
 	
