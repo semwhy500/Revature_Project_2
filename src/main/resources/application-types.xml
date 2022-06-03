@@ -2,16 +2,64 @@
 <types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
   <types:catalog>
     <types:type name="Order" format="json">
+      <types:shape format="weave" example="examples/apiOrder.json"><![CDATA[%dw 2.0
+
+type Order = {|
+  id: String, 
+  quantity: Number {"typeId": "int"}, 
+  date: String, 
+  storeId: Number {"typeId": "int"}, 
+  product: {|
+    id: String, 
+    name: String, 
+    price: Number {"typeId": "double"}
+  |}, 
+  transaction: {|
+    id: String, 
+    paymentType: String, 
+    success: Boolean, 
+    customer: {|
+      id: String, 
+      name: String
+    |}
+  |}
+|} {"example": "{\\\"id\\\":\\\"628d4960f032395bc2000086\\\",\\\"quantity\\\":5,\\\"date\\\":\\\"2022-05-05\\\",\\\"storeId\\\":3,\\\"product\\\":{\\\"id\\\":\\\"040f684e-0bd9-4f0c-a389-ed120bbca959\\\",\\\"name\\\":\\\"Wine - Domaine Boyar Royal\\\",\\\"price\\\":36.31},\\\"transaction\\\":{\\\"id\\\":\\\"628d4937f032395b26000079\\\",\\\"paymentType\\\":\\\"mastercard\\\",\\\"success\\\":false,\\\"customer\\\":{\\\"id\\\":\\\"dcf4624c-599b-40fc-9ad6-b30a14f5cfc2\\\",\\\"name\\\":\\\"Omero Foye\\\"}}}"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="csvOrder" format="json">
       <types:shape format="weave" example="examples/csvOrderExample.json"><![CDATA[%dw 2.0
 
-type Order = Array<{|  order_id: String,   qty: Number {"typeId": "int"},   datetime: String,   store_id: Number {"typeId": "int"},   product_id: String,   txn_id: String|}> {"example": "[{\\\"order_id\\\":\\\"628e4bd5f032395bc200011e\\\",\\\"qty\\\":3,\\\"datetime\\\":\\\"2\\/14\\/2022\\\",\\\"store_id\\\":3,\\\"product_id\\\":\\\"bace903f-8be2-441a-91db-85d332406410\\\",\\\"txn_id\\\":\\\"628e4bbcf032395e2300016d\\\"},{\\\"order_id\\\":\\\"628e4bd5f032395bc2000120\\\",\\\"qty\\\":7,\\\"datetime\\\":\\\"4\\/2\\/2022\\\",\\\"store_id\\\":4,\\\"product_id\\\":\\\"9068362c-b649-4026-9acf-3ffc68a3323c\\\",\\\"txn_id\\\":\\\"628e4bbcf0323958d0000101\\\"},{\\\"order_id\\\":\\\"628e4bd5f032395bc200012a\\\",\\\"qty\\\":3,\\\"datetime\\\":\\\"2\\/16\\/2022\\\",\\\"store_id\\\":2,\\\"product_id\\\":\\\"86b93054-3867-449b-9079-7eb94a7b5cd9\\\",\\\"txn_id\\\":\\\"628e4bbcf03239592e00010a\\\"}]"}
+type csvOrder = Array<{|  order_id: String,   qty: Number {"typeId": "int"},   datetime: String,   store_id: Number {"typeId": "int"},   product_id: String,   txn_id: String|}> {"example": "[{\\\"order_id\\\":\\\"628e4bd5f032395bc200011e\\\",\\\"qty\\\":3,\\\"datetime\\\":\\\"2\\/14\\/2022\\\",\\\"store_id\\\":3,\\\"product_id\\\":\\\"bace903f-8be2-441a-91db-85d332406410\\\",\\\"txn_id\\\":\\\"628e4bbcf032395e2300016d\\\"},{\\\"order_id\\\":\\\"628e4bd5f032395bc2000120\\\",\\\"qty\\\":7,\\\"datetime\\\":\\\"4\\/2\\/2022\\\",\\\"store_id\\\":4,\\\"product_id\\\":\\\"9068362c-b649-4026-9acf-3ffc68a3323c\\\",\\\"txn_id\\\":\\\"628e4bbcf0323958d0000101\\\"},{\\\"order_id\\\":\\\"628e4bd5f032395bc200012a\\\",\\\"qty\\\":3,\\\"datetime\\\":\\\"2\\/16\\/2022\\\",\\\"store_id\\\":2,\\\"product_id\\\":\\\"86b93054-3867-449b-9079-7eb94a7b5cd9\\\",\\\"txn_id\\\":\\\"628e4bbcf03239592e00010a\\\"}]"}
 
 ]]></types:shape>
     </types:type>
   </types:catalog>
-  <types:enrichment select="#3011d5e1-3a73-41a3-8e72-8c2870893a63"/>
+  <types:enrichment select="#3011d5e1-3a73-41a3-8e72-8c2870893a63">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="csvOrder"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
   <types:enrichment select="#79d3a6a0-813e-480b-aa4e-61297770ec91">
     <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Order"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#db2b9213-a051-4b0e-8f4b-8f2060089444">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="Order[]"/>
+        </types:message>
+      </types:input-event>
       <types:output-event>
         <types:message>
           <types:payload type="Order"/>

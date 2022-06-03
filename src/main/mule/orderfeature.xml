@@ -45,11 +45,11 @@ payload map(value, index) ->
 }]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-		<set-payload value="#[payload filter((value, index)-&gt; value.date.month == now().month - 1 )]" doc:name="Set Payload" doc:id="4e610412-0046-40b8-ba95-cda95a69781c" />
+		<set-payload value="#[payload filter((value, index)-&gt; value.date.month == now().month - 1 )]" doc:name="PrevMonthOrders" doc:id="4e610412-0046-40b8-ba95-cda95a69781c" />
 		<logger level="INFO" doc:name="Logger" doc:id="e230cec8-5b16-44c0-9270-ffffe100e208" />
 	</flow>
 	<flow name="apiflow" doc:id="f8656d45-383d-46e9-9fe9-2d530f9d1796">
-		<http:request method="GET" doc:name="swagger API" doc:id="2fd0f5db-536b-4460-b6c9-4413db200c80" config-ref="HTTP_Request_configuration" path="/order/date" targetValue="#[%dw 2.0 output application/xml --- payload]">
+		<http:request method="GET" doc:name="PrevMonthOrders" doc:id="2fd0f5db-536b-4460-b6c9-4413db200c80" config-ref="HTTP_Request_configuration" path="/order/date" targetValue="#[%dw 2.0 output application/xml --- payload]">
 					<http:query-params><![CDATA[#[output application/java
 ---
 {
@@ -59,11 +59,18 @@ payload map(value, index) ->
 				</http:request>
 		<ee:transform doc:name="Transform Message" doc:id="db2b9213-a051-4b0e-8f4b-8f2060089444">
 					<ee:message>
-						<ee:set-payload><![CDATA[%dw 2.0 
-output application/json 
---- 
-payload
-]]></ee:set-payload>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map(value, index) ->
+{
+	order_id: value.id,
+	quantity: value.quantity,
+	date: value.date as Date {format : "yyyy-MM-dd"},
+	store_id: value.storeId,
+	product_id: value.product.id,
+	txn_id: value.transaction.id
+}]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="e2f1637d-021f-43af-b0d6-1eebd07a9c0c" />
