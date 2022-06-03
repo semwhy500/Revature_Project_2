@@ -71,21 +71,64 @@ payload]]></ee:set-payload>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="5bfc9236-c578-4e97-b91b-70dbc584f4f5" />
 	</flow>
-	<flow name="AverageSalePriceFlow2" doc:id="04b09b65-b62d-494a-9e4f-42d485410943" >
-		<flow-ref doc:name="allOrders" doc:id="5ceb24e4-00b6-4b3a-92f7-8f3aa0fd8060" name="allOrders" />
-	</flow>
 	<flow name="AverageSalePriceFlow" doc:id="240123bc-14e8-4bb9-8d16-b093bbc8d4ee" >
-		<http:listener doc:name="GET /averagesale" doc:id="bdad181c-7b8b-45a1-a7a0-9060b403b10c" path="/averagesale" config-ref="HTTP_Listener_config"/>
-		<set-variable value="#[message.attributes.queryParams.day]" doc:name="day" doc:id="051c18bb-94ef-4f5c-ba31-eabda25f838a" variableName="day"/>
-		<set-variable value="#[message.attributes.queryParams.store_id]" doc:name="store_id" doc:id="7eb304bf-024f-4293-acde-3bf9edfee896" variableName="store_id"/>
+		<http:listener doc:name="GET /averagesale" doc:id="bdad181c-7b8b-45a1-a7a0-9060b403b10c" config-ref="HTTP_Listener_config" path="/averagesale"/>
+		<set-variable value='#[message.attributes.queryParams.day default "wrong"]' doc:name="day" doc:id="051c18bb-94ef-4f5c-ba31-eabda25f838a" variableName="day"/>
+		<set-variable value='#[message.attributes.queryParams.store_id default "wrong"]' doc:name="store_id" doc:id="7eb304bf-024f-4293-acde-3bf9edfee896" variableName="store_id"/>
 		<flow-ref doc:name="dbproducts" doc:id="9a90ccf3-2e69-463e-ae75-9e1d85621959" name="dbproducts" />
 		<set-variable value="#[payload]" doc:name="products" doc:id="aad6c7bb-807e-4dd7-895b-d7682a39fdd9" variableName="products"/>
 		<flow-ref doc:name="successfulOrders" doc:id="767c9490-70d5-4ff6-b6f1-635c60cc560d" name="successfulOrders" />
-		<parallel-foreach doc:name="Parallel For Each" doc:id="fb3d53f5-9d9b-4aeb-8fc6-187f3903341c" >
+		<choice doc:name="Choice" doc:id="af6c335b-50ed-4dfc-a033-417765305899">
+			<when expression='#[vars.store_id != "wrong"]'>
+				<ee:transform doc:name="Transform Message" doc:id="2fb70417-cf41-42fa-b64f-77984dafd4e0">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload filter $.store_id == vars.store_id]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="5bb8d186-67f1-4e2f-9938-e8609bdf29de">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="1301ea64-bb7e-42cc-9236-de6c268beb75" message="#[payload]"/>
+		<choice doc:name="Choice" doc:id="d28ca433-0d25-48b7-842f-67e122621a81">
+			<when expression='#[vars.day != "wrong"]'>
+				<ee:transform doc:name="Transform Message" doc:id="814ac6f4-ea9a-4e23-a217-d93c173b769a">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload filter $.day == vars.day]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise>
+				<ee:transform doc:name="Transform Message" doc:id="b7e99bb2-336c-4642-b5d2-4716c4f016a0">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="02e82f46-cd26-4218-bdb1-f438261e4eb6" message="#[payload]"/>
+		<parallel-foreach doc:name="Parallel For Each" doc:id="fb3d53f5-9d9b-4aeb-8fc6-187f3903341c">
 			<set-variable value="#[payload.qty]" doc:name="Set Variable Order Quantity" doc:id="abc671d1-f4b4-4f35-89c9-e07e2524217b" variableName="Order Quantity" />
-			<set-variable value="#[payload.product_id]" doc:name="Set Variable Product ID" doc:id="5eac8c23-711f-4917-be4a-469d7bf2c0b4" variableName="product_id"/>
-			<set-payload value="#[(vars.products filter $.product_id == vars.product_id).price]" doc:name="Set Payload" doc:id="3437a01f-d991-44e6-afed-4fa3720787c5" />
-			<ee:transform doc:name="Copy_of_Transform Message" doc:id="973c0425-f11f-40cb-8b60-9a148669b75a">
+			<set-variable value="#[payload.product_id]" doc:name="Set Variable Product ID" doc:id="5eac8c23-711f-4917-be4a-469d7bf2c0b4" variableName="product_id" />
+			<set-payload value="#[(vars.products filter $.product_id == vars.product_id).price]" doc:name="Set Payload to Price" doc:id="3437a01f-d991-44e6-afed-4fa3720787c5" />
+			<ee:transform doc:name="reduce payload" doc:id="973c0425-f11f-40cb-8b60-9a148669b75a">
 				<ee:message>
 					<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -94,7 +137,7 @@ reduce (payload, (item, acc) -> item + acc) as Number]]></ee:set-payload>
 				</ee:message>
 			</ee:transform>
 			<set-variable value="#[payload]" doc:name="Set Variable Product Price" doc:id="3317f792-e6c5-4ddd-a07f-5e17f5f3e61c" variableName="product_price" />
-			<ee:transform doc:name="Transform Message" doc:id="7369640e-0df2-46c7-bc70-8282a317a386">
+			<ee:transform doc:name="QTY * PRICE" doc:id="7369640e-0df2-46c7-bc70-8282a317a386">
 				<ee:message>
 					<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -104,7 +147,7 @@ output application/json
 			</ee:transform>
 			<logger level="INFO" doc:name="Logger" doc:id="70b701ea-28b1-4fcd-bf36-d7c38094657d" message="#[payload]" />
 		</parallel-foreach>
-		<ee:transform doc:name="Transform Message" doc:id="8124183d-263b-48cd-8c5c-efc09eb6524c" >
+		<ee:transform doc:name="average of" doc:id="8124183d-263b-48cd-8c5c-efc09eb6524c" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -222,7 +265,14 @@ txn_id: item.transaction.id
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+payload map ((item, index) -> {
+order_id: item.order_id,
+qty: item.qty,
+datetime: item.datetime as String {format : "yyyy-MM-dd"},
+store_id: item.store_id,
+product_id: item.product_id,
+txn_id: item.txn_id
+})]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="ef873881-183a-4284-81ea-88063a807cf5" message="#[payload]"/>
@@ -414,11 +464,29 @@ payload filter $.product_id == vars.product_id]]></ee:set-payload>
 		<set-variable value="#[payload]" doc:name="Set Variable All Orders" doc:id="5f9adeb0-178e-4267-9a41-73e3a4a2bbfa" variableName="all_orders" />
 		<set-variable value="#[payload]" doc:name="Set Variable Original Payload" doc:id="3dd72bb0-b008-4b02-b539-a4fb2e5b9410" variableName="original_payload" />
 	</flow>
+	<flow name="AverageSalePriceFlow5" doc:id="05ef9725-412e-41ba-aaef-a76c4493352d" >
+		<http:listener doc:name="Copy_of_Listener" doc:id="9ae1d1f7-e8e8-40c7-aa8e-ab0d61cd440b" config-ref="HTTP_Listener_config" path="/test2" />
+		<flow-ref doc:name="Flow Reference" doc:id="1d68e4e0-8133-41b3-8f81-4cfc8bd7b5e2" name="allOrders" />
+		<parallel-foreach doc:name="Parallel For Each" doc:id="bed0c1d2-497a-482e-96b2-e02bcf3e7a73" >
+			<ee:transform doc:name="Transform Message" doc:id="250aa616-e071-424a-9ca0-73beebd7ab89">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+var dt = payload.datetime
+---
+payload.datetime as Date {format : "yyyy-M[01]-d[01]'T'HH:mm:ss"} as String {format : "MM-dd-yyyy"}
+
+]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+		</parallel-foreach>
+		<logger level="INFO" doc:name="Logger" doc:id="002d814b-86a1-4276-a7b2-1e0380679240" />
+	</flow>
 	<flow name="AverageSalePriceFlow4" doc:id="c97c46ae-df4e-44cc-a9f3-874404bc46a1" >
-		<http:listener doc:name="Listener" doc:id="c781c7b0-93db-42bf-ac5d-5329253f9b48" path="/test" config-ref="HTTP_Listener_config"/>
-		<ee:transform doc:name="Copy_of_Transform Message" doc:id="62d1533c-1bf5-46b7-84b5-ed2160e34c7e" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<http:listener doc:name="Listener" doc:id="c781c7b0-93db-42bf-ac5d-5329253f9b48" config-ref="HTTP_Listener_config" path="/test" />
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="62d1533c-1bf5-46b7-84b5-ed2160e34c7e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 var dt = "2021-12-27"
 ---
@@ -428,24 +496,16 @@ dt as Date {format : "yyyy-M[01]-d[01]"} as String {format : "MM-dd-yyyy"}
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="70f7152f-6050-48c8-b265-daf8f1a64281" />
-		<ee:transform doc:name="Transform Message" doc:id="250aa616-e071-424a-9ca0-73beebd7ab89">
+	</flow>
+	<flow name="AverageSalePriceFlow6" doc:id="77237567-070c-475e-a71f-5641eca9965d" >
+		<flow-ref doc:name="Flow Reference" doc:id="2da8af42-b701-4785-8b21-1d9f3689d73e" name="apiorders" />
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="f556fbc2-f3ce-4f9e-a8ff-9e1668c38832">
 						<ee:message>
 							<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 var dt = payload.datetime as String
 ---
-payload.datetime as Date {format : "yyyy-M[01]-d[01]"} as String {format : "MM-dd-yyyy"}
-
-]]></ee:set-payload>
-						</ee:message>
-					</ee:transform>
-		<ee:transform doc:name="Transform Message" doc:id="5226f141-e401-4ec8-b5e0-929adac50a44">
-						<ee:message>
-							<ee:set-payload><![CDATA[%dw 2.0
-output application/json
-var dt = payload.datetime as String
----
-payload.datetime as Date {format : "yyyy-M[01]-d[01]"} as String {format : "MM-dd-yyyy"}]]></ee:set-payload>
+payload ++  {day : payload.datetime as Date {format : "yyyy-M[01]-d[01]'T'HH:mm:ss"} as String {format : "MM-dd-yyyy"}}]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
 	</flow>
@@ -453,7 +513,7 @@ payload.datetime as Date {format : "yyyy-M[01]-d[01]"} as String {format : "MM-d
 		<http:listener doc:name="GET /successfulorders" doc:id="e30fe72e-e277-4d44-a1a7-c4b2be51a17f" path="/successfulorders" config-ref="HTTP_Listener_config"/>
 		<flow-ref doc:name="allTransactions" doc:id="3fb6a7a4-a423-48f2-8705-e5e40c5e5f8f" name="allTransactions"/>
 		<set-variable value="#[payload]" doc:name="transactions" doc:id="a3c72ab5-8a94-45b4-bd44-b2ab75d03443" variableName="transactions"/>
-		<flow-ref doc:name="allOrders" doc:id="adfd446b-8d7a-4133-bfaa-8f55dfee1c98" name="allOrders"/>
+		<flow-ref doc:name="allOrders" doc:id="adfd446b-8d7a-4133-bfaa-8f55dfee1c98" name="allOrders" />
 		<parallel-foreach doc:name="Parallel For Each" doc:id="57483583-a702-4280-a1b1-cf62f1cb2fbe" >
 			<set-variable value="#[payload.txn_id as String]" doc:name="Set Variable Transaction ID" doc:id="491fd1a4-f2f7-4520-a469-223ed9da6d8c" variableName="transaction_id"/>
 			<set-variable value='#[((vars.transactions filter $.payment_txn_id == vars.transaction_id).payment_txn_success)[0]]' doc:name="single_transaction" doc:id="061875b6-d8a2-4f9c-8a71-7aac8902f7ba" variableName="single_transaction"/>
@@ -467,6 +527,16 @@ output application/json
 payload ++ {payment_txn_success : "true"}]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
+					<ee:transform doc:name="Transform Message" doc:id="5226f141-e401-4ec8-b5e0-929adac50a44">
+						<ee:message>
+							<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var dt = payload.datetime as Date {format : "yyyy-MM-dd"}
+---
+payload ++ {day : dt as Date {format : "E"}}
+]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
 				</when>
 				<otherwise >
 					<ee:transform doc:name="add false" doc:id="a14ebc20-6a03-496c-968b-816a038639ab" >
@@ -475,6 +545,15 @@ payload ++ {payment_txn_success : "true"}]]></ee:set-payload>
 output application/json
 ---
 payload ++ {payment_txn_success : "false"}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+					<ee:transform doc:name="Copy_of_Transform Message" doc:id="87768af9-c394-48cf-9c97-568a0380fbdc" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var dt = payload.datetime as Date {format : "yyyy-MM-dd"}
+---
+payload ++ {day : dt as Date {format : "E"}}]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
 				</otherwise>
