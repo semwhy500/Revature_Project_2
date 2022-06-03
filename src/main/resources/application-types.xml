@@ -1,6 +1,14 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
-  <types:catalog/>
+  <types:catalog>
+    <types:type name="ordersCSVTypeTeam2" format="json">
+      <types:shape format="weave" example="examples/orders-example.json"><![CDATA[%dw 2.0
+
+type ordersCSVTypeTeam2 = Array<{|  order_id: String,   qty: String,   datetime: String,   store_id: String,   product_id: String,   txn_id: String|}> {"example": "[{\\\"order_id\\\":\\\"628e4bd5f032395bc200011e\\\",\\\"qty\\\":\\\"1\\\",\\\"datetime\\\":\\\"2022-02-14\\\",\\\"store_id\\\":\\\"2\\\",\\\"product_id\\\":\\\"bace903f-8be2-441a-91db-85d332406410\\\",\\\"txn_id\\\":\\\"628e4bbcf032395e2300016d\\\"},{\\\"order_id\\\":\\\"628e4bd6f032395e230001a9\\\",\\\"qty\\\":\\\"2\\\",\\\"datetime\\\":\\\"2022-04-09\\\",\\\"store_id\\\":\\\"2\\\",\\\"product_id\\\":\\\"dfb825d1-bb64-462b-a0f0-384d37c99ee9\\\",\\\"txn_id\\\":\\\"628e4bbcf032395e23000163\\\"},{\\\"order_id\\\":\\\"628e4bd6f032395e230001a8\\\",\\\"qty\\\":\\\"6\\\",\\\"datetime\\\":\\\"2022-04-02\\\",\\\"store_id\\\":\\\"3\\\",\\\"product_id\\\":\\\"ec64d596-ca25-49d4-983b-e8883756938b\\\",\\\"txn_id\\\":\\\"628e4bbcf032395ac000011d\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
   <types:enrichment select="#2323967e-2655-4718-ab75-b70cd2103f28">
     <types:processor-declaration>
       <types:input-event>
@@ -110,6 +118,15 @@
           <types:variable name="products" type="null"/>
         </types:variables>
       </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#f579f233-a765-4d8b-9187-304109caa334">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="ordersCSVTypeTeam2"/>
+        </types:message>
+      </types:input-event>
     </types:processor-declaration>
   </types:enrichment>
 </types:mule>
