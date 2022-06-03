@@ -1,5 +1,460 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd"></mule>
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f7fb7073-8187-4355-8323-9bbacc50dec0" basePath="/api" >
+		<http:listener-connection host="0.0.0.0" port="8080" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="f350c7ef-53b4-4fa2-b39a-320b11f81236" >
+		<http:request-connection host="184.72.81.235" port="8080" />
+	</http:request-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="c1ec69cf-1cca-4fc2-8b6e-f2d77181e9c1" >
+		<db:generic-connection url="jdbc:postgresql://grocery-api-historic.cvtq9j4axrge.us-east-1.rds.amazonaws.com:5432/postgres" driverClassName="org.postgresql.Driver" user="postgres" password="password" />
+	</db:config>
+	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="bed54a34-7d6e-4689-aa57-c0edcfb11a7c" >
+		<http:request-connection host="184.72.81.235" port="8080" />
+	</http:request-config>
+	<flow name="CsvToJSON" doc:id="9d333d31-6803-4d50-afff-fff67beec1e0" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="ecc68b64-aa34-4582-a9ed-300026d0890a" >
+			<route >
+				<file:read doc:name="ReadOrders" doc:id="fbf34287-7bae-4486-befe-d00df2401095" path="C:\Users\abbys\Downloads\Orders.csv" />
+				<ee:transform doc:name="CSV to JSON" doc:id="5be520ef-784b-4ebe-bedf-4e0f47b57ca2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	order_id: payload01.order_id,
+	qty: payload01.qty as Number,
+	datetime: payload01.datetime,
+	store_id: payload01.store_id,
+	product_id: payload01.product_id,
+	txn_id: payload01.txn_id,
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="OrderJSON" doc:id="8c43ca7f-469f-44f6-a7ff-355d0d36e547" variableName="OrderJSON"/>
+			</route>
+			<route >
+				<file:read doc:name="ReadProducts" doc:id="0d0599ea-e6da-436d-9348-dbfece149b49" path="C:\Users\abbys\Downloads\Products.csv" />
+				<ee:transform doc:name="CSV to JSON" doc:id="15c950e0-3568-4b42-bd9f-640d14dccb4c" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	product_id: payload01.product_id,
+	product_name: payload01.product_name,
+	price: payload01.price
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="ProductJSON" doc:id="7eb3e618-1a0b-4b12-8b47-88401e1056c8" variableName="ProductJSON"/>
+			</route>
+			<route >
+				<file:read doc:name="ReadTransactions" doc:id="81b17ac4-1f29-489a-9792-d238592dfb0f" path="C:\Users\abbys\Downloads\Transactions.csv" />
+				<ee:transform doc:name="CSV to JSON" doc:id="cc2761bd-a47f-4e58-9dbc-6c82a50dc8b6" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	payment_txn_id: payload01.payment_txn_id,
+	payment_type: payload01.payment_type,
+	payment_txn_success: payload01.payment_txn_success,
+	customer_id: payload01.customer_id
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="TransactionJSON" doc:id="4bc96f3f-6be2-400b-81da-bd1ec45381ad" variableName="TransactionJSON"/>
+			</route>
+			<route >
+				<file:read doc:name="ReadCustomer" doc:id="e55eb34d-9fd4-4ec9-a838-6b79958f19f1" path="C:\Users\abbys\Downloads\Customers.csv" />
+				<ee:transform doc:name="CSV to JSON" doc:id="7e0fc19a-def0-4d13-806e-aa4bf1c554c8" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/csv
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	customer_id: payload01.customer_id,
+	customer_name: payload01.customer_name
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="CustomerJSON" doc:id="2843f94f-f1fe-4c0a-bd05-e7b61ffad505" variableName="CustomerJSON"/>
+			
+</route>
+		</scatter-gather>
+		<ee:transform doc:name="Union of Files" doc:id="a0f765f6-81ad-4a24-af87-7edb556115a7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var firstInput = vars.OrderJSON
+var secondInput = vars.ProductJSON
+var thirdInput = vars.TransactionJSON
+var fourthInput = vars.CustomerJSON
+---
+firstInput map (firstInputValue) ->
+  {
+  	"Order ID": firstInputValue.order_id,
+  	"Quantity": firstInputValue.qty as Number,
+  	"Date": firstInputValue.datetime as Date,
+  	"Store ID": firstInputValue.store_id,
+  	"Product ID": firstInputValue.product_id,
+  	(secondInput filter ($.product_id contains firstInputValue.product_id) map (secondInputValue) -> {
+  		"Product Name": secondInputValue.product_name,
+  		"Price": secondInputValue.price
+  	}),
+  	"Transaction ID": firstInputValue.txn_id,
+    (thirdInput filter ($.payment_txn_id contains firstInputValue.txn_id) map (thirdInputValue) -> {
+    	"Payment Type": thirdInputValue.payment_type,
+    	"Transaction Success": thirdInputValue.payment_txn_success,
+    	 "Customer ID": thirdInputValue.customer_id,
+    	 (fourthInput filter($.customer_id contains thirdInputValue.customer_id) map (fourthInputValue) -> {
+    	 	"Customer Name": fourthInputValue.customer_name
+    	})
+    })
+   }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="Orders" doc:id="bf7d67ba-f836-43a2-bb80-699829f39602" >
+		<http:listener doc:name="/order/succesfull/prevmonth" doc:id="357ad510-70e0-4dcb-a31f-e7c5ecf3070a" config-ref="HTTP_Listener_config" path="/order/succesfull/prevmonth" />
+		<flow-ref doc:name="Flow Reference" doc:id="3455d0f3-8082-4e1f-a596-7e89cac1a124" name="CsvToJSON"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="60cf59f8-205a-4681-bf09-78bb08675d9b" >
+			<route >
+				<ee:transform doc:name="Transform Message" doc:id="198ffa9d-2718-428d-abdc-8eb856a13a4a">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var firstInput = vars.OrderJSON
+var secondInput = vars.ProductJSON
+var thirdInput = vars.TransactionJSON
+var fourthInput = vars.CustomerJSON
+---
+firstInput map (firstInputValue) ->
+  {
+  	"Order ID": firstInputValue.order_id,
+  	"Quantity": firstInputValue.qty as Number,
+  	"Date": firstInputValue.datetime as Date as String {format: "MM"},
+  	"Store ID": firstInputValue.store_id,
+  	"Product ID": firstInputValue.product_id,
+  	(secondInput filter ($.product_id contains firstInputValue.product_id) map (secondInputValue) -> {
+  		"Product Name": secondInputValue.product_name,
+  		"Price": secondInputValue.price
+  	}),
+  	"Transaction ID": firstInputValue.txn_id,
+    (thirdInput filter ($.payment_txn_id contains firstInputValue.txn_id) map (thirdInputValue) -> {
+    	"Payment Type": thirdInputValue.payment_type,
+    	"Transaction Success": thirdInputValue.payment_txn_success,
+    	 "Customer ID": thirdInputValue.customer_id,
+    	 (fourthInput filter($.customer_id contains thirdInputValue.customer_id) map (fourthInputValue) -> {
+    	 	"Customer Name": fourthInputValue.customer_name
+    	})
+    })
+   }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<set-variable value="#[%dw 2.0&#10;output application/json&#10;---&#10;now().month - 1]" doc:name="Previous Month" doc:id="900512b0-204b-4db9-9260-e296b8fe131e" variableName="prevMonth" />
+				<ee:transform doc:name="Filter by Successful Transaction nad Previous Month" doc:id="58ed7bab-36b2-447a-ac56-5a20d31dad2d">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload filter($."Transaction Success"=="true" and ($.Date~=vars.prevMonth))]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<set-variable value='#[payload."Customer ID"]' doc:name="Previous Month Filtered" doc:id="d4c836db-bb24-4ada-a55e-e60595cc3e9a" variableName="monthFiltered"/>
+				<set-variable value="#[sizeOf(payload)]" doc:name="Amount of Customers on Previous Month" doc:id="37cbac9d-afc4-4675-854b-8308fe2dedd9" variableName="prevMonthCustomers" />
+				<logger level="INFO" doc:name="Logger" doc:id="fead2be4-13b3-4b78-9a08-958e4fa6f807" message='#["Amount of Customers on Previous Month " ++ vars.prevMonthCustomers as String]'/>
+			</route>
+			<route >
+				<ee:transform doc:name="Transform Message" doc:id="154f0e58-f1e1-409d-a2d6-60ffd0e1c517">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var firstInput = vars.OrderJSON
+var secondInput = vars.ProductJSON
+var thirdInput = vars.TransactionJSON
+var fourthInput = vars.CustomerJSON
+---
+firstInput map (firstInputValue) ->
+  {
+  	"Order ID": firstInputValue.order_id,
+  	"Quantity": firstInputValue.qty as Number,
+  	"Date": firstInputValue.datetime as Date as String {format: "MM"},
+  	"Store ID": firstInputValue.store_id,
+  	"Product ID": firstInputValue.product_id,
+  	(secondInput filter ($.product_id contains firstInputValue.product_id) map (secondInputValue) -> {
+  		"Product Name": secondInputValue.product_name,
+  		"Price": secondInputValue.price
+  	}),
+  	"Transaction ID": firstInputValue.txn_id,
+    (thirdInput filter ($.payment_txn_id contains firstInputValue.txn_id) map (thirdInputValue) -> {
+    	"Payment Type": thirdInputValue.payment_type,
+    	"Transaction Success": thirdInputValue.payment_txn_success,
+    	 "Customer ID": thirdInputValue.customer_id,
+    	 (fourthInput filter($.customer_id contains thirdInputValue.customer_id) map (fourthInputValue) -> {
+    	 	"Customer Name": fourthInputValue.customer_name
+    	})
+    })
+   }]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[%dw 2.0
+output application/json
+---
+now().month - 1]" doc:name="Before Previous Month" doc:id="f1f8ed0b-d2a2-4c8d-95d9-5b117a0bf5ed" variableName="BeforePrevMonth" />
+				<ee:transform doc:name="Filter by Successful Transaction nad Previous Month" doc:id="a6fa39be-c019-4e93-b174-670eeb2cb9d5" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter($."Transaction Success"=="true" and ($.Date<vars.BeforePrevMonth))]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value='#[payload."Customer ID"]' doc:name="Before Previous Month Filtered" doc:id="6771308b-2826-4e5a-b4fc-0ea8cd162e2e" variableName="beforeFiltered"/>
+				<set-variable value="#[sizeOf(payload)]" doc:name="Amount of customers from beginning of year until 2 months back" doc:id="a103b9dc-a4c8-484a-96fe-d6b2b2b1c846" variableName="restOfYear"/>
+				<logger level="INFO" doc:name="Logger" doc:id="2fb6be28-926f-49a8-a8b9-64137486a842" message='#["Amount of customers from beginning of year until 2 months back " ++ vars.restOfYear as String]'/>
+			</route>
+		</scatter-gather>
+		<!-- [STUDIO:"Transform Message"]		<ee:transform doc:name="Transform Message" doc:id="bd1e6f6f-55c6-4e73-ab22-918a8505514f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+
+var distinctVal = payload."Customer ID"  distinctBy $
+
+ var duplicates = (distinctVal map(key,value) -> {
+
+    count : if(sizeOf((payload map $ == key) filter $ ) > 1) key else null
+
+}) filter $.count !=null 
+
+&#45;&#45;-
+{
+	UniqueCustomers: distinctVal,
+	
+	duplicatesAre : duplicates.count
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform> [STUDIO] -->
+	</flow>
+	<flow name="NewvVSReturningCustomers" doc:id="540320fe-00cb-4ae8-acda-7a03478f2b15" >
+		<http:listener doc:name="/new-vs-returning" doc:id="b95d6b2d-dbd7-43b5-b755-25123f33628d" config-ref="HTTP_Listener_config" path="/new-vs-returning"/>
+		<flow-ref doc:name="Orders" doc:id="5e8b2696-eba5-4f8d-bc24-4163f587d0af" name="Orders" />
+		<set-variable value="#[vars.beforeFiltered]" doc:name="Previous Customers" doc:id="0eab1573-0759-4571-9455-2f043ffdfeff" variableName="prevCust"/>
+		<set-variable value="#[vars.monthFiltered]" doc:name="Last Month's Customers" doc:id="d4eab93e-83f1-4abe-aa29-9ec4a33eda90" variableName="monthCust" />
+		<set-variable value="#[vars.monthCust reduce (item, acc = []) -&gt; if (vars.prevCust contains item) acc + item else acc]" doc:name="Returning Customers (Who is in both Last Month's and the previous data?)" doc:id="76fb6747-eae2-4370-88eb-61f94dc5c980" variableName="returnCust"/>
+		<set-payload value="#[vars.returnCust]" doc:name="Set Payload to returning customer array" doc:id="3f00f242-4625-41c2-b738-4e3f1cd5a5fb" mimeType="application/json"/>
+		<set-variable value="#[sizeOf(vars.monthCust)]" doc:name="Total # of Customers last month" doc:id="20d14195-5d2d-459c-8f7a-72ad335833da" variableName="monthTotal" />
+		<set-variable value="#[sizeOf(vars.returnCust)]" doc:name="# of Returning Customers Last Month" doc:id="6d3a6618-dd19-44f4-9f46-9fbf020b3290" variableName="monthReturn" />
+		<set-variable value="#[(vars.monthTotal-vars.monthReturn)/vars.monthTotal]" doc:name="Set Variable" doc:id="f8d128c9-4db7-43fd-98fa-1b0f2531ab4f" variableName="Percent"/>
+		<ee:transform doc:name="Transform Message" doc:id="f8293b07-b537-4be6-ac99-662399e2f3ee">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+vars.Percent
+//vars.prevCust]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="AvgQuantity" doc:id="3bf9a0f9-ccee-42bd-94d5-f00413ee83ef">
+		<http:listener doc:name="/average-sales-quantity" doc:id="f9df7a5b-3928-4c99-ab14-3a00fd4e93e7" config-ref="HTTP_Listener_config" path="/average-sales-quantity" />
+		<flow-ref doc:name="Get All Data" doc:id="dc477980-7593-499b-8059-c02b776920bf" name="GetAllData" />
+		<flow-ref doc:name="Calculate Average Quantity" doc:id="6d2315c5-4150-49a4-8399-834215db492c" name="CalculateAvgQuantity" />
+	</flow>
+	<flow name="AvgQuantityByStore" doc:id="2fe8dbd5-a7e4-4fee-89a9-33b69e2820c7" >
+		<http:listener doc:name="/average-sales-quantity/store" doc:id="7dbc7f84-6865-49cf-b2ce-6f4d46e1dd9e" config-ref="HTTP_Listener_config" path="/average-sales-quantity/store"/>
+		<set-variable value="#[message.attributes.queryParams.id]" doc:name='Store URIparam "id"' doc:id="369b4a04-a5aa-40b3-9128-0cc2db2bd4e0" variableName="ID"/>
+		<flow-ref doc:name="Get All Data" doc:id="585d8eac-3e09-4d49-aa02-e539a9d147cc" name="GetAllData" />
+		<ee:transform doc:name="Filter Data By Store ID" doc:id="7f41e94b-9e40-4960-a1ef-6922dc9d31c3">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload filter($.store_id==vars.ID)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Calculate Average Quantity" doc:id="c9692237-c521-4435-8d92-46b7bbc8d79a" name="CalculateAvgQuantity" />
+	</flow>
+	<flow name="AvgQuantityByDOW" doc:id="7767ee73-fb21-48cd-a82a-8f7b719b2f0e" >
+		<http:listener doc:name="/average-sales-quantity/dow" doc:id="d4db43fd-2f5b-4db2-94bd-859d3f8e51e9" config-ref="HTTP_Listener_config" path="/average-sales-quantity/dow" />
+		<set-variable value="#[message.attributes.queryParams.dow]" doc:name='Store URIparam "dow"' doc:id="57dcb417-1ff9-4e53-9e06-3a72403748f7" variableName="dow" />
+		<flow-ref doc:name="Get All Data" doc:id="1702cfc3-aeb6-4450-b336-ae7e8ccc3775" name="GetAllData" />
+		<ee:transform doc:name="Filter Data by DOW" doc:id="2f359651-2744-4691-8be1-3380fdf33359" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter($.dow==vars.dow)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<flow-ref doc:name="Calculate Average Quantity" doc:id="043b1fbe-0eae-48d0-b645-6f5fd38d62bd" name="CalculateAvgQuantity" />
+	</flow>
+	<sub-flow name="GetAllData" doc:id="113ff6bc-851a-490d-acd5-8e62035e965a">
+		<scatter-gather doc:name="Gather All Data" doc:id="6340ba35-9d45-442a-b3e2-ed86f144e7b5">
+			<route>
+				<flow-ref doc:name="GetCSVdata" doc:id="96a4b3f5-40b4-4bf2-98f0-83b5168ba83c" name="GetCSVdata" />
+			</route>
+			<route>
+				<try doc:name="Try" doc:id="e14327e0-bacf-4e3b-8b09-e2f2e7442778">
+			<flow-ref doc:name="GetAPIdata" doc:id="9944bc57-d852-4cdb-90af-74ce6240a854" name="GetAPIdata" />
+					<error-handler>
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="8aa547a5-0efe-4312-80d9-f152ffc28b8e" />
+			</error-handler>
+		</try>
+			</route>
+			<route>
+				<flow-ref doc:name="GetDBdata" doc:id="ad67f056-595e-4a1d-82e2-a9b3f47a28d6" name="GetDBdata" />
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Flatten Array" doc:id="0d8ee7cd-c4a1-46e2-85a8-e920824c229c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+flatten(payload..payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="GetCSVdata" doc:id="45b1535a-edcf-4bd9-8229-2e2273253ddd">
+		<scatter-gather doc:name="Copy_of_Scatter-Gather" doc:id="d1f8d010-148d-4128-a89c-a68c1d01cf8c">
+			<route>
+				<file:read doc:name="Read Orders CSV" doc:id="3b317d46-aa47-4af2-ac17-00f102920965" path="C:\Users\abbys\Downloads\Orders.csv" />
+				<ee:transform doc:name="CSV to JSON" doc:id="fdf6e142-c832-4437-aecb-6162a2d5d9b0">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/csv
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	order_id: payload01.order_id,
+	qty: payload01.qty as Number,
+	datetime: payload01.datetime,
+	store_id: payload01.store_id,
+	product_id: payload01.product_id,
+	txn_id: payload01.txn_id,
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="OrderJSON" doc:id="0995e92a-bd64-4617-a0be-70e8ed5d39e3" variableName="OrderJSON" />
+			</route>
+			<route>
+				<file:read doc:name="Read Orders CSV" doc:id="86693a20-eee4-4a90-9504-3b8f01b15f26" path="C:\Users\abbys\Downloads\Transactions.csv" />
+				<ee:transform doc:name="CSV to JSON" doc:id="3d8118e9-f5a6-4420-ac3e-0da1f95362ba">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/csv
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	payment_txn_id: payload01.payment_txn_id,
+	payment_type: payload01.payment_type,
+	payment_txn_success: payload01.payment_txn_success,
+	customer_id: payload01.customer_id
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="TransactionJSON" doc:id="fa0b7c10-499e-4747-abd6-a4025f524dc8" variableName="TransactionJSON" />
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Union of Files" doc:id="35b53dd1-cf27-49a2-8b4e-5eebd7528e4c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var firstInput = vars.OrderJSON
+var thirdInput = vars.TransactionJSON
+---
+firstInput map (firstInputValue) ->
+  {
+  	"Order ID": firstInputValue.order_id,
+  	"Quantity": firstInputValue.qty as Number,
+  	"Date": firstInputValue.datetime as Date,
+  	"Store ID": firstInputValue.store_id,
+  	"Product ID": firstInputValue.product_id,
+  	"Transaction ID": firstInputValue.txn_id,
+    (thirdInput filter ($.payment_txn_id contains firstInputValue.txn_id) map (thirdInputValue) -> {
+    	"Payment Type": thirdInputValue.payment_type,
+    	"Transaction Success": thirdInputValue.payment_txn_success,
+    	 "Customer ID": thirdInputValue.customer_id
+    })
+   }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Reformat" doc:id="3e882221-903a-4bac-a781-afc3710594f8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload ) -> {
+	order_id: payload."Order ID",
+	qty: payload."Quantity" default 0,
+	datetime: payload."Date" as String default "",
+	dow: payload."Date" as Date as String {format: "EEEE"},
+	store_id: payload."Store ID" as String default "",
+	product_id: payload."Product ID" default "",
+	txn_id: payload."Transaction ID" default "",
+	success: payload."Transaction Success"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Filter for Successful Transactions" doc:id="0cb745b6-2039-4f2c-812d-1ee0ae9a6a12" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter($.success contains "true") ]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="GetAPIdata" doc:id="82fcece5-5f20-4e60-a13b-d333cfba3c76">
+		<http:request method="GET" doc:name="Request API Data" doc:id="62cb97b2-3e1a-4990-affe-4db66cdba462" config-ref="HTTP_Request_configuration1" path='#["/order"]' />
+		<ee:transform doc:name="To JSON Array (filter success=true)" doc:id="ebff09bc-1798-45d6-a60c-fa848c8dbb5f">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload filter($.transaction.success==true) map ( payload01 , indexOfPayload01 ) -> {
+	order_id: payload01.id,
+	qty: payload01.quantity,
+	datetime: payload01.date,
+	dow: payload01.date as Date as String {format: "EEEE"},
+	store_id: payload01.storeId as String,
+	product_id: payload01.product.id,
+	txn_id: payload01.transaction.id
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+	</sub-flow>
+	<sub-flow name="GetDBdata" doc:id="fb7c1a99-430c-412c-b9e9-fbdb00725f6c">
+		<db:select doc:name="Select Historical Data (where success=true)" doc:id="c5f884d4-4edc-40cf-889a-edbaee8fb0f4" config-ref="Database_Config">
+					<db:sql><![CDATA[SELECT * FROM orders left join transactions on orders.txn_id=transactions.payment_txn_id WHERE transactions.payment_txn_success=true ]]></db:sql>
+				</db:select>
+		<ee:transform doc:name="To JSON Array" doc:id="73a60f0e-8e85-40b5-a3b2-ed829832c325">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	order_id: payload01.order_id,
+	qty: payload01.qty default 0,
+	datetime: payload01.datetime as String default "",
+	dow: payload01.datetime as Date as String {format: "EEEE"},
+	store_id: payload01.store_id as String default "",
+	product_id: payload01.product_id default "",
+	txn_id: payload01.txn_id default ""
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+	</sub-flow>
+	<sub-flow name="CalculateAvgQuantity" doc:id="9a906202-e4d3-437c-ac93-4a2d02dfe73c">
+		<set-variable value="#[avg(payload.qty)]" doc:name="Find Average Quantity" doc:id="f8cd8500-0ecf-4cbc-8b3c-3c28348f6f39" variableName="avg" />
+		<logger level="INFO" doc:name="Log Average Quantity" doc:id="bd62e6b4-c952-4ef9-be45-3fb37992bdb4" message="#[vars.avg]" />
+		<set-payload value="#[vars.avg]" doc:name="Set Payload to Average Quantity" doc:id="0deec1af-5573-4b74-83c5-a659591a2333" />
+	</sub-flow>
+</mule>
