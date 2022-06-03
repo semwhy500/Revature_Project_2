@@ -1,8 +1,16 @@
 {
   "sampleData": {
+<<<<<<< HEAD
     "84def99d-18b2-4c83-a529-1007f750b59e": {
       "vars-ordersCSV": "sample_data/defaultbinarytype.json",
       "vars-productsCSV": "sample_data/defaultbinarytype_1.json"
+=======
+    "263ce079-9ffa-47ba-b49a-e51a475c3ff2": {
+      "payload": "sample_data/java.dwl"
+    },
+    "dbd77a0b-588f-4e7e-b99d-467bf3bad1c4": {
+      "payload": "sample_data/list_java.dwl"
+>>>>>>> team4
     }
   }
 }
