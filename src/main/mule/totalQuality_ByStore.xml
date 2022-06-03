@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+    <http:listener-config name="totalquantitypermonthbystore-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="8081" />
+    </http:listener-config>
+    <apikit:config name="totalquantitypermonthbystore-config" api="resource::cf2fe624-202b-4766-9453-dc3f11723e92:totalquantitypermonthbystore:1.0.3:raml:zip:totalquantitypermonthbystore.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    <flow name="totalquantitypermonthbystore-main">
+        <http:listener config-ref="totalquantitypermonthbystore-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="totalquantitypermonthbystore-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="totalquantitypermonthbystore-console">
+        <http:listener config-ref="totalquantitypermonthbystore-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="totalquantitypermonthbystore-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform>
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\store:totalquantitypermonthbystore-config">
+        <set-variable value="#[message.attributes.queryParams.id]" doc:name="Set queryParam store ID Variable" doc:id="f8c9b37f-ae61-4b80-882b-21d0425dc43e" variableName="ID"/>
+		<set-variable value="#[now() - |P1M|]" doc:name="Set prevMonthDate Variable" doc:id="83908f29-618b-4f53-be21-74fd039dc0f0" variableName="prevMonthDate" />
+		<set-variable value='#[vars.prevMonthDate.month]' doc:name="Format to prevMonth" doc:id="446e4fb1-d45d-4a16-9c98-5a4cbc7004b5" variableName="prevMonth" />
+<!-- [STUDIO:"Scatter-Gather"]		<scatter-gather doc:name="Scatter-Gather" doc:id="69e44fd4-4092-4323-a116-187402c2c399" >
+			<route >
+				<file:read doc:name="Copy_of_Read orders.csv" doc:id="ebb210ae-c8ec-4c98-a3ca-7fc0d0d402b8" path="C:\Users\JediTony_GamePC\Downloads\Orders.csv" />
+				<ee:transform doc:name="Copy_of_Transform CSV to JSON and Filter Store ID" doc:id="47bf5e4a-d694-4c29-b547-55aeb60bf90b" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload filter($.store_id~=vars.ID) map ( payload01 , indexOfPayload01 ) -> {
+	orderID: payload01.order_id,
+	storeID: payload01.store_id as Number,
+	quantity: payload01.qty as Number,
+	datetime: payload01.datetime
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<ee:transform doc:name="Copy_of_Filter by previous month" doc:id="0815e287-518c-4773-8699-42a6c914cf75" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload filter($.datetime.month == vars.prevMonth) map ( payload01 , indexOfPayload01 ) -> {
+	orderID: payload01.orderID,
+	storeID: payload01.storeID,
+	quantity: payload01.quantity
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[sum(payload.quantity)]" doc:name="Copy_of_Sum Quantity Variable" doc:id="6eba149c-6cde-439b-ad8b-d670fd94fa5f" variableName="sumQuantity" />
+			</route>
+			<route >
+				<http:request method="GET" doc:name="Copy_of_Request API Orders Data" doc:id="37a3d3d0-fa42-448f-86ab-84ca43767993" config-ref="HTTP_Request_configuration" path="/order" />
+				<ee:transform doc:name="Copy_of_Transform Message | API to JSON" doc:id="362a54d4-7b0d-4766-b978-bb2a1ee361ea" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+&#45;&#45;-
+payload map ( payload01 , indexOfPayload01 ) -> {
+	storeID: payload01.storeId,
+	totalQuantity: payload01.quantity
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</route>
+		</scatter-gather> [STUDIO] -->
+		<file:read doc:name="Read orders.csv" doc:id="ce474626-2272-4b6d-95b7-b65f60cc0274" path="C:\Users\JediTony_GamePC\Downloads\Orders.csv"/>
+		<ee:transform doc:id="222cb784-f445-4bef-a589-a0ef361393d5" doc:name="Transform CSV to JSON and Filter Store ID">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload filter($.store_id~=vars.ID) map ( payload01 , indexOfPayload01 ) -> {
+	orderID: payload01.order_id,
+	storeID: payload01.store_id as Number,
+	quantity: payload01.qty as Number,
+	datetime: payload01.datetime
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<ee:transform doc:name="Filter by previous month" doc:id="a4625163-db66-4ee1-abf3-92528ea342bd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter($.datetime.month == vars.prevMonth) map ( payload01 , indexOfPayload01 ) -> {
+	orderID: payload01.orderID,
+	storeID: payload01.storeID,
+	quantity: payload01.quantity
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[sum(payload.quantity)]" doc:name="Sum Quantity Variable" doc:id="a52c6acf-afa2-4ad2-9f21-3fc0ce06d9ce" variableName="sumQuantity" />
+		<ee:transform doc:name="Transform Message" doc:id="040e329d-1c15-40b5-99b5-2ee3f242e8f5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+[{
+	storeID: vars.ID,
+	totalQuantity: vars.sumQuantity
+}]]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+    </flow>
+</mule>
