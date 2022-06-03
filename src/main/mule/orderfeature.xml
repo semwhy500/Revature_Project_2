@@ -16,6 +16,15 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 				<flow-ref doc:name="apiflow" doc:id="3a023ed1-4c67-48dd-9f71-7c5d0e8af352" name="apiflow"/>
 			</route>
 		</scatter-gather>
+		<ee:transform doc:name="flatten to json" doc:id="711ae5d9-623f-480e-9bb3-efd9ae54e785" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+flatten(payload..payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="2e20124b-74df-4888-9374-5502e41d4e14" />
 	</flow>
 	<flow name="csvflow" doc:id="012e2d70-8f43-4346-9414-6a3585413c70" >
 		<file:read doc:name="orders.csv" doc:id="79d3a6a0-813e-480b-aa4e-61297770ec91" path="orders.csv" config-ref="File_Config"/>
@@ -41,7 +50,7 @@ payload map(value, index) ->
 	</flow>
 	<flow name="apiflow" doc:id="f8656d45-383d-46e9-9fe9-2d530f9d1796">
 		<http:request method="GET" doc:name="swagger API" doc:id="2fd0f5db-536b-4460-b6c9-4413db200c80" config-ref="HTTP_Request_configuration" path="/order/date" targetValue="#[%dw 2.0 output application/xml --- payload]">
-					<http:query-params><![CDATA[#[output application/json
+					<http:query-params><![CDATA[#[output application/java
 ---
 {
 	"end_date" : "2022-05-31",
@@ -53,7 +62,7 @@ payload map(value, index) ->
 						<ee:set-payload><![CDATA[%dw 2.0 
 output application/json 
 --- 
-payload 
+payload
 ]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
