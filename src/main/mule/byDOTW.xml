@@ -31,7 +31,7 @@ http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/cu
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-[payload]]]></ee:set-payload>
+payload["date"]]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<choice doc:name="Choice" doc:id="1753853a-44aa-43db-a3d1-61ca1ef9b3f0" >
