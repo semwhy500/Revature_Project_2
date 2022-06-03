@@ -22,9 +22,6 @@ payload]]></ee:set-payload>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="4e22176d-8be3-42b9-bf7f-0279a61a4510" message="#[payload]"/>
 	</flow>
-	<flow name="scatter-gather-testFlow1" doc:id="0780211d-a278-43cf-ad25-2a99ffa5486f" >
-		<file:read doc:id="5f79b9cc-6e52-407e-9632-cebceb2b9b03" />
-	</flow>
 	<flow name="productsCSVFlow" doc:id="c31ef09c-35cb-4c01-b05a-ee4f6a3d2e27" >
 		<file:read doc:name="readProductsCSV" doc:id="b8c75dd9-5c37-4a2b-a703-e11c9bfbb88d" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Products.csv" />
 		<ee:transform doc:name="Transform Message" doc:id="5fb61567-25e8-4be3-abf1-301006ed157b" >
@@ -50,6 +47,7 @@ payload]]></ee:set-payload>
 		<logger level="INFO" doc:name="Logger" doc:id="7bfcf043-8ceb-4065-a7d2-ff74e096fadc" message="#[payload]"/>
 	</flow>
 	<flow name="csv-scatter-gather-testFlow" doc:id="d7f5a5c1-cd2b-45bb-a7b2-8a627ac09c67">
+		<http:listener doc:name="Listener" doc:id="568f85e0-8fbb-47f1-8996-1c4d86e323d5" config-ref="HTTP_Listener_config" path="/scatter"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="cf6fdb60-c5f8-4a08-b564-f8cb47264ca7">
 			<route>
 				<flow-ref doc:name="ordersCSVFlowRef" doc:id="5f3a2d73-a29f-42d3-9726-bda23c8ec390" name="ordersCSVFlow" />

@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<apikit:config outboundHeadersMapName="outboundHeadersMapName" httpStatusVarName="httpStatus" doc:name="Router" doc:id="b9a4862e-f4fa-4ac6-88cf-22ff4227756d" name="Router" api="api\totalincomeperpreviousmonthbystore.raml" />
+	<apikit:config outboundHeadersMapName="outboundHeadersMapName" httpStatusVarName="httpStatus" doc:name="Router" doc:id="01c5f58e-9fa0-460d-9d1f-b1897e361ed8" name="Router1" api="api\totalincomeperpreviousmonthbystore.raml" />
 	<flow name="getDataFromAPIFlow" doc:id="e2bfdbdb-8d6d-468f-ad4c-b264b29e5c71" >
 		<ee:transform doc:name="Transform Message" doc:id="a4ef738d-9821-47e1-8dc1-25e7d24341dd" >
 			<ee:message >
@@ -34,7 +36,7 @@ payload]]></ee:set-payload>
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
-        <apikit:router config-ref="totalincomeperpreviousmonthbystore-config"/>
+        <apikit:router config-ref="Router"/>
         <error-handler>
             <on-error-propagate type="APIKIT:BAD_REQUEST">
                 <ee:transform>
@@ -126,7 +128,7 @@ output application/json
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:error-response>
         </http:listener>
-        <apikit:console config-ref="totalincomeperpreviousmonthbystore-config"/>
+        <apikit:console config-ref="Router1"/>
         <error-handler>
             <on-error-propagate type="APIKIT:NOT_FOUND">
                 <ee:transform>

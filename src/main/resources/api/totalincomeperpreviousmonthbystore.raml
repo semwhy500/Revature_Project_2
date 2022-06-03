@@ -1,6 +1,5 @@
 #%RAML 1.0
 title: Total Income Per Previous Month By Store
-# .../totalQuantityPrevMonth/month?month=1 
 /totalIncome:
   description: The endpoint that will get total income per previous month
   get:
@@ -13,6 +12,7 @@ title: Total Income Per Previous Month By Store
     get:
       queryParameters:
         month:
+          # an example url to put in postman for this is .../totalQuantityPrevMonth/month?month=1 
           type: number
           description: the total income of that month, January = 1, February = 2, etc.
           example: 1
