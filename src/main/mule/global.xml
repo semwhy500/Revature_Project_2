@@ -1,32 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
-<<<<<<< HEAD
-	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="57c63cb8-56fe-489d-a488-4cc620b680dd" basePath="/api" >
-		<http:listener-connection host="0.0.0.0" port="8081" />
-	</http:listener-config>
-	<file:config name="File_Config" doc:name="File Config" doc:id="b706fa8a-bca9-4a13-b74d-42fe041f5d21" >
-		<file:connection workingDir="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3" />
-	</file:config>
-	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="9ce901b6-3fb3-4100-bad4-a4f303c84ec1" >
-=======
-	<file:config name="File_Config" doc:name="File Config" doc:id="f0c692f2-6150-4b4b-b0c4-28a1a720c8e3" >
-		<file:connection workingDir="H:\AnypointStudio\studio-workspace\Mulesoft_Cohort_p3\src\main\resources\p3_data" />
-	</file:config>
-	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="50443993-b888-4fa2-b3ae-8207797261c3">
->>>>>>> team4
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="ffb5ee42-366a-4689-863a-b3311a2611e4" >
 		<http:request-connection host="184.72.81.235" port="8080" />
 	</http:request-config>
-	<db:config name="Database_Config" doc:name="Database Config" doc:id="bff1a115-daf1-4265-af25-7ce60169d9db" >
-		<db:generic-connection url="jdbc:postgresql://grocery-api-historic.cvtq9j4axrge.us-east-1.rds.amazonaws.com:5432/" driverClassName="org.postgresql.Driver" user="postgres" password="password" />
-	</db:config>
-</http:request-config>
-	<db:config name="Database_Config" doc:name="Database Config" doc:id="a4715123-d1dd-466b-96e9-62875b486231" >
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="bfad4151-7db3-41ca-9d09-e9f50d77ac79" basePath="/api">
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="40dd52a6-aa48-4dd7-8540-ed558bc05a8b" >
+		<file:connection workingDir="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3" />
+	</file:config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="25996541-7add-4d96-818b-a44307ac523e" >
 		<db:generic-connection url="jdbc:postgresql://grocery-api-historic.cvtq9j4axrge.us-east-1.rds.amazonaws.com:5432/" driverClassName="org.postgresql.Driver" user="postgres" password="password" />
 	</db:config>
 </mule>
