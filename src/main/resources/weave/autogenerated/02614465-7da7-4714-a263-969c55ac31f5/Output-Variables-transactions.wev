@@ -1,4 +1,0 @@
-%dw 2.0
-
-type auto_02614465_7da7_4714_a263_969c55ac31f5_Output_Variables_transactions = Any
-

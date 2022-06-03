@@ -13,11 +13,11 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 		<http:request-connection host="184.72.81.235" port="8080" />
 	</http:request-config>
 	<flow name="getECommerceDataFlow" doc:id="a9019162-1df3-4886-a53c-95879904e104" >
-		<http:request method="GET" doc:name="Request" doc:id="1843d55d-5940-462c-91c6-d3cb9c303096" config-ref="HTTP_Request_configuration1" path="/order"/>
+		<http:request method="GET" doc:name="Request" doc:id="1843d55d-5940-462c-91c6-d3cb9c303096" config-ref="HTTP_Request_configuration1" path="/order" />
 		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="ecbcb93c-2431-4a55-a4c8-2a2d802a79f1" />
-		<ee:transform doc:name="Transform Message" doc:id="e0b68f18-7dbe-4615-b51d-f91fcef8fadc" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<ee:transform doc:name="Transform Message" doc:id="e0b68f18-7dbe-4615-b51d-f91fcef8fadc">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 payload map (value) -> {
@@ -39,7 +39,7 @@ payload map (value) -> {
 	<flow name="getCSVDataFlow" doc:id="81f78a90-4b5e-4ea3-8b61-29a7dbbf224b" >
 		<scatter-gather doc:name="Scatter-Gather" doc:id="c4604a66-ce54-46dc-80dd-f32bd3038703" >
 			<route >
-				<file:read doc:name="Read Orders CSV" doc:id="6be2fc08-2af4-489d-9001-0d02bef96e0d" path="C:\Users\blear\Documents\mulebasics\mulesoft_cohort_project.1\Store_Data_CSV_Files\Orders.csv" />
+				<file:read doc:name="Read Orders CSV" doc:id="6be2fc08-2af4-489d-9001-0d02bef96e0d" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Orders.csv" />
 				<ee:transform doc:name="Transform Message" doc:id="35f182cc-6acd-44fd-841a-51191fedd88c" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -51,7 +51,7 @@ payload]]></ee:set-payload>
 				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="aafc224f-bcc7-483d-bca3-82148dd9ed74" variableName="OrderJSON"/>
 			</route>
 			<route >
-				<file:read doc:name="Read Products CSV" doc:id="424ff791-42e6-4d36-9af8-b90cb82437ad" config-ref="File_Config1" path="C:\Users\blear\Documents\mulebasics\mulesoft_cohort_project.1\Store_Data_CSV_Files\Products.csv" />
+				<file:read doc:name="Read Products CSV" doc:id="424ff791-42e6-4d36-9af8-b90cb82437ad" config-ref="File_Config1" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Products.csv" />
 				<ee:transform doc:name="Transform Message" doc:id="3646258c-4412-41b9-bbdc-9d4636bbc2b8" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -63,7 +63,7 @@ payload]]></ee:set-payload>
 				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="b7d0a932-7d6e-4d78-809b-f90413ae3d0f" variableName="ProductJSON"/>
 			</route>
 			<route >
-				<file:read doc:name="Read Transactions CSV" doc:id="970a7cc2-f45c-434f-8d77-b9a65e04ff85" config-ref="File_Config1" path="C:\Users\blear\Documents\mulebasics\mulesoft_cohort_project.1\Store_Data_CSV_Files\Transactions.csv" />
+				<file:read doc:name="Read Transactions CSV" doc:id="970a7cc2-f45c-434f-8d77-b9a65e04ff85" config-ref="File_Config1" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Transactions.csv" />
 				<ee:transform doc:name="Transform Message" doc:id="1fb42086-64b5-4a1d-9e8b-ade378ae84b3" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -106,7 +106,7 @@ firstInput map (firstInputValue) ->
 		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="7b9bf6d0-4207-48a2-b817-297f0949f247" />
 	</flow>
 	<flow name="historicSalesByStoreFlow" doc:id="2fa108b3-8d95-4c2b-a11b-7adbda6b3032" >
-		<set-variable value="#[attributes.queryParams.id]" doc:name="Set Variable" doc:id="245b4775-9c5e-439f-8351-6312a03ba240" variableName="store_id" />
+		<set-variable value="#[message.attributes.queryParams.id]" doc:name="Set Variable" doc:id="245b4775-9c5e-439f-8351-6312a03ba240" variableName="store_id" />
 		<scatter-gather doc:name="Scatter-Gather" doc:id="f8fe1bf1-70a7-4f76-8962-1c4897bf5cb4" >
 			<route >
 				<db:select doc:name="Select * from RDB" doc:id="4e80a04b-a838-4ffe-9451-92f7b2862e54" config-ref="Database_Config">
@@ -167,9 +167,12 @@ vars.CSVObject ++ vars.RDBObject ++ vars.ECommerceObject
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
+var dateYear = now().year ++ "-0" ++ now().month
 ---
-payload orderBy($.datetime) filter($.store_id==(vars.store_id as Number)) and ($.payment_txn_success == true)
-]]></ee:set-payload>
+payload orderBy($.datetime) 
+filter($.store_id==(vars.store_id as Number)) 
+and ($.payment_txn_success == true)
+and ($.datetime < dateYear)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="59c02e9f-900f-4939-974c-db60f6c368ea" message="salesByStoreSuccessfullyInvoked" />
@@ -187,7 +190,7 @@ payload orderBy($.datetime) filter($.store_id==(vars.store_id as Number)) and ($
 		<set-variable value="#[attributes.queryParams.id]" doc:name="Set Variable" doc:id="e3334151-3b92-47ae-9d72-e9326e8e92ca" variableName="product_id" />
 		<scatter-gather doc:name="Scatter-Gather" doc:id="b902839f-c8a2-4e9e-8ea2-d594c948f729">
 			<route>
-				<db:select doc:name="Select * from RDB" doc:id="3e3d0b9d-81e8-4e17-8176-9ada7244c40d">
+				<db:select doc:name="Select * from RDB" doc:id="3e3d0b9d-81e8-4e17-8176-9ada7244c40d" config-ref="Database_Config">
 					<db:sql><![CDATA[select orders.store_id, orders.datetime, orders.qty, product.product_id, product.price, transactions.payment_txn_success, round(product.price::numeric * orders.qty, 2) as total_sales_of_day
 from orders
 join product on orders.product_id = product.product_id
@@ -245,9 +248,12 @@ vars.CSVObject ++ vars.RDBObject ++ vars.ECommerceObject
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
+var dateYear = now().year ++ "-0" ++ now().month
 ---
-payload orderBy($.datetime) filter($.product_id==vars.product_id) and ($.payment_txn_success == true)
-]]></ee:set-payload>
+payload orderBy($.datetime) 
+filter($.product_id==(vars.product_id as Number)) 
+and ($.payment_txn_success == true)
+and ($.datetime < dateYear)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="27370e29-5c7f-4286-a8bb-de2bc50ccecc" message="salesByStoreSuccessfullyInvoked" />
@@ -264,7 +270,7 @@ payload orderBy($.datetime) filter($.product_id==vars.product_id) and ($.payment
         <set-variable value="#[message.attributes.queryParams.id as String]" doc:name="Set Filter" doc:id="ab92cfe6-7d99-4a2c-8b64-4ed821a87738" variableName="storeID" />
         <choice doc:name="Choice" doc:id="0b0303ce-f8c3-4db9-ac3a-a8e09fe2eb25" >
             <when expression="#[message.attributes.queryParams.id != null]">
-                <db:select doc:name="Select By Store" doc:id="711825fd-dda8-4e6b-90b0-d1e26b14b808">
+                <db:select doc:name="Select By Store" doc:id="711825fd-dda8-4e6b-90b0-d1e26b14b808" config-ref="Database_Config">
                     <db:sql ><![CDATA[select store_id, datetime, sum(total_sales_of_day) as total_sales_of_day 
 from (select orders.store_id, orders.datetime, orders.qty, product.product_id, product.price, transactions.payment_txn_success, round(product.price::numeric * orders.qty, 2) as total_sales_of_day
 from orders
