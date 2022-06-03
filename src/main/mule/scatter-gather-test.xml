@@ -16,8 +16,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 		<ee:transform doc:name="Transform Message" doc:id="f579f233-a765-4d8b-9187-304109caa334">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
-input payload application/json
-output application/json header = false
+output application/json
 ---
 payload]]></ee:set-payload>
 			</ee:message>
