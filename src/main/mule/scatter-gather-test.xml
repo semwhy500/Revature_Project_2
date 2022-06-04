@@ -96,25 +96,40 @@ Data : ordersCSV map (ordersItems, indexOfOrdersItems) -> {
 			</ee:message>
 		</ee:transform>
 		<set-variable value="#[payload]" doc:name="bob" doc:id="813b5908-1ab0-4378-b99e-ab12ada5a6c9" variableName="bob"/>
-		<ee:transform doc:name="only successful txns" doc:id="2dd601e2-b89a-4452-a0cb-605820bc8085" >
+		<ee:transform doc:name="only successful txns and previous month" doc:id="2dd601e2-b89a-4452-a0cb-605820bc8085" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 var pay1 = vars.bob.Data
+//var myDate = pay1.date as Date
 ---
-pay1 filter ($.transaction_success == "true") map(items, index) -> {
-	"More Data": items
+pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 and $.date.month < now().month) map(items, index) -> {
+	"Data": items
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-variable value="#[payload]" doc:name="joe" doc:id="d96cf11b-e270-4c9a-8d18-895fa271bcfa" variableName="joe"/>
-		<ee:transform doc:name="only prev month" doc:id="92c2d8d2-180f-436e-88ae-6c097f752d03" >
+		<ee:transform doc:name="quantity * price" doc:id="7b03431c-c4ed-4cd3-bde9-8f86753a95a9" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
-var pay1 = vars.joe
+var pay1 = payload.Data
 ---
-pay1]]></ee:set-payload>
+Data: (pay1 map {
+	quantity: $.order_qty,
+	price: $.price,
+	total: $.order_qty as Number * ($.price as String replace /[$]/ with("")) as Number
+})
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="total Income Per Previous Month" doc:id="01223037-d3b8-438a-af58-46f136be33c4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var pay1 = payload.Data
+var pay1Totals = payload.Data.total
+---
+total_Income_Per_Previous_Month: sum(pay1Totals)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="b72581fd-2d56-4a5d-a4ed-1e1e2eef73ff" />
