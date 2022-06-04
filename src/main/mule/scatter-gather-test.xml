@@ -167,7 +167,7 @@ total_Income_Per_Previous_Month: sum(pay1Totals)]]></ee:set-payload>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="b72581fd-2d56-4a5d-a4ed-1e1e2eef73ff" />
 	</flow>
-	<flow name="Copy_of_basicFlowForCSVs" doc:id="c34c00d5-4fbb-41cb-afd0-4c16aee9b376">
+	<flow name="byStoreIdFlow" doc:id="c34c00d5-4fbb-41cb-afd0-4c16aee9b376">
 		<http:listener doc:name="Copy_of_Copy_of_Listener" doc:id="68852683-8fdd-4f38-a410-6e3c2bf31c89" config-ref="HTTP_Listener_config" path="/storeid" />
 		<scatter-gather doc:name="Copy_of_Copy_of_Scatter-Gather" doc:id="cb17703f-7f5d-473d-9709-1c4e51fd0ef7">
 			<route>
@@ -204,6 +204,27 @@ Data : ordersCSV map (ordersItems, indexOfOrdersItems) -> {
 	})
 	
 }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="bob" doc:id="ce342e20-329f-4c32-b9e6-10bd131f3fff" variableName="bob" />
+		<ee:transform doc:name="Copy_of_only successful txns and previous month" doc:id="695344bc-7572-4b0e-8c2d-4ed5eabac5dd">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var pay1 = vars.bob.Data
+//var myDate = pay1.date as Date
+---
+pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 and $.date.month < now().month) map(items, index) -> {
+	"Data": items
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="1417e33c-cde7-490b-846a-566cf593864c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="8dd15a26-5a23-4f85-976a-a84f2cea0f86" />
@@ -244,7 +265,7 @@ payload]]></ee:set-payload>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="8b304c0d-dc6c-4973-b7d3-c777bca8e472" />
 	</flow>
-	<flow name="scatter-gather-testFlow" doc:id="360cc0ea-989d-4cd2-9406-89f11541235e" >
+	<flow name="flowOfAPIs" doc:id="360cc0ea-989d-4cd2-9406-89f11541235e" >
 		<http:listener doc:name="Listener" doc:id="1f2a1bd1-868e-454b-a403-72bf4912f2e2" config-ref="HTTP_Listener_config" path="/scatterAPI"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="985e58fb-cf18-4844-94d8-2bdff1271cbd" >
 			<route >
