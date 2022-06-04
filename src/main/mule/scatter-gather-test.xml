@@ -50,7 +50,7 @@ payload]]></ee:set-payload>
 		<logger level="INFO" doc:name="Logger" doc:id="7bfcf043-8ceb-4065-a7d2-ff74e096fadc" message="#[payload]"/>
 	</flow>
 	<flow name="csv-scatter-gather-testFlow" doc:id="d7f5a5c1-cd2b-45bb-a7b2-8a627ac09c67">
-		<http:listener doc:name="Listener" doc:id="568f85e0-8fbb-47f1-8996-1c4d86e323d5" config-ref="HTTP_Listener_config" path="/scatter"/>
+		<http:listener doc:name="Listener" doc:id="568f85e0-8fbb-47f1-8996-1c4d86e323d5" config-ref="HTTP_Listener_config" path="/totalincome"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="cf6fdb60-c5f8-4a08-b564-f8cb47264ca7">
 			<route>
 				<flow-ref doc:name="ordersCSVFlowRef" doc:id="5f3a2d73-a29f-42d3-9726-bda23c8ec390" name="ordersCSVFlow" />
@@ -84,15 +84,7 @@ Data : ordersCSV map (ordersItems, indexOfOrdersItems) -> {
 	"transaction_success" : var3.payment_txn_success
 	})
 	
-}
-
-//ordersCSV ++ productsCSV ++ transactionsCSV
-//{
-//	"orders": ordersCSV,
-//	"products": productsCSV,
-//	"transactions": transactionsCSV,
-//}
-//productsCSV + transactionsCSV]]></ee:set-payload>
+}]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<set-variable value="#[payload]" doc:name="bob" doc:id="813b5908-1ab0-4378-b99e-ab12ada5a6c9" variableName="bob"/>
@@ -133,6 +125,88 @@ total_Income_Per_Previous_Month: sum(pay1Totals)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="b72581fd-2d56-4a5d-a4ed-1e1e2eef73ff" />
+	</flow>
+	<flow name="basicFlowForCSVs" doc:id="5763da06-86eb-4612-b21b-f582da2e597a">
+		<http:listener doc:name="Copy_of_Listener" doc:id="a35eec05-7c0a-4b5e-9eb0-ba43619dabaa" config-ref="HTTP_Listener_config" path="/mainpayloadtest" />
+		<scatter-gather doc:name="Copy_of_Scatter-Gather" doc:id="fe69d910-9a87-4016-947c-486016e4becb">
+			<route>
+				<flow-ref doc:name="Copy_of_ordersCSVFlowRef" doc:id="514535ea-4676-4513-a75e-d9ff336d4f24" name="ordersCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_ordersCSV" doc:id="e271cb2c-9488-4628-84ce-137b09d960c8" variableName="ordersCSV" />
+			</route>
+			<route>
+				<flow-ref doc:name="Copy_of_productsCSVFlowRef" doc:id="4235f6a6-a61c-45c5-a6b3-faec952220a2" name="productsCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_productsCSV" doc:id="b1c8a784-790e-41df-b3ca-887ff4293df1" variableName="productsCSV" />
+			</route>
+			<route>
+				<flow-ref doc:name="Copy_of_transactionsCSVFlowRef" doc:id="60355981-1709-4a96-b780-8c89e716844a" name="transactionsCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_transactionsCSV" doc:id="8950dfd1-dff2-4e99-a14e-4c142360bd86" variableName="transactionsCSV" />
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Copy_of_major transform" doc:id="b6bb0755-277c-45e8-accf-cbf36202625b">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var ordersCSV = vars.ordersCSV
+var productsCSV = vars.productsCSV
+var transactionsCSV = vars.transactionsCSV
+---
+Data : ordersCSV map (ordersItems, indexOfOrdersItems) -> {
+	"order_qty": ordersItems.qty,
+	"date": ordersItems.datetime,
+	"store_id": ordersItems.store_id,
+	"product_id": ordersItems.product_id,
+	(productsCSV filter ($."product_id" == ordersItems."product_id") map (var2, indexVar2) -> {
+	"price": var2.price
+	}),
+	(transactionsCSV filter (($."payment_txn_id" == ordersItems."txn_id") and ($."payment_txn_success" == "true")) map (var3, indexVar3) -> {
+	"transaction_success" : var3.payment_txn_success
+	})
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="54b2a092-d07e-421b-9e2f-c02193093ebe" />
+	</flow>
+	<flow name="Copy_of_basicFlowForCSVs" doc:id="c34c00d5-4fbb-41cb-afd0-4c16aee9b376">
+		<http:listener doc:name="Copy_of_Copy_of_Listener" doc:id="68852683-8fdd-4f38-a410-6e3c2bf31c89" config-ref="HTTP_Listener_config" path="/storeid" />
+		<scatter-gather doc:name="Copy_of_Copy_of_Scatter-Gather" doc:id="cb17703f-7f5d-473d-9709-1c4e51fd0ef7">
+			<route>
+				<flow-ref doc:name="Copy_of_Copy_of_ordersCSVFlowRef" doc:id="c21bba54-4f45-4096-bfd3-7df5bc53eece" name="ordersCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_ordersCSV" doc:id="7e9f5fd7-a943-4ccf-9ba3-d14e28c44a5f" variableName="ordersCSV" />
+			</route>
+			<route>
+				<flow-ref doc:name="Copy_of_Copy_of_productsCSVFlowRef" doc:id="46d45b5b-28c5-489c-a14a-d6716c107868" name="productsCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_productsCSV" doc:id="18681282-3f2d-446a-909b-3dde1bbd4d2f" variableName="productsCSV" />
+			</route>
+			<route>
+				<flow-ref doc:name="Copy_of_Copy_of_transactionsCSVFlowRef" doc:id="2d31019b-8195-4dea-91bf-a46ee683d4d3" name="transactionsCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_transactionsCSV" doc:id="c2a03d96-6738-474a-a5fd-f82422ce294c" variableName="transactionsCSV" />
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Copy_of_Copy_of_major transform" doc:id="98fd7ab5-3fde-4b0a-9a0d-c91597e54f95">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var ordersCSV = vars.ordersCSV
+var productsCSV = vars.productsCSV
+var transactionsCSV = vars.transactionsCSV
+---
+Data : ordersCSV map (ordersItems, indexOfOrdersItems) -> {
+	"order_qty": ordersItems.qty,
+	"date": ordersItems.datetime,
+	"store_id": ordersItems.store_id,
+	"product_id": ordersItems.product_id,
+	(productsCSV filter ($."product_id" == ordersItems."product_id") map (var2, indexVar2) -> {
+	"price": var2.price
+	}),
+	(transactionsCSV filter (($."payment_txn_id" == ordersItems."txn_id") and ($."payment_txn_success" == "true")) map (var3, indexVar3) -> {
+	"transaction_success" : var3.payment_txn_success
+	})
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="8dd15a26-5a23-4f85-976a-a84f2cea0f86" />
 	</flow>
 	<flow name="orderAPIFlow" doc:id="e908a1d1-908a-40e8-aa32-526535ac4f64">
 		<http:request method="GET" doc:name="Request" doc:id="91955e42-70d0-45e3-9646-ac9086dc2d12" config-ref="HTTP_Request_configuration" path="/order" />
@@ -192,6 +266,19 @@ payload]]></ee:set-payload>
 output application/json
 ---
 vars.ordersAPI ++ vars.productsAPI ++ vars.transactionAPI]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="testQueryParams" doc:id="12e2bc4f-bd40-4880-9e32-de25345695f4" >
+		<http:listener doc:name="Listener" doc:id="ca3104b9-7ec5-4d6e-b722-231bcba75c82" path="/querytestteam2" config-ref="HTTP_Listener_config"/>
+		<ee:transform doc:name="Transform Message" doc:id="bd1fd1ef-10e1-4deb-81cf-614342f7613c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	name: attributes.queryParams.name
+}]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
