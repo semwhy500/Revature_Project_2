@@ -69,4 +69,159 @@ payload map(value, index) ->
 				</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="e2f1637d-021f-43af-b0d6-1eebd07a9c0c" />
 	</flow>
+	<flow name="Get:QuantityofSalesofPrevMonthbyStoreId" doc:id="739c71b5-0743-4229-b631-09c01bddd2ec" >
+		<http:listener doc:name="GET:QuantityofSalesofPrevMonthbyStoreId" doc:id="a38af711-d03f-4730-949e-fc3f524feb73" config-ref="HTTP_Listener_config" path="/api/totalQuantitySalesPrevMonth/store"/>
+		<set-variable value="#[attributes.queryParams.id]" doc:name="Set store_id" doc:id="caa86a0a-3de9-4037-86f8-e62eab39d63b" variableName="store_id"/>
+		<flow-ref doc:name="orderfeatureFlow" doc:id="cd6b83a6-0bed-4b4a-a6ac-c18c0b203371" name="orderfeatureFlow"/>
+		<ee:transform doc:name="Filter payload by store_id" doc:id="65dffee9-e3c0-479a-bac4-46efc7884d09" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> 
+	value.store_id == vars.store_id
+)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-payload value='#[output application/json&#10;---&#10;{&#10;	"Store ID": vars.store_id,&#10;	"Total Quantity of Sales in Previous Month": sizeOf(payload)&#10;}]' doc:name="Set Payload " doc:id="73abb965-3051-459e-9885-dc7862ee1431" />
+		<logger level="INFO" doc:name="Logger" doc:id="6b81f78c-c59d-4e32-928c-cd912bb3e39a" />
+	</flow>
+	<flow name="Get:QuantityofSalesofPrevMonthbyProductId" doc:id="7452114b-682b-4af4-818c-f95965328e28" >
+		<http:listener doc:name="Get:QuantityofSalesofPrevMonthbyProductId" doc:id="234d8289-4895-4e12-b5f2-41fdb5abf8e6" config-ref="HTTP_Listener_config" path="/api/totalQuantitySalesPrevMonth/product" />
+		<set-variable value="#[attributes.queryParams.id]" doc:name="id from queryparam" doc:id="61f37811-9f3e-4cd8-8918-7ed2617b7036" variableName="id" />
+		<flow-ref doc:name="orderfeatureFlow" doc:id="2d866927-1ec6-4654-abee-ac0bb92ab2d0" name="orderfeatureFlow" />
+		<ee:transform doc:name="Filter payload by product_id" doc:id="d4c285a9-1132-47cb-8f4e-838fde9403e7">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload filter ((value, index) -> value.product_id as String == vars.id as String)
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[output application/json
+---
+sizeOf(payload)]" doc:name="get count" doc:id="147657e4-851c-453e-ae3e-af0aa87842a5" variableName="order_count" />
+		<set-variable value="#[output application/json
+---
+0 as Number]" doc:name="set quantity to 0" doc:id="ebcd96ab-c4e1-4239-8a2c-8921be9b7e34" variableName="quantity_count" />
+		<foreach doc:name="For Each" doc:id="5201324f-2e8e-435d-ab2e-db0f344f7971" >
+			<set-variable value="#[output application/json
+---
+vars.quantity_count as Number + payload.quantity as Number]" doc:name="add up quantities" doc:id="217549ba-a381-44ce-92e6-4bf2f2c924c5" variableName="quantity_count" />
+		</foreach>
+		<set-payload value='#[output application/json
+---
+{
+	"order_count": vars.order_count,
+	"quantity_count": vars.quantity_count
+}]' doc:name="return" doc:id="80d91dc5-37cb-45ca-8257-eef09be5d23b" />
+		<logger level="INFO" doc:name="Logger" doc:id="1748086f-7e9b-4b91-a55a-8e990226207a" />
+	</flow>
+	<flow name="Get:QuantityofSalesofPrevMonthbyDoTW" doc:id="3458927d-f924-4118-add2-5fda82ed57d7" >
+		<http:listener doc:name="Get:QuantityofSalesofPrevMonthbyDoTW" doc:id="115bd01e-fea3-4a59-bfa5-1c1ee56d50ad" config-ref="HTTP_Listener_config" path="/api/totalQuantitySalesPrevMonth/dotw" allowedMethods="GET" />
+		<set-variable value="#[message.attributes.queryParams.dotw]" doc:name="Set Dotw" doc:id="7c665a84-a6bf-4ab5-a413-35035f781852" variableName="dayWeek" />
+		<flow-ref doc:name="orderfeatureFlow" doc:id="57d923e9-b4ed-4b60-8cdf-a7e0b524d787" name="orderfeatureFlow" />
+		<choice doc:name="Choice by DoTW" doc:id="c17dc577-1c9c-469d-b1cb-38302c20eadc" >
+			<when expression="#[vars.dayWeek == '1']" >
+				<ee:transform doc:name="Transform if Dotw == 1" doc:id="22a06a20-31c8-4853-8020-0a26e75ec5b6" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 1)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{&#10;	"day of week": "Sunday",&#10;	"total Sales": sizeOf(payload)&#10;}]' doc:name="Set Payload to Sunday" doc:id="6cbccff0-a5bd-45f3-8a67-d095882d5b17" />
+			</when>
+			<when expression="#[vars.dayWeek == '2']" >
+				<ee:transform doc:name="Transform if Dotw == 2" doc:id="17f8bf22-ec19-4f9e-a749-af55a43ce099" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 2)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Monday",
+	"total Sales": sizeOf(payload)
+}]' doc:name="Set Payload to Monday" doc:id="48154df4-72a9-4b7c-82f6-32f86a4dc098" />
+			</when>
+			<when expression="#[vars.dayWeek == '3']" >
+				<ee:transform doc:name="Transform if Dotw == 3" doc:id="df111c28-004e-4a69-8ee3-751d84e9c73a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 3)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Tuesday",
+	"total Sales": sizeOf(payload)
+}]' doc:name="Set Payload to Tuesday" doc:id="8bc7210c-0d15-4ce4-bd58-9ef9a9fe1dbe" />
+			</when>
+			<when expression="#[vars.dayWeek == '4']" >
+				<ee:transform doc:name="Transform if Dotw == 4" doc:id="05a5fc0c-a21d-4e23-964e-067559200daa" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 4)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Wednesday",
+	"total Sales": sizeOf(payload)
+}]' doc:name="Set Payload to Wednesday" doc:id="e81ee658-745f-447f-9fa0-52825cc24c96" />
+			</when>
+			<when expression="#[vars.dayWeek == '5']" >
+				<ee:transform doc:name="Transform if Dotw == 5" doc:id="f74dcc88-9cd2-4255-a6fa-2011a90ddada" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 5)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Thursday",
+	"total Sales": sizeOf(payload)
+}]' doc:name="Set Payload to Thursday" doc:id="ca4f5d6f-5309-4ed5-830f-c0367a3dd2f8" />
+			</when>
+			<when expression="#[vars.dayWeek == '6']" >
+				<ee:transform doc:name="Transform if Dotw == 6" doc:id="fe22e3b6-199a-488c-ac85-d28cb73319cc" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 6)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Friday",
+	"total Sales": sizeOf(payload)
+}]' doc:name="Set Payload to Friday" doc:id="538e67a2-b8fd-4c05-9353-715be3b90519" />
+			</when>
+			<when expression="#[vars.dayWeek == '7']" >
+				<ee:transform doc:name="Transform if Dotw == 7" doc:id="eff07dfc-70eb-42e5-ae9b-e3eb689afc66" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 7)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Saturday",
+	"total Sales": sizeOf(payload)
+}]' doc:name="Set Payload to Saturday" doc:id="227e3107-b334-4a9c-abe6-14c8ab27c726" />
+			</when>
+			<otherwise >
+				<set-payload value="No Day Of Week Specified." doc:name="Default Payload if No DoTW is provided" doc:id="f0540401-a75d-47fd-b52f-323798b128aa" />
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="e4a21b55-9a4a-4c1e-9dc9-e0f161069511" />
+	</flow>
 </mule>
