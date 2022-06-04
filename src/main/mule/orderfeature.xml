@@ -27,7 +27,7 @@ flatten(payload..payload)]]></ee:set-payload>
 		<logger level="INFO" doc:name="Logger" doc:id="2e20124b-74df-4888-9374-5502e41d4e14" />
 	</flow>
 	<flow name="csvflow" doc:id="012e2d70-8f43-4346-9414-6a3585413c70" >
-		<file:read doc:name="orders.csv" doc:id="79d3a6a0-813e-480b-aa4e-61297770ec91" path="orders.csv" config-ref="File_Config"/>
+		<file:read doc:name="orders.csv" doc:id="79d3a6a0-813e-480b-aa4e-61297770ec91" path="Orders.csv" config-ref="File_Config"/>
 		<ee:transform doc:name="CSV to JSON" doc:id="3011d5e1-3a73-41a3-8e72-8c2870893a63">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
