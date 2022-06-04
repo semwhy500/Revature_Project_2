@@ -83,7 +83,12 @@ payload filter((value, index) ->
 )]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-payload value='#[output application/json&#10;---&#10;{&#10;	"Store ID": vars.store_id,&#10;	"Total Quantity of Sales in Previous Month": sizeOf(payload)&#10;}]' doc:name="Set Payload " doc:id="73abb965-3051-459e-9885-dc7862ee1431" />
+		<set-payload value='#[output application/json
+---
+{
+	"Store ID": vars.store_id,
+	"Total Sales": sizeOf(payload)
+}]' doc:name="Set Payload " doc:id="73abb965-3051-459e-9885-dc7862ee1431" />
 		<logger level="INFO" doc:name="Logger" doc:id="6b81f78c-c59d-4e32-928c-cd912bb3e39a" />
 	</flow>
 	<flow name="Get:QuantityofSalesofPrevMonthbyProductId" doc:id="7452114b-682b-4af4-818c-f95965328e28" >
