@@ -120,13 +120,14 @@ type ordersCSVTypeTeam2 = Array<{|  order_id: String,   qty: String,   datetime:
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
-  <types:enrichment select="#f579f233-a765-4d8b-9187-304109caa334">
+  <types:enrichment select="#f579f233-a765-4d8b-9187-304109caa334"/>
+  <types:enrichment select="#5630baea-c3f2-40f6-bd89-de1942dac0ae">
     <types:processor-declaration>
-      <types:input-event>
+      <types:output-event>
         <types:message>
           <types:payload type="ordersCSVTypeTeam2"/>
         </types:message>
-      </types:input-event>
+      </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
 </types:mule>
