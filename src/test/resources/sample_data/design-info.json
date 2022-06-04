@@ -4,6 +4,9 @@
       "vars-ordersCSV": "sample_data/defaultbinarytype.json",
       "vars-productsCSV": "sample_data/defaultbinarytype_1.json",
       "payload": "sample_data/java_1.dwl"
+    },
+    "f579f233-a765-4d8b-9187-304109caa334": {
+      "payload": "sample_data/defaultbinarytype.dwl"
     }
   }
 }
