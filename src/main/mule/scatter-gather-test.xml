@@ -67,8 +67,32 @@ payload]]></ee:set-payload>
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
+import * from dw::core::Strings
+import * from dw::core::Periods
+
+var todayDate = now() as Date
+var prevMonthDate = now() as Date + months(-1)
+
+var transactions = payload."2".payload 
+filter ($.payment_txn_success as Boolean)
+
+var orders = payload."0".payload 
+filter ($.product_id == "0398221d-cfa7-4099-b693-b6b2d63a0419" 
+    and ($.datetime as Date < todayDate and $.datetime as Date > prevMonthDate)
+    and (transactions.payment_txn_id contains($.txn_id))
+)
+
+var price = substringAfter((payload."1".payload filter ($.product_id == "0398221d-cfa7-4099-b693-b6b2d63a0419")).price[0],'\$') as Number
+
+var quantity = orders reduce ((item, acc=0) -> acc +
+    if (item.qty != "") item.qty as Number
+    else 0
+)
+var ordersCSV = vars.ordersCSV
+var productsCSV = vars.productsCSV
+var transactionsCSV = vars.transcationsCSV
 ---
-vars.ordersCSV ++ vars.productsCSV ++ vars.ordersCSV]]></ee:set-payload>
+"StoreData" : price * quantity]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="b72581fd-2d56-4a5d-a4ed-1e1e2eef73ff" />
