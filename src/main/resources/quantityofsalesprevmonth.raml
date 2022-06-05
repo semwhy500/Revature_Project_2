@@ -1,0 +1,82 @@
+#%RAML 1.0
+title: QuantityOfSalesPrevMonth
+
+/totalQuantityPrevMonth:
+  description: The endpoint that will get total quantity of sales for previous month
+  get:
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/TotalSalesQuantityPreviousMonth.raml
+
+  /month:
+    get:
+      queryParameters:
+        month:
+          type: number
+          description: the total quantity of sales for that month, January = 1, February = 2, etc.
+          example: 1
+          required: false
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/TotalSalesQuantityPreviousMonth.raml
+
+  /year:
+    get:
+      queryParameters:
+          year:
+            type: number
+            description: the total quantity of sales for that year
+            example: 2022
+            required: false
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/TotalSalesQuantityPreviousMonth.raml
+
+  /store:
+    get:
+      queryParameters:
+        store_id:
+          type: number
+          description: the total quantity of sales for that store id.
+          example: 1
+          required: false
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/TotalSalesQuantityPreviousMonth.raml
+
+  /productId:
+    get:
+      queryParameters:
+        product_id:
+          type: string
+          description: Product's ID 
+          example: 168feb7b-a977-4538-898c-4050a75c047d
+          required: false
+          minLength: 1
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/TotalSalesQuantityPreviousMonth.raml
+
+  /DoTW:
+    get:
+      queryParameters:
+        dayOfWeek:
+          type: string
+          description: any day, Monday through Sunday and Mon through Sun. This resource returns the number of all sales within the previous month that were recorded for the specified weekday. 
+          example: Saturday
+          required: false
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/TotalSalesQuantityPreviousMonth.raml
