@@ -55,7 +55,7 @@ output application/json
 	<flow name="CsvToJSON" doc:id="25107c9c-5aa0-44d4-b08a-108ae2d39754" >
 		<scatter-gather doc:name="Scatter-Gather" doc:id="8dd8c77c-b3c3-443d-87a0-ac38a1e3d5c3" >
 			<route >
-				<file:read doc:name="ReadOrders" doc:id="c1b5a0f7-94c4-4aa4-8e15-8de04b47c51b" path="C:\Users\abbys\Downloads\Orders.csv" />
+				<file:read doc:name="ReadOrders" doc:id="c1b5a0f7-94c4-4aa4-8e15-8de04b47c51b" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Orders.csv" />
 				<ee:transform doc:name="CSV to JSON" doc:id="9725eb0c-6717-4d64-b7d9-b912b8ba1864" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -74,7 +74,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 				<set-variable value="#[payload]" doc:name="OrderJSON" doc:id="4a64a432-0ebf-47be-b0bf-6f66b7d1ae1d" variableName="OrderJSON"/>
 			</route>
 			<route >
-				<file:read doc:name="ReadProducts" doc:id="db687842-efc6-448e-bf6a-af58e7000451" path="C:\Users\abbys\Downloads\Products.csv" />
+				<file:read doc:name="ReadProducts" doc:id="db687842-efc6-448e-bf6a-af58e7000451" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Products.csv" />
 				<ee:transform doc:name="CSV to JSON" doc:id="3696ce17-f8ff-47f3-a1f4-ff24819c6a5c" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -90,7 +90,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 				<set-variable value="#[payload]" doc:name="ProductJSON" doc:id="9de19d5f-9fe3-4821-9571-ab794081c3e9" variableName="ProductJSON"/>
 			</route>
 			<route >
-				<file:read doc:name="ReadTransactions" doc:id="7d44f5f7-3faa-448f-9df7-6116431b592f" path="C:\Users\abbys\Downloads\Transactions.csv" />
+				<file:read doc:name="ReadTransactions" doc:id="7d44f5f7-3faa-448f-9df7-6116431b592f" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Transactions.csv" />
 				<ee:transform doc:name="CSV to JSON" doc:id="a3003ca7-9133-4fe7-88bd-7ed1466fe68e" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -107,7 +107,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 				<set-variable value="#[payload]" doc:name="TransactionJSON" doc:id="4c30e97c-c355-4450-8967-94e7be01ccf0" variableName="TransactionJSON"/>
 			</route>
 			<route >
-				<file:read doc:name="ReadCustomer" doc:id="f85d6110-684b-41e4-9900-6037d1f414d7" path="C:\Users\abbys\Downloads\Customers.csv" />
+				<file:read doc:name="ReadCustomer" doc:id="f85d6110-684b-41e4-9900-6037d1f414d7" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Customers.csv" />
 				<ee:transform doc:name="CSV to JSON" doc:id="599e832f-67d9-4ed0-8f11-45155625f29a" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
