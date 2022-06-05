@@ -364,30 +364,38 @@ total_Income_Per_Previous_Month: ("product_id: " ++ vars.queryParamsID as String
 		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="57c07007-6f7a-4a28-960d-a7faf81abcf0" />
 	</flow>
 	<flow name="orderAPIFlow" doc:id="e908a1d1-908a-40e8-aa32-526535ac4f64">
+		<http:listener doc:name="Listener" doc:id="0d5eef2b-5f40-4538-9401-a3d044956249" config-ref="HTTP_Listener_config" path="/testOrderAPI"/>
 		<http:request method="GET" doc:name="Request" doc:id="91955e42-70d0-45e3-9646-ac9086dc2d12" path="/order" config-ref="HTTP_Request_configuration"/>
 		<ee:transform doc:name="Transform Message" doc:id="0f60fd38-62b8-4e4b-af09-bccb73c935f4">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+payload map(value, index) -> {
+	product_id: value.product.id
+}]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="aa43048f-896e-412d-8450-885ef0e634a9" />
 	</flow>
 	<flow name="productAPIFlow" doc:id="ec5eeca6-cf6c-46ea-9774-e72964cd1819">
+		<http:listener doc:name="Listener" doc:id="dc1f8bc9-70ff-4012-9676-820f1ea34151" config-ref="HTTP_Listener_config" path="/testProductAPI"/>
 		<http:request method="GET" doc:name="Request" doc:id="aa97cea1-d4da-4081-8bdf-ea6857a5d32c" path="/product" config-ref="HTTP_Request_configuration"/>
 		<ee:transform doc:name="Transform Message" doc:id="d3e75af4-1a2f-4770-bc6e-2b85de1d4809">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+payload map(value, index) -> {
+	product_id: value.id
+}
+]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="8677f42f-efee-4482-98fc-be3939b82395" />
 	</flow>
 	<flow name="transactionAPIFlow" doc:id="c8c76d47-51ef-45bf-902b-fb5896c236e7" >
+		<http:listener doc:name="Listener" doc:id="ca7e807e-5e76-452f-b8f9-2629301934b8" config-ref="HTTP_Listener_config" path="/testTransactionAPI"/>
 		<http:request method="GET" doc:name="Request" doc:id="fe41ca36-7a0f-4273-97c1-052f997220b4" path="/transaction" config-ref="HTTP_Request_configuration"/>
 		<ee:transform doc:name="Transform Message" doc:id="2906972a-f5a9-4310-962e-5540d6361390" >
 			<ee:message >
@@ -589,15 +597,16 @@ output application/json
 var pay1 = vars.bob.Data
 //var myDate = pay1.date as Date
 ---
-pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 and $.date.month < now().month) map(items, index) -> {
-	"Data": items
-}]]></ee:set-payload>
+//pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 and $.date.month < now().month) map(items, index) -> {
+//	"Data": items
+//}
+pay1]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="6cbafd7d-23ff-4bf9-bb77-10ed477a1efa" />
 	</flow>
 	<flow name="Copy_of_referenceFlowWhenCombiningCSVsAndAPIs" doc:id="d8035e29-f375-4247-868b-6a71ddc104b5" >
-		<flow-ref doc:name="Copy_of_Flow Reference" doc:id="417f9478-c84c-4eb8-9720-e34b75c5dec1" name="ordersCSVFlow" />
+		<flow-ref doc:name="ordersCSVFlowRef" doc:id="417f9478-c84c-4eb8-9720-e34b75c5dec1" name="ordersCSVFlow" />
 		<ee:transform doc:name="Copy_of_Transform Message" doc:id="725ae1b0-2956-446d-97f1-f54fca4fe4ce" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -629,6 +638,22 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<set-variable value="" doc:name="Copy_of_set variable as ordersCSV and ordersAPI" doc:id="12bcfbb7-41aa-4e20-b507-d61c3abb1d9f" variableName="var3" />
+	</flow>
+	<flow name="scatter-gather-testFlow1" doc:id="73e9aa9b-8603-4aec-9c6e-15a77b6a6e82" >
+		<http:listener doc:name="Listener" doc:id="e963224a-8a29-4219-b46d-a182eb75e397" path="/test3" config-ref="HTTP_Listener_config"/>
+		<flow-ref doc:name="Flow Reference" doc:id="b3bebc01-b0c2-4ee6-9975-89c5443bee6c" name="ordersCSVFlow"/>
+		<ee:transform doc:name="Transform Message" doc:id="6d379c7b-9bae-4ee2-8cb2-44289b576036" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (item, index) -> {
+	order_id: item.order_id,
+	qty: item.qty
+}
+//payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</flow>
 	
 	
