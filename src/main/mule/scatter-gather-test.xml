@@ -49,6 +49,40 @@ payload]]></ee:set-payload>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="7bfcf043-8ceb-4065-a7d2-ff74e096fadc" message="#[payload]"/>
 	</flow>
+	<flow name="referenceFlowWhenCombiningCSVsAndAPIs" doc:id="db01debc-da7d-4f5e-8656-d2db2775e1bf" >
+		<flow-ref doc:name="Flow Reference" doc:id="36dcf214-e6a5-4217-b451-4b78a024903a" name="ordersCSVFlow"/>
+		<ee:transform doc:name="Transform Message" doc:id="3d8b4c19-388c-475d-97b8-e9502bfda9af" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+//transform into standard format as usually using
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="" doc:name="set variable as payload" doc:id="d68b811f-7566-4a69-b8c2-ad0a0a9d0e16" variableName="var1"/>
+		<http:request method="GET" doc:name="requestPayloadFromOrdersCSV" doc:id="c1a81251-44e0-46d4-a70a-f7ff8a4c2f1c" config-ref="HTTP_Request_configuration" path="/dummypath"/>
+		<ee:transform doc:name="Transform Message" doc:id="52b05ce6-9c02-4af8-8047-374137a7cbb7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+//transform payload as payload usually used
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="" doc:name="set variable as API payload" doc:id="f00a9b4e-9cc3-445e-8291-3a3f4f06ca06" variableName="var2"/>
+		<ee:transform doc:name="Transform Message" doc:id="31e639f9-6a9e-4087-9bdc-08d28f3a5121" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+//flatten (var1..var2)
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="" doc:name="set variable as ordersCSV and ordersAPI" doc:id="5728f96d-841b-4599-aa99-3128d13f4e3c" variableName="var3"/>
+	</flow>
 	<flow name="basicFlowForCSVs" doc:id="5763da06-86eb-4612-b21b-f582da2e597a">
 		<http:listener doc:name="Copy_of_Listener" doc:id="a35eec05-7c0a-4b5e-9eb0-ba43619dabaa" config-ref="HTTP_Listener_config" path="/mainpayloadtest" />
 		<scatter-gather doc:name="Copy_of_Scatter-Gather" doc:id="fe69d910-9a87-4016-947c-486016e4becb">
@@ -85,6 +119,19 @@ Data : ordersCSV map (ordersItems, indexOfOrdersItems) -> {
 	"transaction_success" : var3.payment_txn_success
 	})
 	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Copy_of_bob" doc:id="87c3e78a-b4ba-42db-9bfa-b4d98d8a8bdd" variableName="bob" />
+		<ee:transform doc:name="Copy_of_only successful txns and previous month" doc:id="0e318ba2-0935-4028-8e52-9f75de8f5a63">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var pay1 = vars.bob.Data
+//var myDate = pay1.date as Date
+---
+pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 and $.date.month < now().month) map(items, index) -> {
+	"Data": items
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
@@ -348,10 +395,6 @@ total_Income_Per_Previous_Month: ("product_id: " ++ vars.queryParamsID as String
 		</ee:transform>
 		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="57c07007-6f7a-4a28-960d-a7faf81abcf0" />
 	</flow>
-	<flow name="byDayOfTheWeekFlow" doc:id="e3211d17-9cb2-4a2b-a0b4-2b7ab61d358e" >
-		<http:listener doc:name="Listener" doc:id="bfe36717-f0e7-4141-a215-56e9d2cb47b3" config-ref="HTTP_Listener_config" path="/dayoftheweek"/>
-		<flow-ref doc:name="Flow Reference" doc:id="1fda9a1e-d813-4e3f-a148-f8bb60a40b3d" name="basicFlowForCSVs"/>
-	</flow>
 	<flow name="orderAPIFlow" doc:id="e908a1d1-908a-40e8-aa32-526535ac4f64">
 		<http:request method="GET" doc:name="Request" doc:id="91955e42-70d0-45e3-9646-ac9086dc2d12" config-ref="HTTP_Request_configuration" path="/order" />
 		<ee:transform doc:name="Transform Message" doc:id="0f60fd38-62b8-4e4b-af09-bccb73c935f4">
@@ -409,7 +452,8 @@ payload]]></ee:set-payload>
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-vars.ordersAPI ++ vars.productsAPI ++ vars.transactionAPI]]></ee:set-payload>
+//flatten (payload..payload)
+payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
@@ -426,4 +470,123 @@ output application/json
 			</ee:message>
 		</ee:transform>
 	</flow>
+	<flow name="scatter-gather-testFlow" doc:id="8744fe29-ce14-4823-8d5e-9859cae8f89a" >
+		<http:listener doc:name="Listener" doc:id="c1d42808-b1c4-4842-af07-be1a2493d4fc" path="/dayoftheweek" config-ref="HTTP_Listener_config"/>
+		<set-variable value="#[attributes.queryParams.dayWeek]" doc:name="dayWeek" doc:id="ae6eb4e2-a144-44c4-b960-a60350aa3a2b" variableName="dayWeek"/>
+		<flow-ref doc:name="Flow Reference" doc:id="d40a6ed7-e6f7-40e6-83ed-002fc7912bd7" name="basicFlowForCSVs"/>
+		<choice doc:name="Copy_of_Choice by DoTW" doc:id="e303943c-d569-4033-8736-244678ea6c5e" >
+			<when expression="#[vars.dayWeek == '1']" >
+				<ee:transform doc:name="Copy_of_Transform if Dotw == 1" doc:id="229acfd9-6aba-4b22-989b-b7256ea0ec40" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Data filter((value, index) -> value.date.dayOfWeek == 1)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Monday",
+	"Data": payload
+}]' doc:name="Copy_of_Set Payload to Sunday" doc:id="a14781ee-a7cb-4a41-a6be-7ac0fed84086" />
+			</when>
+			<when expression="#[vars.dayWeek == '2']" >
+				<ee:transform doc:name="Copy_of_Transform if Dotw == 2" doc:id="831d35cd-58c8-42e2-b3b2-f4e9d61a8c68" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Data filter((value, index) -> value.date.dayOfWeek == 2)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{&#10;	"day of week": "Tuesday",&#10;	"Data": payload&#10;}]' doc:name="Copy_of_Set Payload to Monday" doc:id="2f0600a2-2dc8-4ba8-85d1-f6327463775f" />
+			</when>
+			<when expression="#[vars.dayWeek == '3']" >
+				<ee:transform doc:name="Copy_of_Transform if Dotw == 3" doc:id="a4382fa7-98e6-47bc-974b-803e9139e490" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Data filter((value, index) -> value.date.dayOfWeek == 3)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{&#10;	"day of week": "Wednesday",&#10;	"Data": payload&#10;}]' doc:name="Copy_of_Set Payload to Tuesday" doc:id="9adce357-2aa2-4221-8307-86231be86c72" />
+			</when>
+			<when expression="#[vars.dayWeek == '4']" >
+				<ee:transform doc:name="Copy_of_Transform if Dotw == 4" doc:id="fd900e58-a0de-4733-be01-af6272a1c06a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Data filter((value, index) -> value.date.dayOfWeek == 4)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{&#10;	"day of week": "Thursday",&#10;	"Data": payload&#10;}]' doc:name="Copy_of_Set Payload to Wednesday" doc:id="fc15b377-b034-44f9-b942-9c242b98e941" />
+			</when>
+			<when expression="#[vars.dayWeek == '5']" >
+				<ee:transform doc:name="Copy_of_Transform if Dotw == 5" doc:id="d9337d80-056e-4b63-8df2-fcfcdbf6ffc1" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Data filter((value, index) -> value.date.dayOfWeek == 5)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{&#10;	"day of week": "Friday",&#10;	"Data": payload&#10;}]' doc:name="Copy_of_Set Payload to Thursday" doc:id="0c7c1bdd-07c6-4226-bedc-5a1ee0bf9449" />
+			</when>
+			<when expression="#[vars.dayWeek == '6']" >
+				<ee:transform doc:name="Copy_of_Transform if Dotw == 6" doc:id="35c7d213-d2c2-4c73-bbf7-2711746126ee" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Data filter((value, index) -> value.date.dayOfWeek == 6)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{&#10;	"day of week": "Saturday",&#10;	"Data": payload&#10;}]' doc:name="Copy_of_Set Payload to Friday" doc:id="6dd1cd60-2e1e-48f6-9c67-54d66655a874" />
+			</when>
+			<when expression="#[vars.dayWeek == '7']" >
+				<ee:transform doc:name="Copy_of_Transform if Dotw == 7" doc:id="99d3d7be-7e3b-4a9b-be8e-4733eca3fe14" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.Data filter((value, index) -> value.date.dayOfWeek == 7)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{&#10;	"day of week": "Sunday",&#10;	"Data": payload&#10;}]' doc:name="Copy_of_Set Payload to Saturday" doc:id="1c58a549-2659-4d9b-aa9e-c6c0b4444c51" />
+			</when>
+			<otherwise >
+				<set-payload value="No Day Of Week Specified." doc:name="Copy_of_Default Payload if No DoTW is provided" doc:id="55473cfb-7038-438b-a362-ed6701b2da88" />
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Copy_of_Copy_of_Copy_of_quantity * price" doc:id="b9de3d4e-61bf-4471-b291-8866b4106690" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var pay1 = payload.Data
+---
+Data: (pay1 map {
+	quantity: $.order_qty,
+	price: $.price,
+	store_id: $.store_id,
+	total: $.order_qty as Number * ($.price as String replace /[$]/ with("")) as Number
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Copy_of_Copy_of_Copy_of_total Income Per Previous Month" doc:id="1a38442c-9c4d-434a-8e4e-9bf72ccb3580" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var pay1 = payload.Data
+var pay1Totals = pay1.total
+---
+total_Income_Per_Previous_Month: ("day_week: " ++ vars.dayWeek as String ++ " total: " ++ sum(pay1Totals)) as String
+//pay1]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	
+	
+	
+	
 </mule>
