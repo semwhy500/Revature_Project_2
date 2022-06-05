@@ -6,7 +6,7 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
 	<flow name="mainFlow" doc:id="2257c6f7-2f0e-4b2a-99b6-73f963476284" >
-		<http:listener doc:name="Listener" doc:id="df522a65-a62b-498b-9ee8-edd2d75e7162" path="/api/totalQuantitySalesPrevMonth" allowedMethods="GET"/>
+		<http:listener doc:name="Listener" doc:id="df522a65-a62b-498b-9ee8-edd2d75e7162" path="/api/totalQuantitySalesPrevMonth" allowedMethods="GET" config-ref="HTTP_Listener_config"/>
 		<flow-ref doc:name="orderfeatureFlow" doc:id="9ac10093-1af4-4f50-9e39-c6d495813c80" name="orderfeatureFlow" />
 	</flow>
 
