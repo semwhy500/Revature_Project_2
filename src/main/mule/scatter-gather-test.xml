@@ -433,13 +433,10 @@ payload]]></ee:set-payload>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="8b304c0d-dc6c-4973-b7d3-c777bca8e472" />
 	</flow>
-<<<<<<< HEAD
-	<flow name="scatter-gather-testFlow" doc:id="360cc0ea-989d-4cd2-9406-89f11541235e" >
-		<http:listener doc:name="Listener" doc:id="1f2a1bd1-868e-454b-a403-72bf4912f2e2" path="/scatterAPI"/>
-=======
+
 	<flow name="flowOfAPIs" doc:id="360cc0ea-989d-4cd2-9406-89f11541235e" >
 		<http:listener doc:name="Listener" doc:id="1f2a1bd1-868e-454b-a403-72bf4912f2e2" config-ref="HTTP_Listener_config" path="/scatterAPI"/>
->>>>>>> team2
+
 		<scatter-gather doc:name="Scatter-Gather" doc:id="985e58fb-cf18-4844-94d8-2bdff1271cbd" >
 			<route >
 				<flow-ref doc:name="ordersAPIFlowRef" doc:id="04417184-5857-440d-8851-1e4b9651893b" name="orderAPIFlow"/>

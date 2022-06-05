@@ -11,7 +11,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 		<http:request-connection host="184.72.81.235" port="8080" />
 	</http:request-config>
 	<flow name="NewvVSReturningCustomers" doc:id="62fcc787-c318-421e-88c4-cd742e8a7e84">
-		<http:listener doc:name="/new-vs-returning" doc:id="04425ac1-ceb8-483f-8f12-d7fa0747339f" path="/new-vs-returning" />
+		<http:listener doc:name="/new-vs-returning" doc:id="04425ac1-ceb8-483f-8f12-d7fa0747339f" path="/new-vs-returning" config-ref="HTTP_Listener_config"/>
 		<flow-ref doc:name="Orders" doc:id="be1a1320-669a-44b2-873c-29a3b4c740eb" name="Orders" />
 		<flow-ref doc:name="APIOrders" doc:id="8046aa9c-0b9e-4218-ba25-434f69f2eb31" name="APIOrders"/>
 		<set-variable value="#[vars.beforeFiltered ++ vars.restOfYear]" doc:name="Previous Customers" doc:id="42828914-3160-4ed4-9ee5-20b15298c9a1" variableName="prevCust" />
@@ -32,7 +32,7 @@ output application/json
 		</ee:transform>
 	</flow>
 	<flow name="NewvVSReturningCustomersByStore" doc:id="7469b9ac-00dd-4406-9578-954e987c2671">
-		<http:listener doc:name="/new-vs-returning/store" doc:id="ced50469-6d3e-464d-8b92-b83d66e41c3d" path="/new-vs-returning/store" />
+		<http:listener doc:name="/new-vs-returning/store" doc:id="ced50469-6d3e-464d-8b92-b83d66e41c3d" path="/new-vs-returning/store" config-ref="HTTP_Listener_config"/>
 		<set-variable value="#[message.attributes.queryParams.id]" doc:name='Store URIparam "id"' doc:id="3823b6ee-bf1d-4afd-9fab-23c575a1585f" variableName="ID" />
 		<flow-ref doc:name="OrdersByStore" doc:id="552e5abe-0020-478f-b612-7fa57f044c2b" name="OrdersByStore" />
 		<flow-ref doc:name="APIOrdersByStore" doc:id="d7ba040c-c882-4941-b71a-8209550c9b11" name="APIOrdersByStore"/>
@@ -157,7 +157,7 @@ firstInput map (firstInputValue) ->
 		</ee:transform>
 	</flow>
 	<flow name="Orders" doc:id="0ef20659-ea79-45a5-b4ab-99dd7b1da52c" >
-		<http:listener doc:name="/order/succesfull/prevmonth" doc:id="8a1347b7-d38f-4c2f-b834-861ac455b166" path="/order/succesfull/prevmonth" />
+		<http:listener doc:name="/order/succesfull/prevmonth" doc:id="8a1347b7-d38f-4c2f-b834-861ac455b166" path="/order/succesfull/prevmonth" config-ref="HTTP_Listener_config"/>
 		<flow-ref doc:name="CsvToJSON" doc:id="3419f24d-621b-413f-8e9a-dedb55f07c9f" name="CsvToJSON"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="849d3319-86a4-43e1-9071-ed616c36523e" >
 			<route >
@@ -279,8 +279,8 @@ var distinctVal = payload."Customer ID"  distinctBy $
 		</ee:transform> [STUDIO] -->
 	</flow>
 	<flow name="APIOrders" doc:id="4f9eeb57-e7ad-4d73-bb87-fe54599a725b">
-		<http:listener doc:name="/order/api/succesfull/prevmonth" doc:id="f1cc7c63-f6c3-40c8-8a90-42d8623a8037" path="/order/api/succesfull/prevmonth" />
-		<http:request method="GET" doc:name="Request" doc:id="3cd77eec-fd94-457e-910d-f149df7eca51" path='#["/order"]' />
+		<http:listener doc:name="/order/api/succesfull/prevmonth" doc:id="f1cc7c63-f6c3-40c8-8a90-42d8623a8037" path="/order/api/succesfull/prevmonth" config-ref="HTTP_Listener_config"/>
+		<http:request method="GET" doc:name="Request" doc:id="3cd77eec-fd94-457e-910d-f149df7eca51" path='#["/order"]' config-ref="HTTP_Request_configuration"/>
 		<ee:transform doc:name="Transform Message" doc:id="d6cfe7dc-39d2-4efc-ab43-0dc77069b42f" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -341,8 +341,8 @@ output application/json
 		</ee:transform>
 	</flow>
 	<flow name="APIOrdersByStore" doc:id="7ba729a0-886a-4f7e-80c8-56efaa661310">
-		<http:listener doc:name="/order/api/succesfull/prevmonth" doc:id="0caaec28-5d7c-43d8-80f4-2fceb41efe87" path="/order/api/succesfull/prevmonth" />
-		<http:request method="GET" doc:name="Request" doc:id="35ba1920-bc2b-47f4-91bf-52e9227e222d" path='#["/order"]' />
+		<http:listener doc:name="/order/api/succesfull/prevmonth" doc:id="0caaec28-5d7c-43d8-80f4-2fceb41efe87" path="/order/api/succesfull/prevmonth" config-ref="HTTP_Listener_config"/>
+		<http:request method="GET" doc:name="Request" doc:id="35ba1920-bc2b-47f4-91bf-52e9227e222d" path='#["/order"]' config-ref="HTTP_Request_configuration"/>
 		<ee:transform doc:name="Transform Message" doc:id="b207c66a-f160-4c6a-9589-97912ec614d1" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -403,7 +403,7 @@ output application/json
 		</ee:transform>
 	</flow>
 	<flow name="OrdersByStore" doc:id="3720199c-b8d9-4e2e-816c-03c7e98590cc" >
-		<http:listener doc:name="/order/succesfull/prevmonth" doc:id="704b5995-0021-4a18-89b6-27b240eaa8cb" path="/order/succesfull/prevmonth" />
+		<http:listener doc:name="/order/succesfull/prevmonth" doc:id="704b5995-0021-4a18-89b6-27b240eaa8cb" path="/order/succesfull/prevmonth" config-ref="HTTP_Listener_config"/>
 		<flow-ref doc:name="CsvToJSON" doc:id="13d1c063-d155-47d5-9f72-d78730ad9b16" name="CsvToJSON"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="88fc539f-82f9-430f-b350-8870bdc4d1c8" >
 			<route >
@@ -525,12 +525,12 @@ var distinctVal = payload."Customer ID"  distinctBy $
 		</ee:transform> [STUDIO] -->
 	</flow>
 	<flow name="AvgQuantity" doc:id="e5433088-736e-41ae-95ff-c4d513fbf9ab">
-		<http:listener doc:name="/average-sales-quantity" doc:id="e9c41c27-e953-49d6-bda7-fa9102fbc4dd" path="/average-sales-quantity" />
+		<http:listener doc:name="/average-sales-quantity" doc:id="e9c41c27-e953-49d6-bda7-fa9102fbc4dd" path="/average-sales-quantity" config-ref="HTTP_Listener_config"/>
 		<flow-ref doc:name="Get All Data" doc:id="d7be38b1-22c7-4171-8da4-85a3396a6f3f" name="GetAllData" />
 		<flow-ref doc:name="Calculate Average Quantity" doc:id="e7afa042-bf5d-456b-8ba9-fc2057a682a7" name="CalculateAvgQuantity" />
 	</flow>
 	<flow name="AvgQuantityByStore" doc:id="dc1b895c-fcb8-4106-b8b7-4a5ae2b29d42" >
-		<http:listener doc:name="/average-sales-quantity/store" doc:id="290e475e-67be-4b78-b794-a9c146bf6543" path="/average-sales-quantity/store"/>
+		<http:listener doc:name="/average-sales-quantity/store" doc:id="290e475e-67be-4b78-b794-a9c146bf6543" path="/average-sales-quantity/store" config-ref="HTTP_Listener_config"/>
 		<set-variable value="#[message.attributes.queryParams.id]" doc:name='Store URIparam "id"' doc:id="d5da0666-503c-4231-9456-4a34fc19ee6b" variableName="ID"/>
 		<flow-ref doc:name="Get All Data" doc:id="92072651-1138-47bd-85a5-fda29c9f82e0" name="GetAllData" />
 		<ee:transform doc:name="Filter Data By Store ID" doc:id="823506b8-ec84-4c33-b2a2-92e3beb432cf">
@@ -544,7 +544,7 @@ payload filter($.store_id==vars.ID)]]></ee:set-payload>
 		<flow-ref doc:name="Calculate Average Quantity" doc:id="1585ece0-d663-41d3-a65e-b33f4259bc7a" name="CalculateAvgQuantity" />
 	</flow>
 	<flow name="AvgQuantityByDOW" doc:id="0245dfb7-9c1f-45b1-80aa-dadec5b55cc4" >
-		<http:listener doc:name="/average-sales-quantity/dow" doc:id="9e4a3838-2430-49ce-9468-9ececf536bc0" path="/average-sales-quantity/dow" />
+		<http:listener doc:name="/average-sales-quantity/dow" doc:id="9e4a3838-2430-49ce-9468-9ececf536bc0" path="/average-sales-quantity/dow" config-ref="HTTP_Listener_config"/>
 		<set-variable value="#[message.attributes.queryParams.dow]" doc:name='Store URIparam "dow"' doc:id="e8dadec9-472a-4bd1-b4db-219a7620ac17" variableName="dow" />
 		<flow-ref doc:name="Get All Data" doc:id="e626e007-18db-4b8d-b2f7-c611bfa65fc8" name="GetAllData" />
 		<ee:transform doc:name="Filter Data by DOW" doc:id="d9800e05-41f2-4af8-84f4-4dfa72e42989" >
@@ -672,7 +672,7 @@ payload filter($.success contains "true") ]]></ee:set-payload>
 		</ee:transform>
 	</sub-flow>
 	<sub-flow name="GetAPIdata" doc:id="cb2979b6-9886-4c90-a46b-c87957740da9">
-		<http:request method="GET" doc:name="Request API Data" doc:id="b5e65373-94ea-48a4-ac2e-1fd87bdd66a3" path='#["/order"]' />
+		<http:request method="GET" doc:name="Request API Data" doc:id="b5e65373-94ea-48a4-ac2e-1fd87bdd66a3" path='#["/order"]' config-ref="HTTP_Request_configuration"/>
 		<ee:transform doc:name="To JSON Array (filter success=true)" doc:id="7510c65f-5ab5-4ac0-bfe3-ba8fc92cc846">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
