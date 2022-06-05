@@ -596,12 +596,9 @@ Data : ordersCSV map (ordersItems, indexOfOrdersItems) -> {
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 var pay1 = vars.bob.Data
-//var myDate = pay1.date as Date
 ---
-//pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 and $.date.month < now().month) map(items, index) -> {
-//	"Data": items
-//}
-pay1]]></ee:set-payload>
+pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 and $.date.month < now().month)
+]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="6cbafd7d-23ff-4bf9-bb77-10ed477a1efa" />
@@ -651,8 +648,17 @@ output application/json
 payload map (item, index) -> {
 	order_id: item.order_id,
 	qty: item.qty
-}
-//payload]]></ee:set-payload>
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="var1" doc:id="9795bff8-22ff-4170-bb01-cd24eb5b011e" variableName="var1"/>
+		<http:request method="GET" doc:name="Request" doc:id="d910bab5-2a45-46fb-9a0e-9a762a5e18fd" config-ref="HTTP_Request_configuration" path="/order"/>
+		<ee:transform doc:name="Transform Message" doc:id="1a838e07-c3d4-401f-b3f7-1db19d4f5bb5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload + vars.var1]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
