@@ -1,0 +1,5 @@
+file:
+  orders: H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\ordersInput.csv
+  customers: H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\customersInput.csv
+  transactions: H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\Input.csv
+  products: H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\productsInput.csv

@@ -71,16 +71,16 @@ payload]]></ee:set-payload>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="5bfc9236-c578-4e97-b91b-70dbc584f4f5" />
 	</flow>
-	<flow name="AverageSalePriceFlow" doc:id="240123bc-14e8-4bb9-8d16-b093bbc8d4ee" >
+	<flow name="averageSale" doc:id="240123bc-14e8-4bb9-8d16-b093bbc8d4ee" >
 		<http:listener doc:name="GET /averagesale" doc:id="bdad181c-7b8b-45a1-a7a0-9060b403b10c" path="/averagesale" config-ref="HTTP_Listener_config"/>
-		<set-variable value='#[message.attributes.queryParams.day default "wrong"]' doc:name="day" doc:id="051c18bb-94ef-4f5c-ba31-eabda25f838a" variableName="day"/>
-		<set-variable value='#[message.attributes.queryParams.store_id default "wrong"]' doc:name="store_id" doc:id="7eb304bf-024f-4293-acde-3bf9edfee896" variableName="store_id"/>
+		<set-variable value='#[message.attributes.queryParams.day default "default"]' doc:name="day" doc:id="051c18bb-94ef-4f5c-ba31-eabda25f838a" variableName="day"/>
+		<set-variable value='#[message.attributes.queryParams.store_id default "default"]' doc:name="store_id" doc:id="7eb304bf-024f-4293-acde-3bf9edfee896" variableName="store_id"/>
 		<flow-ref doc:name="dbproducts" doc:id="9a90ccf3-2e69-463e-ae75-9e1d85621959" name="dbproducts" />
 		<set-variable value="#[payload]" doc:name="products" doc:id="aad6c7bb-807e-4dd7-895b-d7682a39fdd9" variableName="products"/>
 		<flow-ref doc:name="successfulOrders" doc:id="767c9490-70d5-4ff6-b6f1-635c60cc560d" name="successfulOrders" />
 		<choice doc:name="Choice" doc:id="af6c335b-50ed-4dfc-a033-417765305899">
-			<when expression='#[vars.store_id != "wrong"]'>
-				<ee:transform doc:name="Transform Message" doc:id="2fb70417-cf41-42fa-b64f-77984dafd4e0">
+			<when expression='#[vars.store_id != "default"]'>
+				<ee:transform doc:name="Filter by Store ID" doc:id="2fb70417-cf41-42fa-b64f-77984dafd4e0">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -90,7 +90,7 @@ payload filter $.store_id == vars.store_id]]></ee:set-payload>
 				</ee:transform>
 			</when>
 			<otherwise>
-				<ee:transform doc:name="Transform Message" doc:id="5bb8d186-67f1-4e2f-9938-e8609bdf29de">
+				<ee:transform doc:name="Full Payload" doc:id="5bb8d186-67f1-4e2f-9938-e8609bdf29de">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -102,8 +102,8 @@ payload]]></ee:set-payload>
 		</choice>
 		<logger level="INFO" doc:name="Logger" doc:id="1301ea64-bb7e-42cc-9236-de6c268beb75" message="#[payload]"/>
 		<choice doc:name="Choice" doc:id="d28ca433-0d25-48b7-842f-67e122621a81">
-			<when expression='#[vars.day != "wrong"]'>
-				<ee:transform doc:name="Transform Message" doc:id="814ac6f4-ea9a-4e23-a217-d93c173b769a">
+			<when expression='#[vars.day != "default"]'>
+				<ee:transform doc:name="Filter by day" doc:id="814ac6f4-ea9a-4e23-a217-d93c173b769a">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -113,7 +113,7 @@ payload filter $.day == vars.day]]></ee:set-payload>
 				</ee:transform>
 			</when>
 			<otherwise>
-				<ee:transform doc:name="Transform Message" doc:id="b7e99bb2-336c-4642-b5d2-4716c4f016a0">
+				<ee:transform doc:name="Full Payload" doc:id="b7e99bb2-336c-4642-b5d2-4716c4f016a0">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -125,8 +125,8 @@ payload]]></ee:set-payload>
 		</choice>
 		<logger level="INFO" doc:name="Logger" doc:id="02e82f46-cd26-4218-bdb1-f438261e4eb6" message="#[payload]"/>
 		<parallel-foreach doc:name="Parallel For Each" doc:id="fb3d53f5-9d9b-4aeb-8fc6-187f3903341c">
-			<set-variable value="#[payload.qty]" doc:name="Set Variable Order Quantity" doc:id="abc671d1-f4b4-4f35-89c9-e07e2524217b" variableName="Order Quantity" />
-			<set-variable value="#[payload.product_id]" doc:name="Set Variable Product ID" doc:id="5eac8c23-711f-4917-be4a-469d7bf2c0b4" variableName="product_id" />
+			<set-variable value="#[payload.qty]" doc:name="Order Quantity" doc:id="abc671d1-f4b4-4f35-89c9-e07e2524217b" variableName="Order Quantity" />
+			<set-variable value="#[payload.product_id]" doc:name="Product ID" doc:id="5eac8c23-711f-4917-be4a-469d7bf2c0b4" variableName="product_id" />
 			<set-payload value="#[(vars.products filter $.product_id == vars.product_id).price]" doc:name="Set Payload to Price" doc:id="3437a01f-d991-44e6-afed-4fa3720787c5" />
 			<ee:transform doc:name="reduce payload" doc:id="973c0425-f11f-40cb-8b60-9a148669b75a">
 				<ee:message>
@@ -213,7 +213,7 @@ output application/json
 	</flow>
 	<flow name="csvorders" doc:id="012e2d70-8f43-4346-9414-6a3585413c70" >
 		<http:listener doc:name="GET /csvorders" doc:id="524492d5-2056-4349-981c-fb0c6bbeaa4f" path="/csvorders" config-ref="HTTP_Listener_config"/>
-		<file:read doc:name="orders.csv" doc:id="79d3a6a0-813e-480b-aa4e-61297770ec91" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\p3_data\ordersInput.csv" config-ref="File_Config" />
+		<file:read doc:name="orders.csv" doc:id="79d3a6a0-813e-480b-aa4e-61297770ec91" path="${file.orders}" config-ref="File_Config" />
 		<ee:transform doc:name="CSV to JSON" doc:id="3011d5e1-3a73-41a3-8e72-8c2870893a63">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
@@ -279,7 +279,7 @@ txn_id: item.txn_id
 	</flow>
 	<flow name="csvtransactions" doc:id="586283f6-520c-4e44-9801-17a3b79ac2ab" >
 		<http:listener doc:name="GET /csvtransactions" doc:id="8bb77cc6-fee6-4172-a3ec-d406d253014c" path="/csvtransactions" config-ref="HTTP_Listener_config"/>
-		<file:read doc:name="transactionsInput.csv" doc:id="6b571a31-e6b7-41c5-9a30-1328f3a28bb7" config-ref="File_Config" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\p3_data\transactionsInput.csv"/>
+		<file:read doc:name="transactionsInput.csv" doc:id="6b571a31-e6b7-41c5-9a30-1328f3a28bb7" config-ref="File_Config" path="${file.transactions}"/>
 		<ee:transform doc:name="CSV to JSON" doc:id="ad5f32cb-75df-4755-a534-3202c0b57b3d" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -340,6 +340,19 @@ txn_id: item.id
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="06a3ce18-bb21-45dd-aab5-9aa824306893" message="#[payload]" />
 	</flow>
+	<flow name="csvproducts" doc:id="2323967e-2655-4718-ab75-b70cd2103f28">
+		<http:listener doc:name="GET /csvproducts" doc:id="dfed8e67-dfed-4b82-a9da-59d408d8f777" path="/csvproducts" config-ref="HTTP_Listener_config" />
+		<file:read doc:name="productsInput.csv" doc:id="a43881f4-dae1-4c19-bdd8-401230e6c0f9" config-ref="File_Config" path="${file.products}" />
+		<ee:transform doc:name="CSV to JSON" doc:id="6f85ae60-b71e-4287-a217-502f5b84b4d6">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="7cf3f46a-1d3d-4e4e-8904-0a9bb312edad" />
+	</flow>
 	<flow name="apiproducts" doc:id="44a405dd-521b-4d21-96d1-4a616fe9bc00" >
 		<http:listener doc:name="GET  /apitproducts" doc:id="92e2236f-d2d8-4c6d-be65-b4abc74a249a" path="/apiproducts" config-ref="HTTP_Listener_config"/>
 		<http:request method="GET" doc:name="swagger API" doc:id="6cea212b-7720-4a6e-8823-634a823b8b0a" path="/product" targetValue="#[%dw 2.0 output application/xml --- payload]" config-ref="HTTP_Request_configuration">
@@ -385,22 +398,9 @@ payload
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="dea40d58-4c48-43c8-b5ff-f721ae4f77df" message="#[payload]" />
 	</flow>
-	<flow name="csvproducts" doc:id="2323967e-2655-4718-ab75-b70cd2103f28" >
-		<http:listener doc:name="GET /csvproducts" doc:id="dfed8e67-dfed-4b82-a9da-59d408d8f777" path="/csvproducts" config-ref="HTTP_Listener_config"/>
-		<file:read doc:name="productsInput.csv" doc:id="a43881f4-dae1-4c19-bdd8-401230e6c0f9" config-ref="File_Config" path="H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\productsInput.csv" />
-		<ee:transform doc:name="CSV to JSON" doc:id="6f85ae60-b71e-4287-a217-502f5b84b4d6" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="7cf3f46a-1d3d-4e4e-8904-0a9bb312edad" />
-	</flow>
 	<flow name="successfulTransactions" doc:id="e7c12095-c1b2-421a-84b5-dfd5279e9b43">
-		<flow-ref doc:name="Scatter Gather Transactions" doc:id="c6d494e1-5144-4bb8-8835-a8fd53a0c6ba" name="allTransactions" />
-		<ee:transform doc:name="Transform Message" doc:id="19189d5f-9aaf-4743-aea9-13746a20a300">
+		<flow-ref doc:name="allTransactions" doc:id="c6d494e1-5144-4bb8-8835-a8fd53a0c6ba" name="allTransactions" />
+		<ee:transform doc:name="Filter only successful" doc:id="19189d5f-9aaf-4743-aea9-13746a20a300">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -411,10 +411,10 @@ payload filter $.payment_txn_success == "true"]]></ee:set-payload>
 		<set-variable value="#[payload]" doc:name="successful_transactions" doc:id="515214c0-cd8c-404a-ae4a-f25e0825a0b2" variableName="successful_transactions" />
 		<logger level="INFO" doc:name="Logger" doc:id="6d04ded1-ad41-4b69-86a0-1fad350d5918" />
 	</flow>
-	<flow name="TransactionSuccessMetrics" doc:id="7e877e18-bf29-4f2e-87eb-7b382562ddc8" >
+	<flow name="transactionSuccessMetrics" doc:id="7e877e18-bf29-4f2e-87eb-7b382562ddc8" >
 		<http:listener doc:name="GET /transactionsuccess" doc:id="e64b6d93-f298-401f-a5ae-63f612cf9459" path="/transactionsuccess" config-ref="HTTP_Listener_config"/>
-		<flow-ref doc:name="Scatter Gather Transactions" doc:id="bf931c32-b2b5-4c97-a637-15ab1fedb00e" name="allTransactions" />
-		<set-variable value="#[sizeOf(payload) as Number]" doc:name="Set Variable Payload Size" doc:id="287ec126-ce1e-4847-925e-d30a5bfb9c4d" variableName="payloadsize" />
+		<flow-ref doc:name="allTransactions" doc:id="bf931c32-b2b5-4c97-a637-15ab1fedb00e" name="allTransactions" />
+		<set-variable value="#[sizeOf(payload) as Number]" doc:name="Payload Size" doc:id="287ec126-ce1e-4847-925e-d30a5bfb9c4d" variableName="payloadsize" />
 		<ee:transform doc:name="Transform Payload to Readable Format" doc:id="15859030-affd-498e-9dc5-9dfe542b4b0f" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0import java!java::lang::System
@@ -430,84 +430,6 @@ output application/java
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="e6f1915b-3947-43aa-9c10-d2e90b4ee042" message="#[payload]" />
-	</flow>
-	<flow name="AverageSalePriceFlow1" doc:id="99ddae78-5e90-4408-bba8-12c0de315d94" >
-		<db:select doc:name="RDS AWS db" doc:id="1331379d-ac00-4c08-8d23-b99daff4267d">
-			<db:sql><![CDATA[SELECT * FROM product WHERE product_id = :pid]]></db:sql>
-			<db:input-parameters><![CDATA[#[{'pid' : vars.product_id}]]]></db:input-parameters>
-		</db:select>
-		<ee:transform doc:name="Transform Message" doc:id="991da793-1cb9-4d0a-92fe-02b39d6e3fb8">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-reduce (payload, (item, acc) -> item + acc) as Number]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="product_price" doc:id="e2893654-988a-4ea4-8302-e9ce22a16c13" >
-		<set-variable value="#[payload.product_id as String]" doc:name="Set Variable Product ID" doc:id="0f3eb5c1-1d1e-49ee-93c4-6fc870d77057" variableName="product_id"/>
-		<flow-ref doc:name="Flow Reference" doc:id="72f9f555-e47e-4339-9d9a-bf22dead92ba" name="csvproducts" />
-		<set-variable value="#[payload]" doc:name="Set Variable Products" doc:id="073672f4-139d-4076-99a2-a3792e26b02e" variableName="products"/>
-		<ee:transform doc:name="Transform Message" doc:id="30701927-7a99-4135-ad46-a51c397a1a08">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
----
-payload filter $.product_id == vars.product_id]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<set-variable value="#[payload.price]" doc:name="Set Variable" doc:id="6f0daa3f-04d9-4c6d-a4ef-9fa06c630e1d" variableName="product_price" />
-		<logger level="INFO" doc:name="Logger" doc:id="a61d4af4-8726-43e8-bc10-1a295e472f09" message="#[payload]" />
-	</flow>
-	<flow name="AverageSalePriceFlow3" doc:id="948c2f06-7593-449d-b572-50d5ec8cb04c" >
-		<set-variable value="#[payload]" doc:name="Set Variable All Orders" doc:id="5f9adeb0-178e-4267-9a41-73e3a4a2bbfa" variableName="all_orders" />
-		<set-variable value="#[payload]" doc:name="Set Variable Original Payload" doc:id="3dd72bb0-b008-4b02-b539-a4fb2e5b9410" variableName="original_payload" />
-	</flow>
-	<flow name="AverageSalePriceFlow5" doc:id="05ef9725-412e-41ba-aaef-a76c4493352d" >
-		<http:listener doc:name="Copy_of_Listener" doc:id="9ae1d1f7-e8e8-40c7-aa8e-ab0d61cd440b" path="/test2" config-ref="HTTP_Listener_config"/>
-		<flow-ref doc:name="Flow Reference" doc:id="1d68e4e0-8133-41b3-8f81-4cfc8bd7b5e2" name="allOrders" />
-		<parallel-foreach doc:name="Parallel For Each" doc:id="bed0c1d2-497a-482e-96b2-e02bcf3e7a73" >
-			<ee:transform doc:name="Transform Message" doc:id="250aa616-e071-424a-9ca0-73beebd7ab89">
-						<ee:message>
-							<ee:set-payload><![CDATA[%dw 2.0
-output application/java
-var dt = payload.datetime
----
-payload.datetime as Date {format : "yyyy-M[01]-d[01]'T'HH:mm:ss"} as String {format : "MM-dd-yyyy"}
-
-]]></ee:set-payload>
-						</ee:message>
-					</ee:transform>
-		</parallel-foreach>
-		<logger level="INFO" doc:name="Logger" doc:id="002d814b-86a1-4276-a7b2-1e0380679240" />
-	</flow>
-	<flow name="AverageSalePriceFlow4" doc:id="c97c46ae-df4e-44cc-a9f3-874404bc46a1" >
-		<http:listener doc:name="Listener" doc:id="c781c7b0-93db-42bf-ac5d-5329253f9b48" path="/test" config-ref="HTTP_Listener_config"/>
-		<ee:transform doc:name="Copy_of_Transform Message" doc:id="62d1533c-1bf5-46b7-84b5-ed2160e34c7e">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
-output application/json
-var dt = "2021-12-27"
----
-dt as Date {format : "yyyy-M[01]-d[01]"} as String {format : "MM-dd-yyyy"}
-
-]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="70f7152f-6050-48c8-b265-daf8f1a64281" />
-	</flow>
-	<flow name="AverageSalePriceFlow6" doc:id="77237567-070c-475e-a71f-5641eca9965d" >
-		<flow-ref doc:name="Flow Reference" doc:id="2da8af42-b701-4785-8b21-1d9f3689d73e" name="apiorders" />
-		<ee:transform doc:name="Copy_of_Transform Message" doc:id="f556fbc2-f3ce-4f9e-a8ff-9e1668c38832">
-						<ee:message>
-							<ee:set-payload><![CDATA[%dw 2.0
-output application/json
-var dt = payload.datetime as String
----
-payload ++  {day : payload.datetime as Date {format : "yyyy-M[01]-d[01]'T'HH:mm:ss"} as String {format : "MM-dd-yyyy"}}]]></ee:set-payload>
-						</ee:message>
-					</ee:transform>
 	</flow>
 	<flow name="successfulOrders" doc:id="02614465-7da7-4714-a263-969c55ac31f5" >
 		<http:listener doc:name="GET /successfulorders" doc:id="e30fe72e-e277-4d44-a1a7-c4b2be51a17f" path="/successfulorders" config-ref="HTTP_Listener_config"/>
