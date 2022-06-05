@@ -1,4 +1,0 @@
-%dw 2.0
-
-type auto_5763da06_86eb_4612_b21b_f582da2e597a_Output_Variables_transactionsCSV = Binary
-

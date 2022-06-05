@@ -1,4 +1,0 @@
-%dw 2.0
-
-type auto_f8656d45_383d_46e9_9fe9_2d530f9d1796_Output_Payload = Array<Any>
-

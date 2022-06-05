@@ -3,29 +3,6 @@
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
 	<apikit:config outboundHeadersMapName="outboundHeadersMapName" httpStatusVarName="httpStatus" doc:name="Router" doc:id="b9a4862e-f4fa-4ac6-88cf-22ff4227756d" name="Router" api="api\totalincomeperpreviousmonthbystore.raml" />
 	<apikit:config outboundHeadersMapName="outboundHeadersMapName" httpStatusVarName="httpStatus" doc:name="Router" doc:id="01c5f58e-9fa0-460d-9d1f-b1897e361ed8" name="Router1" api="api\totalincomeperpreviousmonthbystore.raml" />
-	<flow name="getDataFromAPIFlow" doc:id="e2bfdbdb-8d6d-468f-ad4c-b264b29e5c71" >
-		<ee:transform doc:name="Transform Message" doc:id="a4ef738d-9821-47e1-8dc1-25e7d24341dd" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-{
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="getDataFromCSVsFlow" doc:id="22e2345c-36c6-4192-8df3-d990f30a4820" >
-		<file:read doc:name="readFromCSVs" doc:id="c6d09037-b73a-4bcd-a828-7e94fc1d165d" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\data\csvs for p3\Orders.csv"/>
-		<ee:transform doc:name="Transform Message" doc:id="fd92b3f7-cd72-466a-b67f-9f0175d0239d" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="d492889e-a724-42a7-be83-bbc4d4e7983d" message="#[payload]"/>
-	</flow>
 	<flow name="totalincomeperpreviousmonthbystore-main">
         <http:listener path="/api/*" config-ref="HTTP_Listener_config">
             <http:response statusCode="#[vars.httpStatus default 200]">
