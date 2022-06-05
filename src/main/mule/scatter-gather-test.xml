@@ -371,9 +371,10 @@ total_Income_Per_Previous_Month: ("product_id: " ++ vars.queryParamsID as String
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-payload map(value, index) -> {
-	product_id: value.product.id
-}]]></ee:set-payload>
+//payload map(value, index) -> {
+//	product_id: value.product.id
+//}
+payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="aa43048f-896e-412d-8450-885ef0e634a9" />
@@ -386,10 +387,10 @@ payload map(value, index) -> {
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-payload map(value, index) -> {
-	product_id: value.id
-}
-]]></ee:set-payload>
+//payload map(value, index) -> {
+//	product_id: value.id
+//}
+payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="8677f42f-efee-4482-98fc-be3939b82395" />
