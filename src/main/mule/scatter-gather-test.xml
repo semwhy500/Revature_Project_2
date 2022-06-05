@@ -169,6 +169,7 @@ total_Income_Per_Previous_Month: sum(pay1Totals)]]></ee:set-payload>
 	</flow>
 	<flow name="byStoreIdFlow" doc:id="c34c00d5-4fbb-41cb-afd0-4c16aee9b376">
 		<http:listener doc:name="Copy_of_Copy_of_Listener" doc:id="68852683-8fdd-4f38-a410-6e3c2bf31c89" config-ref="HTTP_Listener_config" path="/storeid" />
+		<set-variable value="#[attributes.queryParams.id]" doc:name="queryParamsID" doc:id="a36dca11-8f6c-48f4-a0db-bd663b3f0ae2" variableName="queryParamsID"/>
 		<scatter-gather doc:name="Copy_of_Copy_of_Scatter-Gather" doc:id="cb17703f-7f5d-473d-9709-1c4e51fd0ef7">
 			<route>
 				<flow-ref doc:name="Copy_of_Copy_of_ordersCSVFlowRef" doc:id="c21bba54-4f45-4096-bfd3-7df5bc53eece" name="ordersCSVFlow" />
@@ -219,15 +220,137 @@ pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 a
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<ee:transform doc:name="Transform Message" doc:id="1417e33c-cde7-490b-846a-566cf593864c" >
+		<ee:transform doc:name="getByStoreID" doc:id="1417e33c-cde7-490b-846a-566cf593864c" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+payload.Data filter ((value, index) -> 
+	value.store_id as String == vars.queryParamsID as String
+)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Copy_of_quantity * price" doc:id="a8afd96a-28c9-4b7f-89f1-b8636ca13175">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var pay1 = payload
+---
+Data: (pay1 map {
+	quantity: $.order_qty,
+	price: $.price,
+	store_id: $.store_id,
+	total: $.order_qty as Number * ($.price as String replace /[$]/ with("")) as Number
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Copy_of_total Income Per Previous Month" doc:id="552c444b-507f-4c72-a93d-fb949d7ce4b4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var pay1 = payload.Data
+var pay1Totals = pay1.total
+---
+total_Income_Per_Previous_Month: ("store_id: " ++ vars.queryParamsID as String ++ " total: " ++ sum(pay1Totals)) as String
+//pay1]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="8dd15a26-5a23-4f85-976a-a84f2cea0f86" />
+	</flow>
+	<flow name="byProductFlow" doc:id="31b703ef-3349-4f0e-83ca-2ea511a7e17a">
+		<http:listener doc:name="Copy_of_Copy_of_Listener" doc:id="e8b5c90d-cc3b-4744-9a36-353e220c6bfe" config-ref="HTTP_Listener_config" path="/product" />
+		<set-variable value="#[attributes.queryParams.id]" doc:name="queryParamsID" doc:id="26cce4d2-6e5d-43c5-bbe2-b3d1a3d03d13" variableName="queryParamsID"/>
+		<scatter-gather doc:name="Copy_of_Copy_of_Scatter-Gather" doc:id="c8eb0428-56d4-41c4-97ef-a3639b0bb815">
+			<route>
+				<flow-ref doc:name="Copy_of_Copy_of_ordersCSVFlowRef" doc:id="499bc890-80de-4fea-a16b-d3b1f4126a3a" name="ordersCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_ordersCSV" doc:id="6582fc3e-0bac-485c-88fe-049eabde7dbb" variableName="ordersCSV" />
+			</route>
+			<route>
+				<flow-ref doc:name="Copy_of_Copy_of_productsCSVFlowRef" doc:id="a7bb574f-a179-4c26-ad3b-9cff0b404749" name="productsCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_productsCSV" doc:id="cddcb143-8ce1-4612-b3db-c7de6563aea6" variableName="productsCSV" />
+			</route>
+			<route>
+				<flow-ref doc:name="Copy_of_Copy_of_transactionsCSVFlowRef" doc:id="68cc9aaf-a29f-44c2-a0d2-d144b24d2bd5" name="transactionsCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_transactionsCSV" doc:id="b52749c0-467b-4e5e-9324-df531b409b0d" variableName="transactionsCSV" />
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Copy_of_Copy_of_major transform" doc:id="03b63ef4-232e-4efb-a772-c13fe8493f07">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var ordersCSV = vars.ordersCSV
+var productsCSV = vars.productsCSV
+var transactionsCSV = vars.transactionsCSV
+---
+Data : ordersCSV map (ordersItems, indexOfOrdersItems) -> {
+	"order_qty": ordersItems.qty,
+	"date": ordersItems.datetime,
+	"store_id": ordersItems.store_id,
+	"product_id": ordersItems.product_id,
+	(productsCSV filter ($."product_id" == ordersItems."product_id") map (var2, indexVar2) -> {
+	"price": var2.price
+	}),
+	(transactionsCSV filter (($."payment_txn_id" == ordersItems."txn_id") and ($."payment_txn_success" == "true")) map (var3, indexVar3) -> {
+	"transaction_success" : var3.payment_txn_success
+	})
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Copy_of_bob" doc:id="32061e9e-2e14-40a0-a31f-216143ac21a2" variableName="bob" />
+		<ee:transform doc:name="Copy_of_Copy_of_only successful txns and previous month" doc:id="1fe1795a-a74c-45b7-a7db-466e9d4e6534">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var pay1 = vars.bob.Data
+//var myDate = pay1.date as Date
+---
+pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 and $.date.month < now().month) map(items, index) -> {
+	"Data": items
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="getByProductID" doc:id="a9d2a1b4-7b2b-4260-b2aa-7a7312fd935d">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload.Data filter ((value, index) -> 
+	value.product_id as String == vars.queryParamsID as String
+)
+//payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Copy_of_Copy_of_quantity * price" doc:id="ce11e53d-af52-403c-83a6-cad101e45dd7">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var pay1 = payload
+---
+Data: (pay1 map {
+	quantity: $.order_qty,
+	price: $.price,
+	store_id: $.store_id,
+	total: $.order_qty as Number * ($.price as String replace /[$]/ with("")) as Number
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Copy_of_Copy_of_total Income Per Previous Month" doc:id="9b7a7ffb-27c2-4239-88fb-117f9309f3da">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var pay1 = payload.Data
+var pay1Totals = pay1.total
+---
+total_Income_Per_Previous_Month: ("product_id: " ++ vars.queryParamsID as String ++ " total: " ++ sum(pay1Totals)) as String
+//pay1]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="57c07007-6f7a-4a28-960d-a7faf81abcf0" />
+	</flow>
+	<flow name="byDayOfTheWeekFlow" doc:id="e3211d17-9cb2-4a2b-a0b4-2b7ab61d358e" >
+		<http:listener doc:name="Listener" doc:id="bfe36717-f0e7-4141-a215-56e9d2cb47b3" config-ref="HTTP_Listener_config" path="/dayoftheweek"/>
+		<flow-ref doc:name="Flow Reference" doc:id="1fda9a1e-d813-4e3f-a148-f8bb60a40b3d" name="basicFlowForCSVs"/>
 	</flow>
 	<flow name="orderAPIFlow" doc:id="e908a1d1-908a-40e8-aa32-526535ac4f64">
 		<http:request method="GET" doc:name="Request" doc:id="91955e42-70d0-45e3-9646-ac9086dc2d12" config-ref="HTTP_Request_configuration" path="/order" />
