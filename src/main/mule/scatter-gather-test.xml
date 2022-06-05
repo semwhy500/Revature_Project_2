@@ -7,7 +7,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
 	<flow name="helloFlow" doc:id="625d821d-0e98-4015-beee-2c5876694459">
-		<http:listener doc:name="Listener" doc:id="aadae3f3-5e6c-4015-a435-b28afa8aa75d" config-ref="HTTP_Listener_config" path="/hello" />
+		<http:listener doc:name="Listener" doc:id="aadae3f3-5e6c-4015-a435-b28afa8aa75d" path="/hello" />
 		<set-payload value="hello world" doc:name="Set Payloadd" doc:id="7e56a8d5-81a8-40fb-a9db-a2ab1f3e782e" />
 	</flow>
 	<flow name="ordersCSVFlow" doc:id="5630baea-c3f2-40f6-bd89-de1942dac0ae">
@@ -47,7 +47,7 @@ payload]]></ee:set-payload>
 		<logger level="INFO" doc:name="Logger" doc:id="7bfcf043-8ceb-4065-a7d2-ff74e096fadc" message="#[payload]"/>
 	</flow>
 	<flow name="csv-scatter-gather-testFlow" doc:id="d7f5a5c1-cd2b-45bb-a7b2-8a627ac09c67">
-		<http:listener doc:name="Listener" doc:id="568f85e0-8fbb-47f1-8996-1c4d86e323d5" config-ref="HTTP_Listener_config" path="/scatter"/>
+		<http:listener doc:name="Listener" doc:id="568f85e0-8fbb-47f1-8996-1c4d86e323d5" path="/scatter"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="cf6fdb60-c5f8-4a08-b564-f8cb47264ca7">
 			<route>
 				<flow-ref doc:name="ordersCSVFlowRef" doc:id="5f3a2d73-a29f-42d3-9726-bda23c8ec390" name="ordersCSVFlow" />
@@ -73,7 +73,7 @@ vars.ordersCSV ++ vars.productsCSV ++ vars.ordersCSV]]></ee:set-payload>
 		<logger level="INFO" doc:name="Logger" doc:id="b72581fd-2d56-4a5d-a4ed-1e1e2eef73ff" />
 	</flow>
 	<flow name="orderAPIFlow" doc:id="e908a1d1-908a-40e8-aa32-526535ac4f64">
-		<http:request method="GET" doc:name="Request" doc:id="91955e42-70d0-45e3-9646-ac9086dc2d12" config-ref="HTTP_Request_configuration" path="/order" />
+		<http:request method="GET" doc:name="Request" doc:id="91955e42-70d0-45e3-9646-ac9086dc2d12" path="/order" />
 		<ee:transform doc:name="Transform Message" doc:id="0f60fd38-62b8-4e4b-af09-bccb73c935f4">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -85,7 +85,7 @@ payload]]></ee:set-payload>
 		<logger level="INFO" doc:name="Logger" doc:id="aa43048f-896e-412d-8450-885ef0e634a9" />
 	</flow>
 	<flow name="productAPIFlow" doc:id="ec5eeca6-cf6c-46ea-9774-e72964cd1819">
-		<http:request method="GET" doc:name="Request" doc:id="aa97cea1-d4da-4081-8bdf-ea6857a5d32c" config-ref="HTTP_Request_configuration" path="/product" />
+		<http:request method="GET" doc:name="Request" doc:id="aa97cea1-d4da-4081-8bdf-ea6857a5d32c" path="/product" />
 		<ee:transform doc:name="Transform Message" doc:id="d3e75af4-1a2f-4770-bc6e-2b85de1d4809">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -97,7 +97,7 @@ payload]]></ee:set-payload>
 		<logger level="INFO" doc:name="Logger" doc:id="8677f42f-efee-4482-98fc-be3939b82395" />
 	</flow>
 	<flow name="transactionAPIFlow" doc:id="c8c76d47-51ef-45bf-902b-fb5896c236e7" >
-		<http:request method="GET" doc:name="Request" doc:id="fe41ca36-7a0f-4273-97c1-052f997220b4" config-ref="HTTP_Request_configuration" path="/transaction" />
+		<http:request method="GET" doc:name="Request" doc:id="fe41ca36-7a0f-4273-97c1-052f997220b4" path="/transaction" />
 		<ee:transform doc:name="Transform Message" doc:id="2906972a-f5a9-4310-962e-5540d6361390" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -109,7 +109,7 @@ payload]]></ee:set-payload>
 		<logger level="INFO" doc:name="Logger" doc:id="8b304c0d-dc6c-4973-b7d3-c777bca8e472" />
 	</flow>
 	<flow name="scatter-gather-testFlow" doc:id="360cc0ea-989d-4cd2-9406-89f11541235e" >
-		<http:listener doc:name="Listener" doc:id="1f2a1bd1-868e-454b-a403-72bf4912f2e2" config-ref="HTTP_Listener_config" path="/scatterAPI"/>
+		<http:listener doc:name="Listener" doc:id="1f2a1bd1-868e-454b-a403-72bf4912f2e2" path="/scatterAPI"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="985e58fb-cf18-4844-94d8-2bdff1271cbd" >
 			<route >
 				<flow-ref doc:name="ordersAPIFlowRef" doc:id="04417184-5857-440d-8851-1e4b9651893b" name="orderAPIFlow"/>

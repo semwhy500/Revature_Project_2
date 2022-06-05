@@ -9,11 +9,8 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
 	<file:config name="File_Config1" doc:name="File Config" doc:id="0746effc-df32-47be-bde2-87912d1da8bc" >
 	</file:config>
-	<http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="5b0ce4ed-e8b0-4f31-b5bd-52fc05737969">
-		<http:request-connection host="184.72.81.235" port="8080" />
-	</http:request-config>
 	<flow name="getECommerceDataFlow" doc:id="a9019162-1df3-4886-a53c-95879904e104" >
-		<http:request method="GET" doc:name="Request" doc:id="1843d55d-5940-462c-91c6-d3cb9c303096" config-ref="HTTP_Request_configuration1" path="/order" />
+		<http:request method="GET" doc:name="Request" doc:id="1843d55d-5940-462c-91c6-d3cb9c303096" path="/order" />
 		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="ecbcb93c-2431-4a55-a4c8-2a2d802a79f1" />
 		<ee:transform doc:name="Transform Message" doc:id="e0b68f18-7dbe-4615-b51d-f91fcef8fadc">
 			<ee:message>
