@@ -1,4 +1,5 @@
 file:
+  directory: H:\AnypointStudio\studio-workspace\Mulesoft_Cohort_p3\src\main\resources\p3_data
   orders: H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\ordersInput.csv
   customers: H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\customersInput.csv
   transactions: H:\AnypointStudio\mulesoft_cohort_project\src\main\resources\p3_data\Input.csv
