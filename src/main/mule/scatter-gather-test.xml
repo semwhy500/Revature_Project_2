@@ -49,40 +49,6 @@ payload]]></ee:set-payload>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="7bfcf043-8ceb-4065-a7d2-ff74e096fadc" message="#[payload]"/>
 	</flow>
-	<flow name="referenceFlowWhenCombiningCSVsAndAPIs" doc:id="db01debc-da7d-4f5e-8656-d2db2775e1bf" >
-		<flow-ref doc:name="Flow Reference" doc:id="36dcf214-e6a5-4217-b451-4b78a024903a" name="ordersCSVFlow"/>
-		<ee:transform doc:name="Transform Message" doc:id="3d8b4c19-388c-475d-97b8-e9502bfda9af" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-//transform into standard format as usually using
-payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<set-variable value="" doc:name="set variable as payload" doc:id="d68b811f-7566-4a69-b8c2-ad0a0a9d0e16" variableName="var1"/>
-		<http:request method="GET" doc:name="requestPayloadFromOrdersCSV" doc:id="c1a81251-44e0-46d4-a70a-f7ff8a4c2f1c" config-ref="HTTP_Request_configuration" path="/dummypath"/>
-		<ee:transform doc:name="Transform Message" doc:id="52b05ce6-9c02-4af8-8047-374137a7cbb7" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-//transform payload as payload usually used
-payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<set-variable value="" doc:name="set variable as API payload" doc:id="f00a9b4e-9cc3-445e-8291-3a3f4f06ca06" variableName="var2"/>
-		<ee:transform doc:name="Transform Message" doc:id="31e639f9-6a9e-4087-9bdc-08d28f3a5121" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/java
----
-//flatten (var1..var2)
-payload]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<set-variable value="" doc:name="set variable as ordersCSV and ordersAPI" doc:id="5728f96d-841b-4599-aa99-3128d13f4e3c" variableName="var3"/>
-	</flow>
 	<flow name="basicFlowForCSVs" doc:id="5763da06-86eb-4612-b21b-f582da2e597a">
 		<http:listener doc:name="Copy_of_Listener" doc:id="a35eec05-7c0a-4b5e-9eb0-ba43619dabaa" config-ref="HTTP_Listener_config" path="/mainpayloadtest" />
 		<scatter-gather doc:name="Copy_of_Scatter-Gather" doc:id="fe69d910-9a87-4016-947c-486016e4becb">
@@ -575,6 +541,94 @@ total_Income_Per_Previous_Month: ("day_week: " ++ vars.dayWeek as String ++ " to
 //pay1]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+	</flow>
+	<flow name="Copy_of_basicFlowForCSVs" doc:id="da124a01-519d-417c-8978-e46c9aa9308d" >
+		<http:listener doc:name="Copy_of_Copy_of_Listener" doc:id="06b2a23c-a15c-43e1-b5e6-ec0dfc640dea" config-ref="HTTP_Listener_config" path="/test2" />
+		<scatter-gather doc:name="Copy_of_Copy_of_Scatter-Gather" doc:id="57039c1d-e916-4dca-8d5c-0fed8e634366" >
+			<route >
+				<flow-ref doc:name="Copy_of_Copy_of_ordersCSVFlowRef" doc:id="bcb6434c-b222-49aa-9bf0-dba772358029" name="ordersCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_ordersCSV" doc:id="f77f20a0-100a-48fb-bcad-9d43325c9ec0" variableName="ordersCSV" />
+			</route>
+			<route >
+				<flow-ref doc:name="Copy_of_Copy_of_productsCSVFlowRef" doc:id="d7d6b7e0-ae0d-4614-af63-c264748662e7" name="productsCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_productsCSV" doc:id="c6943ef3-f702-4f2a-af82-d003c86e6711" variableName="productsCSV" />
+			</route>
+			<route >
+				<flow-ref doc:name="Copy_of_Copy_of_transactionsCSVFlowRef" doc:id="b0ff919c-6697-4912-a5c4-67c53c37ea55" name="transactionsCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_transactionsCSV" doc:id="344b2c12-6f35-4135-a9f4-1fdfb330eba5" variableName="transactionsCSV" />
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Copy_of_Copy_of_major transform" doc:id="e541cd09-bd2e-4c6d-8cde-909ebb7e1a41" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var ordersCSV = vars.ordersCSV
+var productsCSV = vars.productsCSV
+var transactionsCSV = vars.transactionsCSV
+---
+Data : ordersCSV map (ordersItems, indexOfOrdersItems) -> {
+	"order_qty": ordersItems.qty,
+	"date": ordersItems.datetime,
+	"store_id": ordersItems.store_id,
+	"product_id": ordersItems.product_id,
+	(productsCSV filter ($."product_id" == ordersItems."product_id") map (var2, indexVar2) -> {
+	"price": var2.price
+	}),
+	(transactionsCSV filter (($."payment_txn_id" == ordersItems."txn_id") and ($."payment_txn_success" == "true")) map (var3, indexVar3) -> {
+	"transaction_success" : var3.payment_txn_success
+	})
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_bob" doc:id="e820a1f4-e85f-4e69-ad40-a7b67d23ce31" variableName="bob" />
+		<ee:transform doc:name="Copy_of_Copy_of_only successful txns and previous month" doc:id="d8055595-8efd-4953-a999-8c820e4536c5" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var pay1 = vars.bob.Data
+//var myDate = pay1.date as Date
+---
+pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 and $.date.month < now().month) map(items, index) -> {
+	"Data": items
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="6cbafd7d-23ff-4bf9-bb77-10ed477a1efa" />
+	</flow>
+	<flow name="Copy_of_referenceFlowWhenCombiningCSVsAndAPIs" doc:id="d8035e29-f375-4247-868b-6a71ddc104b5" >
+		<flow-ref doc:name="Copy_of_Flow Reference" doc:id="417f9478-c84c-4eb8-9720-e34b75c5dec1" name="ordersCSVFlow" />
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="725ae1b0-2956-446d-97f1-f54fca4fe4ce" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+//transform into standard format as usually using
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="" doc:name="Copy_of_set variable as payload" doc:id="b0d555f9-d50e-46f6-8ea4-4f65b8b156ec" variableName="var1" />
+		<http:request method="GET" doc:name="Copy_of_requestPayloadFromOrdersCSV" doc:id="1c1751dd-7847-46eb-80a8-84420e4a2b0d" config-ref="HTTP_Request_configuration" path="/dummypath" />
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="c6bcaa4c-b0c8-4264-b16d-03b27bb3b519" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+//transform payload as payload usually used
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="" doc:name="Copy_of_set variable as API payload" doc:id="f4bb81ba-9b9e-427e-b06e-4fd658cb2cab" variableName="var2" />
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="b402e326-23d3-4f7f-be9c-3595e745a56c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+//flatten (var1..var2)
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="" doc:name="Copy_of_set variable as ordersCSV and ordersAPI" doc:id="12bcfbb7-41aa-4e20-b507-d61c3abb1d9f" variableName="var3" />
 	</flow>
 	
 	

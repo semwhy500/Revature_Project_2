@@ -55,7 +55,7 @@ output application/json
 	<flow name="CsvToJSON" doc:id="25107c9c-5aa0-44d4-b08a-108ae2d39754" >
 		<scatter-gather doc:name="Scatter-Gather" doc:id="8dd8c77c-b3c3-443d-87a0-ac38a1e3d5c3" >
 			<route >
-				<file:read doc:name="ReadOrders" doc:id="c1b5a0f7-94c4-4aa4-8e15-8de04b47c51b" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Orders.csv" />
+				<file:read doc:name="ReadOrders" doc:id="c1b5a0f7-94c4-4aa4-8e15-8de04b47c51b" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Orders.csv" config-ref="File_Config"/>
 				<ee:transform doc:name="CSV to JSON" doc:id="9725eb0c-6717-4d64-b7d9-b912b8ba1864" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -74,7 +74,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 				<set-variable value="#[payload]" doc:name="OrderJSON" doc:id="4a64a432-0ebf-47be-b0bf-6f66b7d1ae1d" variableName="OrderJSON"/>
 			</route>
 			<route >
-				<file:read doc:name="ReadProducts" doc:id="db687842-efc6-448e-bf6a-af58e7000451" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Products.csv" />
+				<file:read doc:name="ReadProducts" doc:id="db687842-efc6-448e-bf6a-af58e7000451" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Products.csv" config-ref="File_Config"/>
 				<ee:transform doc:name="CSV to JSON" doc:id="3696ce17-f8ff-47f3-a1f4-ff24819c6a5c" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -90,7 +90,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 				<set-variable value="#[payload]" doc:name="ProductJSON" doc:id="9de19d5f-9fe3-4821-9571-ab794081c3e9" variableName="ProductJSON"/>
 			</route>
 			<route >
-				<file:read doc:name="ReadTransactions" doc:id="7d44f5f7-3faa-448f-9df7-6116431b592f" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Transactions.csv" />
+				<file:read doc:name="ReadTransactions" doc:id="7d44f5f7-3faa-448f-9df7-6116431b592f" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Transactions.csv" config-ref="File_Config"/>
 				<ee:transform doc:name="CSV to JSON" doc:id="a3003ca7-9133-4fe7-88bd-7ed1466fe68e" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -107,7 +107,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 				<set-variable value="#[payload]" doc:name="TransactionJSON" doc:id="4c30e97c-c355-4450-8967-94e7be01ccf0" variableName="TransactionJSON"/>
 			</route>
 			<route >
-				<file:read doc:name="ReadCustomer" doc:id="f85d6110-684b-41e4-9900-6037d1f414d7" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Customers.csv" />
+				<file:read doc:name="ReadCustomer" doc:id="f85d6110-684b-41e4-9900-6037d1f414d7" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Customers.csv" config-ref="File_Config"/>
 				<ee:transform doc:name="CSV to JSON" doc:id="599e832f-67d9-4ed0-8f11-45155625f29a" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -586,7 +586,7 @@ flatten(payload..payload)]]></ee:set-payload>
 	<sub-flow name="GetCSVdata" doc:id="551af6c8-5ca3-4619-86cf-5e673c235150">
 		<scatter-gather doc:name="Copy_of_Scatter-Gather" doc:id="27948017-69f8-4d71-a9e6-ab5672985779">
 			<route>
-				<file:read doc:name="Read Orders CSV" doc:id="aac71ca5-9f45-4ea8-abee-773998006d26" path="C:\Users\abbys\Downloads\Orders.csv" />
+				<file:read doc:name="Read Orders CSV" doc:id="aac71ca5-9f45-4ea8-abee-773998006d26" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Orders.csv" config-ref="File_Config"/>
 				<ee:transform doc:name="CSV to JSON" doc:id="b3a5825d-5f42-448f-b9d8-593600810292">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
@@ -605,7 +605,7 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 				<set-variable value="#[payload]" doc:name="OrderJSON" doc:id="dae002da-9c94-4897-b8b3-659cb4f8aa17" variableName="OrderJSON" />
 			</route>
 			<route>
-				<file:read doc:name="Read Orders CSV" doc:id="aaadeeaa-d640-4d6c-95d4-f2fda191551f" path="C:\Users\abbys\Downloads\Transactions.csv" />
+				<file:read doc:name="Read Orders CSV" doc:id="aaadeeaa-d640-4d6c-95d4-f2fda191551f" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Transactions.csv" config-ref="File_Config"/>
 				<ee:transform doc:name="CSV to JSON" doc:id="8b6ec9c8-3ecc-46c1-8970-5cd621e55c1b">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
@@ -691,7 +691,7 @@ payload filter($.transaction.success==true) map ( payload01 , indexOfPayload01 )
 				</ee:transform>
 	</sub-flow>
 	<sub-flow name="GetDBdata" doc:id="0af6a0d5-68e3-4372-aa95-ceeccf2e111a">
-		<db:select doc:name="Select Historical Data (where success=true)" doc:id="6dc5dffb-4f78-49f4-8db0-6dcf05166442">
+		<db:select doc:name="Select Historical Data (where success=true)" doc:id="6dc5dffb-4f78-49f4-8db0-6dcf05166442" config-ref="Database_Config">
 					<db:sql><![CDATA[SELECT * FROM orders left join transactions on orders.txn_id=transactions.payment_txn_id WHERE transactions.payment_txn_success=true ]]></db:sql>
 				</db:select>
 		<ee:transform doc:name="To JSON Array" doc:id="008842d9-5e52-444b-949f-fcd72aaef106">
