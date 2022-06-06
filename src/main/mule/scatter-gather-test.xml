@@ -12,7 +12,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 	</flow>
 	<flow name="ordersCSVFlow" doc:id="5630baea-c3f2-40f6-bd89-de1942dac0ae">
 		<http:listener doc:name="Listener" doc:id="6687f4db-b743-4934-b786-94e82ddfdff6" config-ref="HTTP_Listener_config" path="/ordersTeam2"/>
-		<file:read doc:name="readOrdersCSV" doc:id="d9fc7056-146b-468a-8080-a8b99e58886d" config-ref="File_Config" path="C:\Users\benor\OneDrive\Documents\Mulesoft_Cohort_p3\src\main\resources\csvs\csvs for p3\Orders.csv" />
+		<file:read doc:name="readOrdersCSV" doc:id="d9fc7056-146b-468a-8080-a8b99e58886d" config-ref="File_Config" path="C:\Users\harry\Revature\Mulesoft_Cohort_p3\Store_Data_CSV_Files\Orders.csv" />
 		<ee:transform doc:name="Transform Message" doc:id="f579f233-a765-4d8b-9187-304109caa334">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -25,7 +25,7 @@ payload]]></ee:set-payload>
 	</flow>
 	<flow name="productsCSVFlow" doc:id="c31ef09c-35cb-4c01-b05a-ee4f6a3d2e27" >
 		<http:listener doc:name="Listener" doc:id="8401fbfe-d8b1-4122-b226-04d71451e94a" path="/productsTeam2" config-ref="HTTP_Listener_config"/>
-		<file:read doc:name="readProductsCSV" doc:id="b8c75dd9-5c37-4a2b-a703-e11c9bfbb88d" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Products.csv" />
+		<file:read doc:name="readProductsCSV" doc:id="b8c75dd9-5c37-4a2b-a703-e11c9bfbb88d" config-ref="File_Config" path="C:\Users\harry\Revature\Mulesoft_Cohort_p3\Store_Data_CSV_Files\Products.csv" />
 		<ee:transform doc:name="Transform Message" doc:id="5fb61567-25e8-4be3-abf1-301006ed157b" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -38,7 +38,7 @@ payload]]></ee:set-payload>
 	</flow>
 	<flow name="transactionsCSVFlow" doc:id="bc31397d-f46f-4bca-ba27-3ad8e90ca0ad" >
 		<http:listener doc:name="Listener" doc:id="6bb7754e-5909-477a-bec5-76c3abb1f851" config-ref="HTTP_Listener_config" path="/transactionsTeam2"/>
-		<file:read doc:name="readTransactionsCSV" doc:id="688c792f-3299-45e2-b4ee-c2aad7dbc1cd" config-ref="File_Config" path="C:\Users\benor\OneDrive\Desktop\csvs for p3\Transactions.csv" />
+		<file:read doc:name="readTransactionsCSV" doc:id="688c792f-3299-45e2-b4ee-c2aad7dbc1cd" config-ref="File_Config" path="C:\Users\harry\Revature\Mulesoft_Cohort_p3\Store_Data_CSV_Files\Transactions.csv" />
 		<ee:transform doc:name="Transform Message" doc:id="1ee0395a-14c5-4414-b4f8-ad1675e458e3" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
@@ -707,9 +707,7 @@ vars.var3]]></ee:set-payload>
 output application/json
 ---
 vars.var3 map (item, index) -> {
-	qty: vars.var3.order_qty,
-	price: vars.var3.price,
-	total: vars.var3.order_qty * (vars.var3.price as String replace /[$]/ with("") as Number	)
+	total: item.order_qty as Number * item.price
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
@@ -717,10 +715,13 @@ vars.var3 map (item, index) -> {
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
+var total_income_of_prev_month = payload reduce ((item, acc=0) -> acc +
+    if (item.total != "") item.total as Number
+    else 0
+)
 ---
-//sum(payload.price)
-//combined data from API and CSV
-payload]]></ee:set-payload>
+"total_income_of_prev_month": total_income_of_prev_month
+]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
