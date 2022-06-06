@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
 	<flow name="allOrders" doc:id="ebaec7ac-b46e-4862-b27d-2914de6020f6" >
-		<http:listener doc:name="GET /orders" doc:id="1b1ac2f0-e28a-43e8-a56f-9cf6c28bd32c" path="/orders" allowedMethods="GET" config-ref="HTTP_Listener_config"/>
+		<http:listener doc:name="GET /orders" doc:id="1b1ac2f0-e28a-43e8-a56f-9cf6c28bd32c" path="/allorders" allowedMethods="GET" config-ref="HTTP_Listener_config"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="a0ca9067-de0c-4402-8c5f-758c3771e510">
 			<route>
 				<flow-ref doc:name="CSV ORDERS" doc:id="cf0158ad-97b9-4f03-895a-1a8bb77225cc" name="csvorders" />
@@ -35,7 +35,7 @@ flatten(payload..payload)]]></ee:set-payload>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+payload distinctBy $]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="4222dcc5-3e65-46d0-b4c1-7ed54c408fe7" message="#[payload]"/>
@@ -66,7 +66,7 @@ flatten(payload..payload)]]></ee:set-payload>
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload]]></ee:set-payload>
+payload distinctBy $]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="5bfc9236-c578-4e97-b91b-70dbc584f4f5" />
@@ -147,12 +147,20 @@ output application/json
 			</ee:transform>
 			<logger level="INFO" doc:name="Logger" doc:id="70b701ea-28b1-4fcd-bf36-d7c38094657d" message="#[payload]" />
 		</parallel-foreach>
-		<ee:transform doc:name="average of" doc:id="8124183d-263b-48cd-8c5c-efc09eb6524c" >
+		<ee:transform doc:name="average of payload" doc:id="8124183d-263b-48cd-8c5c-efc09eb6524c" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
 avg(payload.payload)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="format response" doc:id="0763cdc6-2cfb-4e97-b1f7-2d49764b6f28" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload as String {format: "#,###.0#"}]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="45610036-7c61-4432-bec0-32cf5c750740" />
@@ -241,9 +249,9 @@ output application/json
 ---
 payload map ((item, index) -> {
 order_id: item.id,
-qty: item.quantity,
-datetime: item.date,
-store_id: item.storeId,
+qty: item.quantity as String,
+datetime: item.date as String {format : "yyyy-MM-dd"},
+store_id: item.storeId as String,
 product_id: item.product.id,
 txn_id: item.transaction.id
 })
@@ -257,7 +265,7 @@ txn_id: item.transaction.id
 	</flow>
 	<flow name="dborders" doc:id="9f3bc851-2569-4703-8cf9-f6b3ba686388" >
 		<http:listener doc:name="GET /dborders" doc:id="a9b245c3-f33a-4937-b85f-dfc5da599e36" path="/dborders" config-ref="HTTP_Listener_config"/>
-		<db:select doc:name="RDS AWS db" doc:id="d00d509d-8490-407a-86d4-424aea225e7e">
+		<db:select doc:name="RDS AWS db" doc:id="d00d509d-8490-407a-86d4-424aea225e7e" config-ref="Database_Config">
 					<db:sql><![CDATA[SELECT * FROM orders]]></db:sql>
 				</db:select>
 		<ee:transform doc:name="JAVA to JSON" doc:id="02a7675a-1b09-4567-ab65-aaa945b4fa72">
@@ -267,9 +275,9 @@ output application/json
 ---
 payload map ((item, index) -> {
 order_id: item.order_id,
-qty: item.qty,
+qty: item.qty as String,
 datetime: item.datetime as String {format : "yyyy-MM-dd"},
-store_id: item.store_id,
+store_id: item.store_id as String,
 product_id: item.product_id,
 txn_id: item.txn_id
 })]]></ee:set-payload>
@@ -293,7 +301,7 @@ payload
 	</flow>
 	<flow name="dbtransactions" doc:id="8e9b78a0-4766-4a7a-81b6-cd28e66d2baf" >
 		<http:listener doc:name="GET /dbtransactions" doc:id="1fb8b807-9fe2-4ff5-bf8d-c46dea2e6bc3" path="/dbtransactions" config-ref="HTTP_Listener_config"/>
-		<db:select doc:name="RDS AWS db" doc:id="1ce82eeb-e78f-4cc5-8713-4c43b13f9ebf">
+		<db:select doc:name="RDS AWS db" doc:id="1ce82eeb-e78f-4cc5-8713-4c43b13f9ebf" config-ref="Database_Config">
 			<db:sql><![CDATA[SELECT * FROM transactions]]></db:sql>
 		</db:select>
 		<ee:transform doc:name="JAVA to JSON" doc:id="dbd77a0b-588f-4e7e-b99d-467bf3bad1c4" >
@@ -384,7 +392,7 @@ price: item.price
 	</flow>
 	<flow name="dbproducts" doc:id="cab23636-e700-46ec-ae99-00ce8317e744" >
 		<http:listener doc:name="GET /dbproducts" doc:id="d33b2022-8368-44ba-9215-d96a34a21c5d" path="/dbproducts" config-ref="HTTP_Listener_config"/>
-		<db:select doc:name="RDS AWS db" doc:id="47947b40-d624-416e-9a32-d541a5f530d7">
+		<db:select doc:name="RDS AWS db" doc:id="47947b40-d624-416e-9a32-d541a5f530d7" config-ref="Database_Config">
 			<db:sql ><![CDATA[SELECT * FROM product]]></db:sql>
 		</db:select>
 		<ee:transform doc:name="JAVA to JSON" doc:id="4d85b07d-a62e-407e-b16e-08acbe0f4a56" >
@@ -399,7 +407,8 @@ payload
 		<logger level="INFO" doc:name="Logger" doc:id="dea40d58-4c48-43c8-b5ff-f721ae4f77df" message="#[payload]" />
 	</flow>
 	<flow name="successfulTransactions" doc:id="e7c12095-c1b2-421a-84b5-dfd5279e9b43">
-		<flow-ref doc:name="allTransactions" doc:id="c6d494e1-5144-4bb8-8835-a8fd53a0c6ba" name="allTransactions" />
+		<http:listener doc:name="successfulTransactions" doc:id="cad76ce4-bb34-41f1-a0a3-5a9afe3a0fee" path="/successfulTransactions" config-ref="HTTP_Listener_config"/>
+		<flow-ref doc:name="allTransactions" doc:id="ac447733-a3cd-4072-8b8f-016c0d974173" name="allTransactions"/>
 		<ee:transform doc:name="Filter only successful" doc:id="19189d5f-9aaf-4743-aea9-13746a20a300">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
