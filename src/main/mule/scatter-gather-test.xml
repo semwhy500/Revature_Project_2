@@ -719,7 +719,8 @@ vars.var3 map (item, index) -> {
 output application/json
 ---
 //sum(payload.price)
-//combined data from API and CSV]]></ee:set-payload>
+//combined data from API and CSV
+payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
