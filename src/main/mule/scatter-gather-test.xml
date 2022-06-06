@@ -436,7 +436,7 @@ payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
-	<flow name="scatter-gather-testFlow" doc:id="8744fe29-ce14-4823-8d5e-9859cae8f89a" >
+	<flow name="byDayOfTheWeek" doc:id="8744fe29-ce14-4823-8d5e-9859cae8f89a" >
 		<http:listener doc:name="Listener" doc:id="c1d42808-b1c4-4842-af07-be1a2493d4fc" path="/dayoftheweek" config-ref="HTTP_Listener_config"/>
 		<set-variable value="#[attributes.queryParams.dayWeek]" doc:name="dayWeek" doc:id="ae6eb4e2-a144-44c4-b960-a60350aa3a2b" variableName="dayWeek"/>
 		<flow-ref doc:name="Flow Reference" doc:id="d40a6ed7-e6f7-40e6-83ed-002fc7912bd7" name="basicFlowForCSVs"/>
