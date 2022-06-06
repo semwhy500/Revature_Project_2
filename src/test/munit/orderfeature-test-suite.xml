@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="orderfeature-test-suite.xml" />
+	<munit:test name="orderfeature-test-suite-Get:QuantityofSalesofPrevMonthbyProductIdTest" doc:id="3c2723de-874a-4910-942e-43ff028394e3" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthbyProductId" doc:id="fae491d2-42fb-4d30-91b9-4e27da4021b3" name="Get:QuantityofSalesofPrevMonthbyProductId"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="orderfeature-test-suite-Get:QuantityofSalesofPrevMonthAllTest" doc:id="bee862c9-66ac-405f-a776-a06116ab7494" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthAll" doc:id="7a866583-e11c-487a-8ee2-e88969b25831" name="Get:QuantityofSalesofPrevMonthAll"/>
+		</munit:execution>
+	</munit:test>
+
+
+</mule>
