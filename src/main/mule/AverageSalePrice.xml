@@ -449,7 +449,7 @@ output application/json
 payload ++ {payment_txn_success : "true"}]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
-					<ee:transform doc:name="Transform Message" doc:id="5226f141-e401-4ec8-b5e0-929adac50a44">
+					<ee:transform doc:name="format day" doc:id="5226f141-e401-4ec8-b5e0-929adac50a44">
 						<ee:message>
 							<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -469,7 +469,7 @@ output application/json
 payload ++ {payment_txn_success : "false"}]]></ee:set-payload>
 						</ee:message>
 					</ee:transform>
-					<ee:transform doc:name="Copy_of_Transform Message" doc:id="87768af9-c394-48cf-9c97-568a0380fbdc" >
+					<ee:transform doc:name="format day" doc:id="87768af9-c394-48cf-9c97-568a0380fbdc" >
 						<ee:message >
 							<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -480,7 +480,7 @@ payload ++ {day : dt as Date {format : "E"}}]]></ee:set-payload>
 					</ee:transform>
 				</otherwise>
 			</choice>
-			<ee:transform doc:name="Transform Message" doc:id="76da21ab-6730-4cb8-9dde-5103d933eb08" >
+			<ee:transform doc:name="JAVA to JSON" doc:id="76da21ab-6730-4cb8-9dde-5103d933eb08" >
 				<ee:message >
 					<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -491,7 +491,7 @@ payload]]></ee:set-payload>
 			<logger level="INFO" doc:name="Logger" doc:id="be8ba28d-1aef-4226-a252-712b7a63437b" message="#[payload]"/>
 		</parallel-foreach>
 		<logger level="INFO" doc:name="Logger" doc:id="68c80b02-6477-41c1-9bbe-303764eec46d" message="#[payload]"/>
-		<ee:transform doc:name="Transform Message" doc:id="f025da94-bb98-44a2-9128-8075b087aba7" >
+		<ee:transform doc:name="filter only true" doc:id="f025da94-bb98-44a2-9128-8075b087aba7" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
