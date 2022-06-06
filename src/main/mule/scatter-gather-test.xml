@@ -639,26 +639,98 @@ payload]]></ee:set-payload>
 	</flow>
 	<flow name="test3" doc:id="73e9aa9b-8603-4aec-9c6e-15a77b6a6e82" >
 		<http:listener doc:name="Listener" doc:id="e963224a-8a29-4219-b46d-a182eb75e397" path="/test3" config-ref="HTTP_Listener_config"/>
-		<flow-ref doc:name="Flow Reference" doc:id="b3bebc01-b0c2-4ee6-9975-89c5443bee6c" name="ordersCSVFlow"/>
-		<ee:transform doc:name="Transform Message" doc:id="6d379c7b-9bae-4ee2-8cb2-44289b576036" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<scatter-gather doc:name="Scatter-Gather" doc:id="f0d61242-3ae6-4c3a-8ed9-29fbf275a2c5" >
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="b3bebc01-b0c2-4ee6-9975-89c5443bee6c" name="ordersCSVFlow" />
+				<ee:transform doc:name="Transform Message" doc:id="6d379c7b-9bae-4ee2-8cb2-44289b576036">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 payload map (item, index) -> {
-	order_id: item.order_id,
-	qty: item.qty
+	order_qty_csv: item.qty,
+	date_csv: item.datetime,
+	product_id_csv: item.product_id,
+	price_csv: "5",
+	transaction_success_csv: "yes"
+	
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-variable value="#[payload]" doc:name="var1" doc:id="9795bff8-22ff-4170-bb01-cd24eb5b011e" variableName="var1"/>
-		<http:request method="GET" doc:name="Request" doc:id="d910bab5-2a45-46fb-9a0e-9a762a5e18fd" config-ref="HTTP_Request_configuration" path="/order"/>
-		<ee:transform doc:name="Transform Message" doc:id="1a838e07-c3d4-401f-b3f7-1db19d4f5bb5" >
+				<set-variable value="#[payload]" doc:name="var1" doc:id="9795bff8-22ff-4170-bb01-cd24eb5b011e" variableName="var1" />
+				<http:request method="GET" doc:name="Request" doc:id="d910bab5-2a45-46fb-9a0e-9a762a5e18fd" config-ref="HTTP_Request_configuration" path="/order" />
+				<ee:transform doc:name="Transform Message" doc:id="1a838e07-c3d4-401f-b3f7-1db19d4f5bb5">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map (item, indext) -> {
+	order_qty_api: item.quantity,
+	date_api: item.date,
+	product_id_api: item.product.id,
+	price_api: item.product.price,
+	transaction_success_api: item.transaction.success
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<set-variable value="#[payload]" doc:name="var2" doc:id="34d882d0-8d77-45b2-b876-5fb7afccd1cc" variableName="var2" />
+				<ee:transform doc:name="Transform Message" doc:id="f3738bf1-a579-461e-9266-2a792cc66561">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+flatten(vars.var1 + vars.var2)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="d421c1c7-3d83-4ce0-aaa6-627f4d670778" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter ($.transaction_success_csv == "yes" 
+	and $.date_csv.month > now().month -2 
+	and $.date_csv.month < now().month
+//	and $.date_api.month > now().month -2 
+//	and $.date_api.month < now().month
+	and $.transaction_success_api == true
+)
+
+//payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="var3" doc:id="b542fa89-2cda-4142-b336-40d5d29016aa" variableName="var3"/>
+			</route>
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="b2b99b0b-c952-4342-9a5e-23a9550daf3f" name="productsCSVFlow"/>
+				<ee:transform doc:name="Transform Message" doc:id="b6212a91-47c9-4bf7-98fa-1a1238367eda" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="var11" doc:id="429266ab-2f5c-44db-83e3-038be303991c" variableName="var11"/>
+			</route>
+			<route >
+				<flow-ref doc:name="Flow Reference" doc:id="45b8fc4f-62ad-48d5-ac9d-9da58a0bb872" name="transactionsCSVFlow"/>
+				<ee:transform doc:name="Transform Message" doc:id="84c1bcc3-44f4-429e-88da-543815b4c33b" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="var111" doc:id="30cb10eb-74fe-4b79-9bfb-0315ae406f3c" variableName="var111"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="21d0cb9d-6bac-4117-b936-a05e895a8ee4" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload + vars.var1]]></ee:set-payload>
+vars.var3]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
