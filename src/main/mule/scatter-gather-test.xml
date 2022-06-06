@@ -551,58 +551,6 @@ total_Income_Per_Previous_Month: ("day_week: " ++ vars.dayWeek as String ++ " to
 			</ee:message>
 		</ee:transform>
 	</flow>
-	<flow name="test2" doc:id="da124a01-519d-417c-8978-e46c9aa9308d" >
-		<http:listener doc:name="Copy_of_Copy_of_Listener" doc:id="06b2a23c-a15c-43e1-b5e6-ec0dfc640dea" config-ref="HTTP_Listener_config" path="/test2" />
-		<scatter-gather doc:name="Copy_of_Copy_of_Scatter-Gather" doc:id="57039c1d-e916-4dca-8d5c-0fed8e634366" >
-			<route >
-				<flow-ref doc:name="Copy_of_Copy_of_ordersCSVFlowRef" doc:id="bcb6434c-b222-49aa-9bf0-dba772358029" name="ordersCSVFlow" />
-				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_ordersCSV" doc:id="f77f20a0-100a-48fb-bcad-9d43325c9ec0" variableName="ordersCSV" />
-			</route>
-			<route >
-				<flow-ref doc:name="Copy_of_Copy_of_productsCSVFlowRef" doc:id="d7d6b7e0-ae0d-4614-af63-c264748662e7" name="productsCSVFlow" />
-				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_productsCSV" doc:id="c6943ef3-f702-4f2a-af82-d003c86e6711" variableName="productsCSV" />
-			</route>
-			<route >
-				<flow-ref doc:name="Copy_of_Copy_of_transactionsCSVFlowRef" doc:id="b0ff919c-6697-4912-a5c4-67c53c37ea55" name="transactionsCSVFlow" />
-				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_transactionsCSV" doc:id="344b2c12-6f35-4135-a9f4-1fdfb330eba5" variableName="transactionsCSV" />
-			</route>
-		</scatter-gather>
-		<ee:transform doc:name="Copy_of_Copy_of_major transform" doc:id="e541cd09-bd2e-4c6d-8cde-909ebb7e1a41" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
-var ordersCSV = vars.ordersCSV
-var productsCSV = vars.productsCSV
-var transactionsCSV = vars.transactionsCSV
----
-Data : ordersCSV map (ordersItems, indexOfOrdersItems) -> {
-	"order_qty": ordersItems.qty,
-	"date": ordersItems.datetime,
-	"store_id": ordersItems.store_id,
-	"product_id": ordersItems.product_id,
-	(productsCSV filter ($."product_id" == ordersItems."product_id") map (var2, indexVar2) -> {
-	"price": var2.price
-	}),
-	(transactionsCSV filter (($."payment_txn_id" == ordersItems."txn_id") and ($."payment_txn_success" == "true")) map (var3, indexVar3) -> {
-	"transaction_success" : var3.payment_txn_success
-	})
-	
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<set-variable value="#[payload]" doc:name="bob" doc:id="e820a1f4-e85f-4e69-ad40-a7b67d23ce31" variableName="bob" />
-		<ee:transform doc:name="Copy_of_Copy_of_only successful txns and previous month" doc:id="d8055595-8efd-4953-a999-8c820e4536c5" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
-var pay1 = vars.bob.Data
----
-pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 and $.date.month < now().month)
-]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="6cbafd7d-23ff-4bf9-bb77-10ed477a1efa" />
-	</flow>
 	<flow name="Copy_of_referenceFlowWhenCombiningCSVsAndAPIs" doc:id="d8035e29-f375-4247-868b-6a71ddc104b5" >
 		<flow-ref doc:name="ordersCSVFlowRef" doc:id="417f9478-c84c-4eb8-9720-e34b75c5dec1" name="ordersCSVFlow" />
 		<ee:transform doc:name="Copy_of_Transform Message" doc:id="725ae1b0-2956-446d-97f1-f54fca4fe4ce" >
@@ -648,15 +596,23 @@ payload]]></ee:set-payload>
 output application/json
 ---
 payload map (item, index) -> {
-	order_qty_csv: item.qty,
-	date_csv: item.datetime,
-	product_id_csv: item.product_id,
-	price_csv: "5",
-	transaction_success_csv: "yes"
+	order_qty: item.qty,
+	date: item.datetime,
+	product_id: item.product_id,
+	price: "5",
+	transaction_success: "yes"
 	
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="9d73418c-f92e-4a29-bf68-9bcd228807fd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter ($.date.month < now().month and $.date.month > now().month -2 )]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
 				<set-variable value="#[payload]" doc:name="var1" doc:id="9795bff8-22ff-4170-bb01-cd24eb5b011e" variableName="var1" />
 				<http:request method="GET" doc:name="Request" doc:id="d910bab5-2a45-46fb-9a0e-9a762a5e18fd" config-ref="HTTP_Request_configuration" path="/order" />
 				<ee:transform doc:name="Transform Message" doc:id="1a838e07-c3d4-401f-b3f7-1db19d4f5bb5">
@@ -665,14 +621,22 @@ payload map (item, index) -> {
 output application/json
 ---
 payload map (item, indext) -> {
-	order_qty_api: item.quantity,
-	date_api: item.date,
-	product_id_api: item.product.id,
-	price_api: item.product.price,
-	transaction_success_api: item.transaction.success
+	order_qty: item.quantity,
+	date: item.date,
+	product_id: item.product.id,
+	price: item.product.price,
+	transaction_success: item.transaction.success
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+				<ee:transform doc:name="Transform Message" doc:id="2e90fc2b-75df-4f2d-9968-0d48b87976dd" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter ($.date.month < now().month and $.date.month > now().month - 2 and $.transaction_success == true)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
 				<set-variable value="#[payload]" doc:name="var2" doc:id="34d882d0-8d77-45b2-b876-5fb7afccd1cc" variableName="var2" />
 				<ee:transform doc:name="Transform Message" doc:id="f3738bf1-a579-461e-9266-2a792cc66561">
 			<ee:message>
@@ -687,15 +651,14 @@ flatten(vars.var1 + vars.var2)]]></ee:set-payload>
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload filter ($.transaction_success_csv == "yes" 
-	and $.date_csv.month > now().month -2 
-	and $.date_csv.month < now().month
-//	and $.date_api.month > now().month -2 
-//	and $.date_api.month < now().month
-	and $.transaction_success_api == true
-)
+//payload filter ($.transaction_success_csv == "yes" and $.date_csv.month > now().month -2 and $.date_csv.month < now().month)
+//payload filter ($.date_api.month < now().month)
+//payload filter ($.date_csv.month < now().month)
+//	$.date_api.month > now().month -2 
+//	$.date_api.month < now().month
+//	$.transaction_success_api == true //this part works
 
-//payload]]></ee:set-payload>
+payload]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
 				<set-variable value="#[payload]" doc:name="var3" doc:id="b542fa89-2cda-4142-b336-40d5d29016aa" variableName="var3"/>
@@ -733,6 +696,108 @@ output application/json
 vars.var3]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+	</flow>
+	<flow name="scatter-gather-testFlow1" doc:id="c5d0c8b0-565d-4d14-a477-446482e84792" >
+		<http:listener doc:name="Listener" doc:id="f770f319-a4fa-4fb1-893f-d5061f4b45bf" config-ref="HTTP_Listener_config" path="/test222"/>
+		<flow-ref doc:name="Flow Reference" doc:id="e6a690a2-1c28-4fad-8d7e-266fc1557098" name="test22"/>
+		<set-variable value="#[payload]" doc:name="var3" doc:id="af565631-a191-403a-8afd-c9bace466a90" variableName="var3"/>
+		<ee:transform doc:name="Transform Message" doc:id="504df71f-9684-4961-9980-4b20dcbb764a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.var3 map (item, index) -> {
+	qty: vars.var3.order_qty,
+	price: vars.var3.price,
+	total: vars.var3.order_qty * (vars.var3.price as String replace /[$]/ with("") as Number	)
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="test22" doc:id="7091b600-b11b-415b-a2fc-7842f43b96b1" >
+		<http:listener doc:name="Copy_of_Copy_of_Listener" doc:id="98f78166-5fbf-4d2e-bcac-1504e63dc0be" config-ref="HTTP_Listener_config" path="/test22" />
+		<scatter-gather doc:name="Copy_of_Copy_of_Scatter-Gather" doc:id="7420902b-dca7-43c8-b5be-98eb7f7acd64" >
+			<route >
+				<flow-ref doc:name="Copy_of_Copy_of_ordersCSVFlowRef" doc:id="8cfd45b6-e221-427a-86b6-5042155f6299" name="ordersCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_ordersCSV" doc:id="76e1b5e9-6a33-4536-9d3a-d1baffdb71d3" variableName="ordersCSV" />
+			</route>
+			<route >
+				<flow-ref doc:name="Copy_of_Copy_of_productsCSVFlowRef" doc:id="36e761df-9316-41e9-a1ad-23779c394146" name="productsCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_productsCSV" doc:id="2d8b320b-7614-40c1-84c2-9a63d3c14383" variableName="productsCSV" />
+			</route>
+			<route >
+				<flow-ref doc:name="Copy_of_Copy_of_transactionsCSVFlowRef" doc:id="49d6068c-7940-4f7e-b47a-cecebfeebb2b" name="transactionsCSVFlow" />
+				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_transactionsCSV" doc:id="e4876848-6054-46d3-873a-2f7e058670ed" variableName="transactionsCSV" />
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Copy_of_Copy_of_major transform" doc:id="eee81f9c-eeb6-4b88-b172-f470752c9919" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var ordersCSV = vars.ordersCSV
+var productsCSV = vars.productsCSV
+var transactionsCSV = vars.transactionsCSV
+---
+Data : ordersCSV map (ordersItems, indexOfOrdersItems) -> {
+	"order_qty": ordersItems.qty,
+	"date": ordersItems.datetime,
+	"store_id": ordersItems.store_id,
+	"product_id": ordersItems.product_id,
+	(productsCSV filter ($."product_id" == ordersItems."product_id") map (var2, indexVar2) -> {
+	"price": (var2.price as String replace /[$]/ with("")) as Number 
+	}),
+	(transactionsCSV filter (($."payment_txn_id" == ordersItems."txn_id") and ($."payment_txn_success" == "true")) map (var3, indexVar3) -> {
+	"transaction_success" : var3.payment_txn_success
+	})
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_bob" doc:id="a86b06f9-2907-4116-800f-86a4911e4dd1" variableName="bob" />
+		<ee:transform doc:name="Copy_of_Copy_of_only successful txns and previous month" doc:id="d2370132-ed9c-4e9f-b707-fdc2840555f9" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var pay1 = vars.bob.Data
+//var myDate = pay1.date as Date
+---
+pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 and $.date.month < now().month)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="var1" doc:id="1af8832b-abb0-408f-8fab-75196052427c" variableName="var1"/>
+		<http:request method="GET" doc:name="callAPI" doc:id="8187ba2c-1b7a-425a-b9a4-7233c2d5d193" config-ref="HTTP_Request_configuration" path="/order" />
+		<ee:transform doc:name="formatAPIData" doc:id="73e09f4c-810b-4948-85bd-48b9060bf007">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map (item, indext) -> {
+	order_qty: item.quantity,
+	date: item.date,
+	product_id: item.product.id,
+	price: item.product.price,
+	transaction_success: item.transaction.success
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="previousMonthAPIData" doc:id="e09fe1b9-a885-4fac-a7d2-85051175f5ba">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload filter ($.date.month < now().month and $.date.month > now().month - 2 and $.transaction_success == true)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="var2" doc:id="b2720c37-987e-4d1c-be9d-4d2b76ee9cb2" variableName="var2" />
+		<ee:transform doc:name="combine CSV and API" doc:id="77831147-296e-4e1e-8e54-33656a5425c1">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+flatten(vars.var1 + vars.var2)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="176bf407-ddbf-4f00-92bf-0cfaf17f8c33" />
 	</flow>
 	
 	
