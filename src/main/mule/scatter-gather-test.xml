@@ -697,11 +697,11 @@ vars.var3]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
-	<flow name="scatter-gather-testFlow1" doc:id="c5d0c8b0-565d-4d14-a477-446482e84792" >
+	<flow name="APIandCSVDATA" doc:id="c5d0c8b0-565d-4d14-a477-446482e84792" >
 		<http:listener doc:name="Listener" doc:id="f770f319-a4fa-4fb1-893f-d5061f4b45bf" config-ref="HTTP_Listener_config" path="/test222"/>
 		<flow-ref doc:name="Flow Reference" doc:id="e6a690a2-1c28-4fad-8d7e-266fc1557098" name="test22"/>
 		<set-variable value="#[payload]" doc:name="var3" doc:id="af565631-a191-403a-8afd-c9bace466a90" variableName="var3"/>
-		<ee:transform doc:name="Transform Message" doc:id="504df71f-9684-4961-9980-4b20dcbb764a" >
+		<ee:transform doc:name="multiply quantiy * price" doc:id="504df71f-9684-4961-9980-4b20dcbb764a" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -711,6 +711,15 @@ vars.var3 map (item, index) -> {
 	price: vars.var3.price,
 	total: vars.var3.order_qty * (vars.var3.price as String replace /[$]/ with("") as Number	)
 }]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="sum totals of each object to get totalprice of previous month" doc:id="8edb5fb7-a0a7-465d-9f81-56c67238268d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+//sum(payload.price)
+//combined data from API and CSV]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
@@ -761,7 +770,7 @@ output application/json
 var pay1 = vars.bob.Data
 //var myDate = pay1.date as Date
 ---
-pay1 filter ($.transaction_success == "true" and $.date.month > now().month -2 and $.date.month < now().month)]]></ee:set-payload>
+pay1 filter ($.transaction_success == "true" and $.date.month > now().month - 2 and $.date.month < now().month)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<set-variable value="#[payload]" doc:name="var1" doc:id="1af8832b-abb0-408f-8fab-75196052427c" variableName="var1"/>
