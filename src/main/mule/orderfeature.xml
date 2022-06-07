@@ -61,8 +61,8 @@ payload map(value, index) ->
 			<http:query-params ><![CDATA[#[output application/java
 ---
 {
-	'end_date' : '2022-05-31',
-	'start_date' : '2022-05-01'
+	'start_date' : '2022-05-01',
+	'end_date' : '2022-05-31'
 }]]]></http:query-params>
 				</http:request>
 		<ee:transform doc:name="Transform Message" doc:id="aeb75f7b-6fc4-4611-9f55-3e4a8b417551" >
@@ -105,9 +105,7 @@ output application/json
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload filter((value, index) -> 
-	value.store_id == vars.store_id
-)]]></ee:set-payload>
+payload filter($.store_id ~= vars.store_id)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<set-payload value='#[output application/json&#10;---&#10;{&#10;	"Store ID": vars.store_id,&#10;	"Quantity of Sales": sizeOf(payload)&#10;}]' doc:name="Set Payload " doc:id="73abb965-3051-459e-9885-dc7862ee1431" />
