@@ -757,6 +757,7 @@ output application/json
 payload map (item, indext) -> {
 	order_qty: item.quantity,
 	date: item.date,
+	store_id: item.storeId,
 	product_id: item.product.id,
 	price: item.product.price,
 	transaction_success: item.transaction.success
@@ -782,8 +783,8 @@ flatten(vars.var1 + vars.var2)]]></ee:set-payload>
 		</ee:transform>
 		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="176bf407-ddbf-4f00-92bf-0cfaf17f8c33" />
 	</flow>
-	<flow name="APIandCSVDATA" doc:id="c5d0c8b0-565d-4d14-a477-446482e84792" >
-		<http:listener doc:name="Listener" doc:id="f770f319-a4fa-4fb1-893f-d5061f4b45bf" config-ref="HTTP_Listener_config" path="/test222"/>
+	<flow name="APIandCSVDATA_totalIncome" doc:id="c5d0c8b0-565d-4d14-a477-446482e84792" >
+		<http:listener doc:name="Listener" doc:id="f770f319-a4fa-4fb1-893f-d5061f4b45bf" config-ref="HTTP_Listener_config" path="/totalQuantityIncomePrevMonth"/>
 		<flow-ref doc:name="Flow Reference" doc:id="e6a690a2-1c28-4fad-8d7e-266fc1557098" name="test22"/>
 		<set-variable value="#[payload]" doc:name="var3" doc:id="af565631-a191-403a-8afd-c9bace466a90" variableName="var3"/>
 		<ee:transform doc:name="multiply quantiy * price" doc:id="504df71f-9684-4961-9980-4b20dcbb764a" >
@@ -810,14 +811,248 @@ var total_income_of_prev_month = payload reduce ((item, acc=0) -> acc +
 			</ee:message>
 		</ee:transform>
 	</flow>
-	<flow name="scatter-gather-testFlow" doc:id="d3ca071b-4d64-436f-b4dc-112b6a96c357" >
+	<flow name="scatter-gather-testFlow_storeID" doc:id="d3ca071b-4d64-436f-b4dc-112b6a96c357" >
+		<http:listener doc:name="Listener" doc:id="f0133244-6bd3-46a7-af10-773248100f08" path="/totalQuantityIncomePrevMonth/storeId" config-ref="HTTP_Listener_config"/>
+		<set-variable value="#[attributes.queryParams.storeId]" doc:name="queryParamsStoreId" doc:id="792ed8e8-11ab-4779-ba2e-ead41d621e5d" variableName="queryParamsStoreId"/>
 		<flow-ref doc:name="Flow Reference" doc:id="357045b6-f9ce-4fc4-be31-7d0b678d6477" name="test22"/>
+		<ee:transform doc:name="Transform Message" doc:id="637b6e0c-00c6-4cd3-a3d1-9f069aff89e6" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map(item, index) -> {
+	"order_qty": item.order_qty as Number,
+    "date": item.date,
+    "store_id": item.store_id,
+    "product_id": item.product_id,
+    "price": item.price,
+    "transaction_success": item.transaction_success as String
+}
+//payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="c0f4695f-2fa8-4ba3-9482-6d1926ee0a60" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter ($.store_id as String == vars.queryParamsStoreId as String)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="cd00708d-43aa-4718-8fe1-839215bda6f1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (item, index) -> {
+	data: item.order_qty * item.price
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="43fd37ff-885c-498e-ac37-726d1f930840" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+data: "store_id: " ++ vars.queryParamsStoreId ++ ", total_income: " ++ sum(payload.data)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</flow>
-	<flow name="scatter-gather-testFlow1" doc:id="46698c20-7648-4481-b0f8-99efc415df0f" >
-		<flow-ref doc:name="Flow Reference" doc:id="fc40c478-1158-4c3f-bef4-5ae73a511908" />
+	<flow name="scatter-gather-testFlow1_productId" doc:id="46698c20-7648-4481-b0f8-99efc415df0f" >
+		<http:listener doc:name="Listener" doc:id="b305ddde-2b4c-4b48-b382-7f205b1aa5db" config-ref="HTTP_Listener_config" path="/totalQuantityIncomePrevMonth/productId"/>
+		<set-variable value="#[attributes.queryParams.productId]" doc:name="queryParamsProductId" doc:id="71f8b483-2fbd-46ff-ab2e-4da9a20fcd61" variableName="queryParamsProductId"/>
+		<flow-ref doc:name="Flow Reference" doc:id="fc40c478-1158-4c3f-bef4-5ae73a511908" name="test22"/>
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="b3d1bded-c338-4bc6-9f41-5a8a1e354e76" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map(item, index) -> {
+	"order_qty": item.order_qty as Number,
+    "date": item.date,
+    "store_id": item.store_id,
+    "product_id": item.product_id,
+    "price": item.price,
+    "transaction_success": item.transaction_success as String
+}
+//payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="73446d89-d0e9-480a-a30f-7300b794252e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter ($.product_id as String == vars.queryParamsProductId as String)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="27e74844-7449-48d2-a802-1b1a1789e7d7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (item, index) -> {
+	data: item.order_qty * item.price
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Copy_of_Transform Message" doc:id="d0d96df7-dcb2-4ae5-952d-5c9e388c177c" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+
+data: "product_id: " ++ vars.queryParamsProductId ++ ", total_income: " ++ sum(payload.data)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</flow>
 	<flow name="scatter-gather-testFlow2" doc:id="d5297323-ed0c-40f4-80a4-f696be7f7d0e" >
-		<flow-ref doc:name="Flow Reference" doc:id="d4693793-ada9-4f83-b90f-a9e120da7569" />
+		<http:listener doc:name="Listener" doc:id="d340f307-e51b-46c3-a0c4-f86385c8c794" config-ref="HTTP_Listener_config" path="/totalQuantityIncomePrevMonth/dayWeek"/>
+		<set-variable value="#[attributes.queryParams.dayWeek]" doc:name="queryParamsDayWeek" doc:id="f13d3371-6b9a-45b2-a8e6-7c31814f841a" variableName="queryParamsDayWeek"/>
+		<flow-ref doc:name="Flow Reference" doc:id="d4693793-ada9-4f83-b90f-a9e120da7569" name="test22"/>
+		<choice doc:name="Copy_of_Copy_of_Choice by DoTW" doc:id="5f4c839d-1b3f-427d-8e2d-a78767a2b335" >
+			<when expression="#[vars.queryParamsDayWeek == '1']" >
+				<ee:transform doc:name="Copy_of_Copy_of_Transform if Dotw == 1" doc:id="5a20da3c-cd27-47c2-9f94-f326f254a6ff" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 1)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{&#10;	"day of week": "Monday",&#10;	"Data": payload&#10;}]' doc:name="Copy_of_Copy_of_Set Payload to Sunday" doc:id="5d789afb-3821-45a9-b629-75f4622134e9" />
+			</when>
+			<when expression="#[vars.queryParamsDayWeek == '2']" >
+				<ee:transform doc:name="Copy_of_Copy_of_Transform if Dotw == 2" doc:id="f5034947-13ff-452b-a9db-36fdb2d1a062" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 2)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Tuesday",
+	"Data": payload
+}]' doc:name="Copy_of_Copy_of_Set Payload to Monday" doc:id="266803dd-d825-498f-9587-51567decbafe" />
+			</when>
+			<when expression="#[vars.queryParamsDayWeek == '3']" >
+				<ee:transform doc:name="Copy_of_Copy_of_Transform if Dotw == 3" doc:id="37b5f14a-5aeb-4e27-9587-6f8de7454ff2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 3)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Wednesday",
+	"Data": payload
+}]' doc:name="Copy_of_Copy_of_Set Payload to Tuesday" doc:id="5a74253a-2da8-4702-a39f-123b11105ec1" />
+			</when>
+			<when expression="#[vars.queryParamsDayWeek == '4']" >
+				<ee:transform doc:name="Copy_of_Copy_of_Transform if Dotw == 4" doc:id="d6edeefc-8a0e-416a-ac24-4b38fe73383e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 4)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Thursday",
+	"Data": payload
+}]' doc:name="Copy_of_Copy_of_Set Payload to Wednesday" doc:id="a5640d44-1df7-49d0-92b9-4a5ff6a599ac" />
+			</when>
+			<when expression="#[vars.queryParamsDayWeek == '5']" >
+				<ee:transform doc:name="Copy_of_Copy_of_Transform if Dotw == 5" doc:id="7a9dc5b1-25d3-4cce-8632-64a9aff4763e" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 5)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Friday",
+	"Data": payload
+}]' doc:name="Copy_of_Copy_of_Set Payload to Thursday" doc:id="24983955-cdc2-479f-b7ea-e85be33e73ca" />
+			</when>
+			<when expression="#[vars.queryParamsDayWeek == '6']" >
+				<ee:transform doc:name="Copy_of_Copy_of_Transform if Dotw == 6" doc:id="dd5d8868-08f6-406f-a1a9-781ee404a1cf" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 6)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Saturday",
+	"Data": payload
+}]' doc:name="Copy_of_Copy_of_Set Payload to Friday" doc:id="058ef1dd-0af4-410d-aaab-e61ac8c721b2" />
+			</when>
+			<when expression="#[vars.queryParamsDayWeek == '7']" >
+				<ee:transform doc:name="Copy_of_Copy_of_Transform if Dotw == 7" doc:id="c4c5678d-7226-4916-a4ab-9faacfd27a26" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload filter((value, index) -> value.date.dayOfWeek == 7)]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-payload value='#[{
+	"day of week": "Sunday",
+	"Data": payload
+}]' doc:name="Copy_of_Copy_of_Set Payload to Saturday" doc:id="de9c3f24-f831-46fd-8322-13d64b786a5b" />
+			</when>
+			<otherwise >
+				<set-payload value="No Day Of Week Specified." doc:name="Copy_of_Copy_of_Default Payload if No DoTW is provided" doc:id="79491a24-26d8-45c6-bec0-6c539375d5ce" />
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="6aea1f7b-60ac-44e7-8301-8fdc9c7b3874" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+//payload
+payload.Data map {
+	order_qty: $.order_qty as Number,
+	price: $.price,
+	date: $.date
+}
+
+//%dw 2.0
+//output application/json
+//var pay1 = payload.Data
+//---
+//Data: (pay1 map {
+//	quantity: $.order_qty,
+//	price: $.price,
+//	store_id: $.store_id,
+//	total: $.order_qty as Number * ($.price as String replace /[$]/ with("")) as Number
+//})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="a8df1eb8-a1de-41bc-af0f-a0baadac1b86" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map {
+	data: $.order_qty * $.price
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="1980033b-8323-4ec8-9dcf-99586b39eafd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+data: "day_of_the_week: " ++ vars.queryParamsDayWeek ++ ", total_income: " ++ sum(payload.data)]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
 	</flow>
 	
 	
