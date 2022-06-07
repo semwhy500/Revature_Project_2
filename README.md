@@ -56,11 +56,8 @@ Guide to the available endpoints:
 **Returns:** average "quantity of product" per sale, for specified day of the week
 
 ### New vs Returning
-**GET** http://localhost:8081/api/new-vs-returning  
-**Returns:** ???
-
 **GET** http://localhost:8081/api/new-vs-returning/store?id=4  
-**Returns:** ???
+**Returns:** percentage of total customers that are new at the given store
 
 ### Total Income for Previous Month
 **GET** http://localhost:8081/api/totalIncomePrevMonth  
