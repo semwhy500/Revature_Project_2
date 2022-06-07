@@ -95,6 +95,36 @@ type auto_ebaec7ac_b46e_4862_b27d_2914de6020f6_Output_Variables_store_id = Strin
 
 ]]></types:shape>
     </types:type>
+    <types:type name="errorarray" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
+    <types:type name="APIorder" format="json">
+      <types:shape format="weave" example="examples/apiOrder.json"><![CDATA[%dw 2.0
+
+type APIorder = {|
+  id: String, 
+  quantity: Number {"typeId": "int"}, 
+  date: String, 
+  storeId: Number {"typeId": "int"}, 
+  product: {|
+    id: String, 
+    name: String, 
+    price: Number {"typeId": "double"}
+  |}, 
+  transaction: {|
+    id: String, 
+    paymentType: String, 
+    success: Boolean, 
+    customer: {|
+      id: String, 
+      name: String
+    |}
+  |}
+|} {"example": "{\\\"id\\\":\\\"628d4960f032395bc2000086\\\",\\\"quantity\\\":5,\\\"date\\\":\\\"2022-05-05\\\",\\\"storeId\\\":3,\\\"product\\\":{\\\"id\\\":\\\"040f684e-0bd9-4f0c-a389-ed120bbca959\\\",\\\"name\\\":\\\"Wine - Domaine Boyar Royal\\\",\\\"price\\\":36.31},\\\"transaction\\\":{\\\"id\\\":\\\"628d4937f032395b26000079\\\",\\\"paymentType\\\":\\\"mastercard\\\",\\\"success\\\":false,\\\"customer\\\":{\\\"id\\\":\\\"dcf4624c-599b-40fc-9ad6-b30a14f5cfc2\\\",\\\"name\\\":\\\"Omero Foye\\\"}}}"}
+
+]]></types:shape>
+    </types:type>
   </types:catalog>
   <types:enrichment select="#3011d5e1-3a73-41a3-8e72-8c2870893a63">
     <types:processor-declaration>
@@ -107,20 +137,6 @@ type auto_ebaec7ac_b46e_4862_b27d_2914de6020f6_Output_Variables_store_id = Strin
   </types:enrichment>
   <types:enrichment select="#79d3a6a0-813e-480b-aa4e-61297770ec91">
     <types:processor-declaration>
-      <types:output-event>
-        <types:message>
-          <types:payload type="Order"/>
-        </types:message>
-      </types:output-event>
-    </types:processor-declaration>
-  </types:enrichment>
-  <types:enrichment select="#db2b9213-a051-4b0e-8f4b-8f2060089444">
-    <types:processor-declaration>
-      <types:input-event>
-        <types:message>
-          <types:payload type="Order[]"/>
-        </types:message>
-      </types:input-event>
       <types:output-event>
         <types:message>
           <types:payload type="Order"/>
@@ -150,13 +166,27 @@ type auto_ebaec7ac_b46e_4862_b27d_2914de6020f6_Output_Variables_store_id = Strin
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
-  <types:enrichment select="#62fc4b73-db2a-47fe-badb-80e05f2b9e92">
+  <types:enrichment select="#711ae5d9-623f-480e-9bb3-efd9ae54e785">
     <types:processor-declaration>
-      <types:input-event>
+      <types:output-event>
         <types:message>
           <types:payload type="Order[]"/>
         </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#aeb75f7b-6fc4-4611-9f55-3e4a8b417551">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="APIorder[]"/>
+        </types:message>
       </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Order[]"/>
+        </types:message>
+      </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
 </types:mule>
