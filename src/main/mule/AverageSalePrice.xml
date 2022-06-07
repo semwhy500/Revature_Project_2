@@ -10,7 +10,7 @@ http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/
 http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
 http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
 	<flow name="allOrders" doc:id="ebaec7ac-b46e-4862-b27d-2914de6020f6" >
-		<http:listener doc:name="GET /orders" doc:id="1b1ac2f0-e28a-43e8-a56f-9cf6c28bd32c" path="/allorders" allowedMethods="GET" config-ref="HTTP_Listener_config"/>
+		<http:listener doc:name="GET /orders" doc:id="1b1ac2f0-e28a-43e8-a56f-9cf6c28bd32c" path="/orders" allowedMethods="GET" config-ref="HTTP_Listener_config"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="a0ca9067-de0c-4402-8c5f-758c3771e510">
 			<route>
 				<flow-ref doc:name="CSV ORDERS" doc:id="cf0158ad-97b9-4f03-895a-1a8bb77225cc" name="csvorders" />
@@ -44,12 +44,12 @@ payload distinctBy $]]></ee:set-payload>
 		<http:listener doc:name="GET /transactions" doc:id="8d97256f-23aa-4a6f-9794-f8ed4e8a7475" path="/transactions" config-ref="HTTP_Listener_config"/>
 		<scatter-gather doc:name="Scatter-Gather" doc:id="9e0fd69c-dd8a-4816-862a-70678832cc31">
 			<route>
-				<flow-ref doc:name="CSV TRANSACTIONS" doc:id="c9d519ce-99b9-424b-abea-62dabf005892" name="csvtransactions" />
-			</route>
-			<route>
 				<flow-ref doc:name="DB TRANSACTIONS" doc:id="9ae32e60-a629-4cad-9300-4aa9046c65a0" name="dbtransactions" />
 			</route>
-			<route>
+			<route >
+				<flow-ref doc:name="CSV TRANSACTIONS" doc:id="c9d519ce-99b9-424b-abea-62dabf005892" name="csvtransactions" />
+			</route>
+			<route >
 				<flow-ref doc:name="API TRANSACTIONS" doc:id="8332264d-6c70-4a78-b0e0-5b70d614cd99" name="apitransactions" />
 			</route>
 		</scatter-gather>
@@ -127,7 +127,7 @@ payload]]></ee:set-payload>
 		<parallel-foreach doc:name="Parallel For Each" doc:id="fb3d53f5-9d9b-4aeb-8fc6-187f3903341c">
 			<set-variable value="#[payload.qty]" doc:name="Order Quantity" doc:id="abc671d1-f4b4-4f35-89c9-e07e2524217b" variableName="Order Quantity" />
 			<set-variable value="#[payload.product_id]" doc:name="Product ID" doc:id="5eac8c23-711f-4917-be4a-469d7bf2c0b4" variableName="product_id" />
-			<set-payload value="#[(vars.products filter $.product_id == vars.product_id).price]" doc:name="Set Payload to Price" doc:id="3437a01f-d991-44e6-afed-4fa3720787c5" />
+			<set-payload value="#[output application/json --- (vars.products filter $.product_id == vars.product_id).price]" doc:name="Set Payload to Price" doc:id="3437a01f-d991-44e6-afed-4fa3720787c5" />
 			<ee:transform doc:name="reduce payload" doc:id="973c0425-f11f-40cb-8b60-9a148669b75a">
 				<ee:message>
 					<ee:set-payload><![CDATA[%dw 2.0
@@ -409,6 +409,7 @@ payload
 	<flow name="successfulTransactions" doc:id="e7c12095-c1b2-421a-84b5-dfd5279e9b43">
 		<http:listener doc:name="successfulTransactions" doc:id="cad76ce4-bb34-41f1-a0a3-5a9afe3a0fee" path="/successfulTransactions" config-ref="HTTP_Listener_config"/>
 		<flow-ref doc:name="allTransactions" doc:id="ac447733-a3cd-4072-8b8f-016c0d974173" name="allTransactions"/>
+		<logger level="INFO" doc:name="Logger" doc:id="dbe53189-370d-450c-bb4c-fcd74b397266" message="#[payload]"/>
 		<ee:transform doc:name="Filter only successful" doc:id="19189d5f-9aaf-4743-aea9-13746a20a300">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
@@ -422,20 +423,48 @@ payload filter $.payment_txn_success == "true"]]></ee:set-payload>
 	</flow>
 	<flow name="transactionSuccessMetrics" doc:id="7e877e18-bf29-4f2e-87eb-7b382562ddc8" >
 		<http:listener doc:name="GET /transactionsuccess" doc:id="e64b6d93-f298-401f-a5ae-63f612cf9459" path="/transactionsuccess" config-ref="HTTP_Listener_config"/>
+		<set-variable value='#[message.attributes.queryParams.payment_type as String default "default"]' doc:name="payment_type" doc:id="07bf3b0f-6352-45d9-a567-b252435f98c6" variableName="payment_type" />
+		<validation:is-not-blank-string doc:name="Is not blank string" doc:id="5ce3590d-673b-4f59-8a18-c37cce67a8f7" value="#[vars.payment_type]" message='#["payment_type cannot be blank"]'/>
 		<flow-ref doc:name="allTransactions" doc:id="bf931c32-b2b5-4c97-a637-15ab1fedb00e" name="allTransactions" />
 		<set-variable value="#[sizeOf(payload) as Number]" doc:name="Payload Size" doc:id="287ec126-ce1e-4847-925e-d30a5bfb9c4d" variableName="payloadsize" />
-		<ee:transform doc:name="Transform Payload to Readable Format" doc:id="15859030-affd-498e-9dc5-9dfe542b4b0f" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0import java!java::lang::System
-
-output application/java
+		<choice doc:name="Choice" doc:id="2c5165c0-dc40-4642-9500-5d1cee9e622e" >
+			<when expression='#[vars.payment_type != "default"]' >
+				<try doc:name="Try" doc:id="22028de9-edd3-4c8d-a03c-23d1fba35062">
+					<ee:transform doc:name="Transform Message" doc:id="0a423ff0-8073-44eb-b802-f146b1ffdf4b">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
 ---
-"Successful transaction rate for all transactions: " 
-++ (sizeOf(payload filter $.payment_txn_success == "true") as Number / vars.payloadsize) as Number as String {format: "#,###.0#%"}
-++ System::lineSeparator() ++
-"Successful transaction rate for all Mastercard transactions: " 
-++ (sizeOf(payload filter $.payment_txn_success == "true" and $.payment_type == "mastercard") as Number
- / sizeOf(payload filter $.payment_type == "mastercard") as Number) as String {format: "#,###.0#%"}]]></ee:set-payload>
+(sizeOf(payload filter $.payment_txn_success == "true" and $.payment_type == vars.payment_type) as Number
+ / sizeOf(payload filter $.payment_type == vars.payment_type) as Number) as String {format: "#,###.0#%"}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+					<error-handler >
+						<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="2d9c90e6-0253-4d22-8411-1aaa4a5662b1" >
+							<set-payload value='#["No payment type: " ++ vars.payment_type ++ " exists in our system"]' doc:name="Set Payload" doc:id="1b3dce75-1e77-403a-80ce-35cec53377e7" />
+						</on-error-continue>
+					</error-handler>
+				</try>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Payload to Readable Format" doc:id="15859030-affd-498e-9dc5-9dfe542b4b0f">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0import java!java::lang::System
+
+output application/json
+---
+(sizeOf(payload filter $.payment_txn_success == "true") as Number / vars.payloadsize) as Number as String {format: "#,###.0#%"}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</otherwise>
+		</choice>
+		<ee:transform doc:name="Transform Message" doc:id="fee63732-f6c2-4bdc-bce8-1f01f29e6469" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Logger" doc:id="e6f1915b-3947-43aa-9c10-d2e90b4ee042" message="#[payload]" />

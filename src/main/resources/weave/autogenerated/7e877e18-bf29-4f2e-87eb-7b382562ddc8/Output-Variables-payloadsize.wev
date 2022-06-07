@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_7e877e18_bf29_4f2e_87eb_7b382562ddc8_Output_Variables_payloadsize = Number
+
