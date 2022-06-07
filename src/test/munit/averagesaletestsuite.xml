@@ -8,7 +8,7 @@
 		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
 		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
 	<munit:config name="new-test-suite.xml" />
-	<munit:test name="successfulTransactions_test" doc:id="fd94421c-2f3c-4276-a06d-9939525e56ad" description="successfulTransactions flow should return only return successful transactions">
+	<munit:test name="successfulTransactions_Test" doc:id="fd94421c-2f3c-4276-a06d-9939525e56ad" description="successfulTransactions flow should return only return successful transactions">
 		<munit:behavior>
 			<munit-tools:mock-when doc:name="Mock when - successfulTransactions - allTransactions" doc:id="c92d3bdf-96cf-4204-bb60-812ba301e3ca" processor="flow-ref">
 			<munit-tools:with-attributes>
