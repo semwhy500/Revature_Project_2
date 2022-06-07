@@ -784,7 +784,7 @@ flatten(vars.var1 + vars.var2)]]></ee:set-payload>
 		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="176bf407-ddbf-4f00-92bf-0cfaf17f8c33" />
 	</flow>
 	<flow name="APIandCSVDATA_totalIncome" doc:id="c5d0c8b0-565d-4d14-a477-446482e84792" >
-		<http:listener doc:name="Listener" doc:id="f770f319-a4fa-4fb1-893f-d5061f4b45bf" config-ref="HTTP_Listener_config" path="/totalQuantityIncomePrevMonth"/>
+		<http:listener doc:name="Listener" doc:id="f770f319-a4fa-4fb1-893f-d5061f4b45bf" config-ref="HTTP_Listener_config" path="/totalIncomePrevMonth"/>
 		<flow-ref doc:name="Flow Reference" doc:id="e6a690a2-1c28-4fad-8d7e-266fc1557098" name="test22"/>
 		<set-variable value="#[payload]" doc:name="var3" doc:id="af565631-a191-403a-8afd-c9bace466a90" variableName="var3"/>
 		<ee:transform doc:name="multiply quantiy * price" doc:id="504df71f-9684-4961-9980-4b20dcbb764a" >
@@ -812,7 +812,7 @@ var total_income_of_prev_month = payload reduce ((item, acc=0) -> acc +
 		</ee:transform>
 	</flow>
 	<flow name="scatter-gather-testFlow_storeID" doc:id="d3ca071b-4d64-436f-b4dc-112b6a96c357" >
-		<http:listener doc:name="Listener" doc:id="f0133244-6bd3-46a7-af10-773248100f08" path="/totalQuantityIncomePrevMonth/storeId" config-ref="HTTP_Listener_config"/>
+		<http:listener doc:name="Listener" doc:id="f0133244-6bd3-46a7-af10-773248100f08" path="/totalIncomePrevMonth/storeId" config-ref="HTTP_Listener_config"/>
 		<set-variable value="#[attributes.queryParams.storeId]" doc:name="queryParamsStoreId" doc:id="792ed8e8-11ab-4779-ba2e-ead41d621e5d" variableName="queryParamsStoreId"/>
 		<flow-ref doc:name="Flow Reference" doc:id="357045b6-f9ce-4fc4-be31-7d0b678d6477" name="test22"/>
 		<ee:transform doc:name="Transform Message" doc:id="637b6e0c-00c6-4cd3-a3d1-9f069aff89e6" >
@@ -854,13 +854,16 @@ payload map (item, index) -> {
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-
-data: "store_id: " ++ vars.queryParamsStoreId ++ ", total_income: " ++ sum(payload.data)]]></ee:set-payload>
+{
+	"store_id": vars.queryParamsStoreId,
+	"total_income": sum(payload.data)
+}
+//data: "store_id: " ++ vars.queryParamsStoreId ++ ", total_income: " ++ sum(payload.data)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
 	<flow name="scatter-gather-testFlow1_productId" doc:id="46698c20-7648-4481-b0f8-99efc415df0f" >
-		<http:listener doc:name="Listener" doc:id="b305ddde-2b4c-4b48-b382-7f205b1aa5db" config-ref="HTTP_Listener_config" path="/totalQuantityIncomePrevMonth/productId"/>
+		<http:listener doc:name="Listener" doc:id="b305ddde-2b4c-4b48-b382-7f205b1aa5db" config-ref="HTTP_Listener_config" path="/totalIncomePrevMonth/productId"/>
 		<set-variable value="#[attributes.queryParams.productId]" doc:name="queryParamsProductId" doc:id="71f8b483-2fbd-46ff-ab2e-4da9a20fcd61" variableName="queryParamsProductId"/>
 		<flow-ref doc:name="Flow Reference" doc:id="fc40c478-1158-4c3f-bef4-5ae73a511908" name="test22"/>
 		<ee:transform doc:name="Copy_of_Transform Message" doc:id="b3d1bded-c338-4bc6-9f41-5a8a1e354e76" >
@@ -902,13 +905,16 @@ payload map (item, index) -> {
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-
-data: "product_id: " ++ vars.queryParamsProductId ++ ", total_income: " ++ sum(payload.data)]]></ee:set-payload>
+{
+	product_id: vars.queryParamsProductId,
+	total_income: sum(payload.data)
+}
+//data: "product_id: " ++ vars.queryParamsProductId ++ ", total_income: " ++ sum(payload.data)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
-	<flow name="scatter-gather-testFlow2" doc:id="d5297323-ed0c-40f4-80a4-f696be7f7d0e" >
-		<http:listener doc:name="Listener" doc:id="d340f307-e51b-46c3-a0c4-f86385c8c794" config-ref="HTTP_Listener_config" path="/totalQuantityIncomePrevMonth/dayWeek"/>
+	<flow name="scatter-gather-testFlow2_dayWeek" doc:id="d5297323-ed0c-40f4-80a4-f696be7f7d0e" >
+		<http:listener doc:name="Listener" doc:id="d340f307-e51b-46c3-a0c4-f86385c8c794" config-ref="HTTP_Listener_config" path="/totalIncomePrevMonth/dayWeek"/>
 		<set-variable value="#[attributes.queryParams.dayWeek]" doc:name="queryParamsDayWeek" doc:id="f13d3371-6b9a-45b2-a8e6-7c31814f841a" variableName="queryParamsDayWeek"/>
 		<flow-ref doc:name="Flow Reference" doc:id="d4693793-ada9-4f83-b90f-a9e120da7569" name="test22"/>
 		<choice doc:name="Copy_of_Copy_of_Choice by DoTW" doc:id="5f4c839d-1b3f-427d-8e2d-a78767a2b335" >
@@ -1050,7 +1056,11 @@ payload map {
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-data: "day_of_the_week: " ++ vars.queryParamsDayWeek ++ ", total_income: " ++ sum(payload.data)]]></ee:set-payload>
+{
+	day_of_the_week: vars.queryParamsDayWeek,
+	total_income: sum(payload.data)
+}
+//data: "day_of_the_week: " ++ vars.queryParamsDayWeek ++ ", total_income: " ++ sum(payload.data)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
