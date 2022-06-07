@@ -36,8 +36,8 @@ output application/json
 		<set-variable value="#[message.attributes.queryParams.id]" doc:name='Store URIparam "id"' doc:id="3823b6ee-bf1d-4afd-9fab-23c575a1585f" variableName="ID" />
 		<flow-ref doc:name="OrdersByStore" doc:id="552e5abe-0020-478f-b612-7fa57f044c2b" name="OrdersByStore" />
 		<flow-ref doc:name="APIOrdersByStore" doc:id="d7ba040c-c882-4941-b71a-8209550c9b11" name="APIOrdersByStore"/>
-		<set-variable value="#[vars.beforeFiltered ++ vars.restOfYear]" doc:name="Previous Customers" doc:id="9d2b34e6-cc8a-4c8c-af9c-e8363e673c3e" variableName="prevCust" />
-		<set-variable value="#[vars.monthFiltered ++ vars.prevMonthCustomers]" doc:name="Last Month's Customers" doc:id="3623da4f-635c-4bbf-b5e2-1fbd09a522b0" variableName="monthCust" />
+		<set-variable value="#[vars.beforeFiltered ++ vars.fromJanToApr]" doc:name="Previous Customers" doc:id="9d2b34e6-cc8a-4c8c-af9c-e8363e673c3e" variableName="prevCust" />
+		<set-variable value="#[vars.monthFiltered ++ vars.prevMonthPayload]" doc:name="Last Month's Customers" doc:id="3623da4f-635c-4bbf-b5e2-1fbd09a522b0" variableName="monthCust" />
 		<set-variable value="#[vars.monthCust reduce (item, acc = []) -&gt; if (vars.prevCust contains item) acc + item else acc]" doc:name="Returning Customers (Who is in both Last Month's and the previous data?)" doc:id="6bb894c3-29ec-4963-bfe1-64471f860159" variableName="returnCust" />
 		<set-payload value="#[vars.returnCust]" doc:name="Set Payload to returning customer array" doc:id="996ed5f3-5ea4-4f46-a053-459f5fed346a" mimeType="application/json" />
 		<set-variable value="#[sizeOf(vars.monthCust)]" doc:name="Total # of Customers last month" doc:id="89fdd4d1-cc1c-4a39-adc3-d1a0afcc7d1e" variableName="monthTotal" />
@@ -714,6 +714,6 @@ payload map ( payload01 , indexOfPayload01 ) -> {
 	<sub-flow name="CalculateAvgQuantity" doc:id="dbbc7198-45bf-4350-9a50-8889e20e01ac">
 		<set-variable value="#[avg(payload.qty)]" doc:name="Find Average Quantity" doc:id="57b46806-73a9-415b-9375-f92bb3e93959" variableName="avg" />
 		<logger level="INFO" doc:name="Log Average Quantity" doc:id="f10d6adf-a762-4620-baf6-b0ed2cedee3f" message="#[vars.avg]" />
-		<set-payload value="#[vars.avg]" doc:name="Set Payload to Average Quantity" doc:id="2bd61adb-8f64-42be-b714-c9cae438d480" />
+		<set-payload value='#[vars.avg as String {format: "0.00"}]' doc:name="Set Payload to Average Quantity" doc:id="2bd61adb-8f64-42be-b714-c9cae438d480" />
 	</sub-flow>
 </mule>
