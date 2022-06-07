@@ -1,0 +1,24 @@
+{
+    "order_id": "1",
+    "quantity": "1",
+    "date": "2022-05-05",
+    "store_id": "1",
+    "product_id": "32",
+    "txn_id": "1001"
+  },
+  {
+    "order_id": "2",
+    "quantity": "10",
+    "date": "2022-05-23",
+    "store_id": "4",
+    "product_id": "44",
+    "txn_id": "2391"
+  },
+  {
+    "order_id": "3",
+    "quantity": "3",
+    "date": "2022-05-21",
+    "store_id": "3",
+    "product_id": "523",
+    "txn_id": "2000"
+  }

@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_235fbbbc_b2b6_4e20_951c_092d4aaad35a_Output_Variables_ProductJSON = Any
+
