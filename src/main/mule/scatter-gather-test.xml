@@ -697,53 +697,25 @@ vars.var3]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 	</flow>
-	<flow name="APIandCSVDATA" doc:id="c5d0c8b0-565d-4d14-a477-446482e84792" >
-		<http:listener doc:name="Listener" doc:id="f770f319-a4fa-4fb1-893f-d5061f4b45bf" config-ref="HTTP_Listener_config" path="/test222"/>
-		<flow-ref doc:name="Flow Reference" doc:id="e6a690a2-1c28-4fad-8d7e-266fc1557098" name="test22"/>
-		<set-variable value="#[payload]" doc:name="var3" doc:id="af565631-a191-403a-8afd-c9bace466a90" variableName="var3"/>
-		<ee:transform doc:name="multiply quantiy * price" doc:id="504df71f-9684-4961-9980-4b20dcbb764a" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
----
-vars.var3 map (item, index) -> {
-	total: item.order_qty as Number * item.price
-}]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-		<ee:transform doc:name="sum totals of each object to get totalprice of previous month" doc:id="8edb5fb7-a0a7-465d-9f81-56c67238268d" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
-output application/json
-var total_income_of_prev_month = payload reduce ((item, acc=0) -> acc +
-    if (item.total != "") item.total as Number
-    else 0
-)
----
-"total_income_of_prev_month": total_income_of_prev_month
-]]></ee:set-payload>
-			</ee:message>
-		</ee:transform>
-	</flow>
-	<flow name="test22" doc:id="7091b600-b11b-415b-a2fc-7842f43b96b1" >
+	<flow name="test22" doc:id="7091b600-b11b-415b-a2fc-7842f43b96b1">
 		<http:listener doc:name="Copy_of_Copy_of_Listener" doc:id="98f78166-5fbf-4d2e-bcac-1504e63dc0be" config-ref="HTTP_Listener_config" path="/test22" />
-		<scatter-gather doc:name="Copy_of_Copy_of_Scatter-Gather" doc:id="7420902b-dca7-43c8-b5be-98eb7f7acd64" >
-			<route >
+		<scatter-gather doc:name="Copy_of_Copy_of_Scatter-Gather" doc:id="7420902b-dca7-43c8-b5be-98eb7f7acd64">
+			<route>
 				<flow-ref doc:name="Copy_of_Copy_of_ordersCSVFlowRef" doc:id="8cfd45b6-e221-427a-86b6-5042155f6299" name="ordersCSVFlow" />
 				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_ordersCSV" doc:id="76e1b5e9-6a33-4536-9d3a-d1baffdb71d3" variableName="ordersCSV" />
 			</route>
-			<route >
+			<route>
 				<flow-ref doc:name="Copy_of_Copy_of_productsCSVFlowRef" doc:id="36e761df-9316-41e9-a1ad-23779c394146" name="productsCSVFlow" />
 				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_productsCSV" doc:id="2d8b320b-7614-40c1-84c2-9a63d3c14383" variableName="productsCSV" />
 			</route>
-			<route >
+			<route>
 				<flow-ref doc:name="Copy_of_Copy_of_transactionsCSVFlowRef" doc:id="49d6068c-7940-4f7e-b47a-cecebfeebb2b" name="transactionsCSVFlow" />
 				<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_transactionsCSV" doc:id="e4876848-6054-46d3-873a-2f7e058670ed" variableName="transactionsCSV" />
 			</route>
 		</scatter-gather>
-		<ee:transform doc:name="Copy_of_Copy_of_major transform" doc:id="eee81f9c-eeb6-4b88-b172-f470752c9919" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<ee:transform doc:name="Copy_of_Copy_of_major transform" doc:id="eee81f9c-eeb6-4b88-b172-f470752c9919">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 var ordersCSV = vars.ordersCSV
 var productsCSV = vars.productsCSV
@@ -765,9 +737,9 @@ Data : ordersCSV map (ordersItems, indexOfOrdersItems) -> {
 			</ee:message>
 		</ee:transform>
 		<set-variable value="#[payload]" doc:name="Copy_of_Copy_of_bob" doc:id="a86b06f9-2907-4116-800f-86a4911e4dd1" variableName="bob" />
-		<ee:transform doc:name="Copy_of_Copy_of_only successful txns and previous month" doc:id="d2370132-ed9c-4e9f-b707-fdc2840555f9" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<ee:transform doc:name="Copy_of_Copy_of_only successful txns and previous month" doc:id="d2370132-ed9c-4e9f-b707-fdc2840555f9">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 var pay1 = vars.bob.Data
 //var myDate = pay1.date as Date
@@ -775,7 +747,7 @@ var pay1 = vars.bob.Data
 pay1 filter ($.transaction_success == "true" and $.date.month > now().month - 2 and $.date.month < now().month)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-variable value="#[payload]" doc:name="var1" doc:id="1af8832b-abb0-408f-8fab-75196052427c" variableName="var1"/>
+		<set-variable value="#[payload]" doc:name="var1" doc:id="1af8832b-abb0-408f-8fab-75196052427c" variableName="var1" />
 		<http:request method="GET" doc:name="callAPI" doc:id="8187ba2c-1b7a-425a-b9a4-7233c2d5d193" config-ref="HTTP_Request_configuration" path="/order" />
 		<ee:transform doc:name="formatAPIData" doc:id="73e09f4c-810b-4948-85bd-48b9060bf007">
 			<ee:message>
@@ -809,6 +781,43 @@ flatten(vars.var1 + vars.var2)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
 		<logger level="INFO" doc:name="Copy_of_Copy_of_Logger" doc:id="176bf407-ddbf-4f00-92bf-0cfaf17f8c33" />
+	</flow>
+	<flow name="APIandCSVDATA" doc:id="c5d0c8b0-565d-4d14-a477-446482e84792" >
+		<http:listener doc:name="Listener" doc:id="f770f319-a4fa-4fb1-893f-d5061f4b45bf" config-ref="HTTP_Listener_config" path="/test222"/>
+		<flow-ref doc:name="Flow Reference" doc:id="e6a690a2-1c28-4fad-8d7e-266fc1557098" name="test22"/>
+		<set-variable value="#[payload]" doc:name="var3" doc:id="af565631-a191-403a-8afd-c9bace466a90" variableName="var3"/>
+		<ee:transform doc:name="multiply quantiy * price" doc:id="504df71f-9684-4961-9980-4b20dcbb764a" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+vars.var3 map (item, index) -> {
+	total: item.order_qty as Number * item.price
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="sum totals of each object to get totalprice of previous month" doc:id="8edb5fb7-a0a7-465d-9f81-56c67238268d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var total_income_of_prev_month = payload reduce ((item, acc=0) -> acc +
+    if (item.total != "") item.total as Number
+    else 0
+)
+---
+"total_income_of_prev_month": total_income_of_prev_month
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="scatter-gather-testFlow" doc:id="d3ca071b-4d64-436f-b4dc-112b6a96c357" >
+		<flow-ref doc:name="Flow Reference" doc:id="357045b6-f9ce-4fc4-be31-7d0b678d6477" name="test22"/>
+	</flow>
+	<flow name="scatter-gather-testFlow1" doc:id="46698c20-7648-4481-b0f8-99efc415df0f" >
+		<flow-ref doc:name="Flow Reference" doc:id="fc40c478-1158-4c3f-bef4-5ae73a511908" />
+	</flow>
+	<flow name="scatter-gather-testFlow2" doc:id="d5297323-ed0c-40f4-80a4-f696be7f7d0e" >
+		<flow-ref doc:name="Flow Reference" doc:id="d4693793-ada9-4f83-b90f-a9e120da7569" />
 	</flow>
 	
 	
