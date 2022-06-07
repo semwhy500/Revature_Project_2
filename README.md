@@ -100,7 +100,7 @@ Guide to the available endpoints:
 
 ### Transaction Success
 **GET** http://localhost:8081/api/transactionsuccess  
-**Returns:** ???
+**Returns:** transaction success by payment type as a percent
 
 ### Historic Sales
 **GET** http://localhost:8081/api/api/historicSalesByStore?id=4  
