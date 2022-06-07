@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="orderfeature-test-suite.xml" />
+	<munit:test name="orderfeature-test-suite-Get:QuantityofSalesofPrevMonthbyProductIdTest" doc:id="3c2723de-874a-4910-942e-43ff028394e3" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthbyProductId" doc:id="fae491d2-42fb-4d30-91b9-4e27da4021b3" name="Get:QuantityofSalesofPrevMonthbyProductId"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="orderfeature-test-suite-Get:QuantityofSalesofPrevMonthAllTest" doc:id="bee862c9-66ac-405f-a776-a06116ab7494" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthAll" doc:id="7a866583-e11c-487a-8ee2-e88969b25831" name="Get:QuantityofSalesofPrevMonthAll"/>
+		</munit:execution>
+	</munit:test>
+	<munit:test name="orderfeature-test-suite-Get:QuantityofSalesofPrevMonthbyStoreIdTest" doc:id="7827898d-a137-472b-8cd3-2ad0eae63d26" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set GET | id=3" doc:id="539f43a0-9c29-4a70-845b-37182fd784c9" >
+				<munit:attributes value="#[{ method : 'GET', queryParams : { id : '3'}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthbyStoreId" doc:id="2b1dbb50-85ea-4244-ad5c-0dcfd8766826" name="Get:QuantityofSalesofPrevMonthbyStoreId"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Checks if Quantity of Sales is 49 when id = 3" doc:id="139b49f3-7c05-48d6-ac6a-16b2d6432b3d" actual='#[payload."Quantity of Sales"]' expected="49" message="The Quantity of Sales should be 49 for storeID '3'" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="orderfeature-test-suite-Get:QuantityofSalesofPrevMonthbyStoreIdTest1" doc:id="bae17b57-52a9-46e6-b21a-e70a82994384" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set GET | id=3" doc:id="e5ceac30-ba7f-4fae-937c-6b75cd8ac9d9" >
+				<munit:attributes value="#[{ method : 'GET', queryParams : { id : '3'}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthbyStoreId" doc:id="b7e344a8-4ce8-4424-a5c3-37c908da9e19" name="Get:QuantityofSalesofPrevMonthbyStoreId"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Checks if Quantity of Sales is NOT NULL" doc:id="c0f4ff8b-a04c-483e-9472-c9a2b0ac2384" message='"Quantity of Sales" is null value' is="#[MunitTools::notNullValue()]" expression='#[payload."Quantity of Sales"]' />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="orderfeature-test-suite-Get:QuantityofSalesofPrevMonthbyStoreIdTest2" doc:id="ac26f969-cc80-45b2-985c-bcc85309410c" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set GET | id=3" doc:id="ee4f3bfc-6c2a-44c1-945a-09a84fc29754" >
+				<munit:attributes value="#[{ method : 'GET', queryParams : { id : '3'}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthbyStoreId" doc:id="e2760c06-cc0a-44cb-a0fa-cc374d6bc99f" name="Get:QuantityofSalesofPrevMonthbyStoreId"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Checks if Store ID is NOT NULL" doc:id="4acb58cd-783e-40d8-be77-baa84b4f6832" expression='#[payload."Store ID"]' is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
