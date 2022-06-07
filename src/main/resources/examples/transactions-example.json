@@ -1,6 +1,6 @@
 {
-  "txn_id": "628e4bbcf032395bc2000100",
+  "payment_txn_id": "628e4bbcf032395bc2000100",
   "payment_type": "mastercard",
-  "payment_txn_success": "2022-02-14",
-  "customer_id": 2
+  "payment_txn_success": "true",
+  "customer_id": "17f206df-299b-430f-b910-56830c74698a"
 }

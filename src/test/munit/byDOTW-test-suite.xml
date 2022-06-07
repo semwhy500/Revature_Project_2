@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="byDOTW-test-suite.xml" />
+	<munit:test name="QuantityDOTWTestNotNull" doc:id="6f089e1b-498f-43d4-8b5e-d0fc08d062ae" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set To Value" doc:id="9d245b32-449e-4bd8-8321-250fa0056818" >
+				<munit:attributes value="#[{ method : 'GET', queryParams : { dotw : 1}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="QuantityofSalesofPrevMonthbyDoTW" doc:id="d5341855-5446-4c8f-a7b2-03f25e918d1f" name="Get:QuantityofSalesofPrevMonthbyDoTW"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="f6f35447-6e8d-471a-b3e4-9c896a071895" expression="#[vars.dayWeek]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="QuantityDOTWTestAssertEquals1" doc:id="3640a67b-8eed-47d5-a2ae-cb25365ef721">
+		<munit:behavior >
+			<munit:set-event doc:name="Set to 1" doc:id="df351c26-e605-4f93-bfa3-0490e387f212" >
+				<munit:attributes value="#[{ method : 'GET', queryParams : {dotw : 1}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="4d5c2af3-2938-4c64-a60b-697b33c13d89" name="Get:QuantityofSalesofPrevMonthbyDoTW"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="eeb9755a-ef36-450e-b82a-7b62f98a6036" actual="#[vars.dayWeek]" expected="#[1]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="QuantityDOTWTestAssertEquals2" doc:id="6b5ea365-bb8e-4594-a484-39524999b7e9" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set to 2" doc:id="05c2c55d-e323-4bdc-96a8-eaab940f7977" >
+				<munit:attributes value="#[{ method : 'GET', queryParams : {dotw : 2}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="7f148af6-66ac-401c-a8a8-629c177818f4" name="Get:QuantityofSalesofPrevMonthbyDoTW"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="45dbca53-9a60-4cb4-b3c4-2507c8d451c4" actual="#[vars.dayWeek]" expected="#[2]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="QuantityDOTWTestAssertEquals3" doc:id="f4d20ef6-664a-4b94-86cd-849ca36eacae" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set to 3" doc:id="f2170944-33d5-4363-97b5-b6225e902c64" >
+				<munit:attributes value="#[{ method : 'GET', queryParams : {dotw : 3}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="f2178cf4-0bce-453e-b1ea-a64edd94cefd" name="Get:QuantityofSalesofPrevMonthbyDoTW"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="7ddab61d-4e10-4a21-9e27-b34bc80be145" actual="#[vars.dayWeek]" expected="#[3]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="QuantityDOTWTestAssertEquals4" doc:id="4816f76e-69cb-42ec-bf3e-0fa45c1b7729" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set to 4" doc:id="cc70f843-2814-4893-a36a-ef071a00ed89" >
+				<munit:attributes value="#[{ method : 'GET', queryParams : {dotw : 4}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="36862b8f-922e-4ee9-914f-8878b8cd0e11" name="Get:QuantityofSalesofPrevMonthbyDoTW"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="3b897755-8074-467b-be8b-073d296eb412" actual="#[vars.dayWeek]" expected="#[4]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="QuantityDOTWTestAssertEquals5" doc:id="5ba45c79-a93a-4147-bfcc-09f4f46a999a" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set to 5" doc:id="8998f616-7ebb-4946-80a3-1422e712a6aa" >
+				<munit:attributes value="#[{ method : 'GET', queryParams :{dotw : 5}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="13d0cbeb-0eea-434f-8d9c-4cb3d9f4e19c" name="Get:QuantityofSalesofPrevMonthbyDoTW"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="d7f5a432-3424-4462-a6ee-3dcd6180c7a5" actual="#[vars.dayWeek]" expected="#[5]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="QuantityDOTWTestAssertEquals6" doc:id="4659ed86-6a31-4724-adc4-07508e272a83" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set to 6" doc:id="5a8c56f9-e27e-49f0-9384-0de10706ec12" >
+				<munit:attributes value="#[{ method : 'GET', queryParams :{dotw : 6}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="743e6dc9-1199-4d18-94a3-f0dffeb27edf" name="Get:QuantityofSalesofPrevMonthbyDoTW"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="5c360e6b-6de6-4088-89e3-d96bcc592ddf" actual="#[vars.dayWeek]" expected="#[6]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="QuantityDOTWTestAssertEquals7" doc:id="d30c1256-070e-4a02-85dd-33f290421084" >
+		<munit:behavior >
+			<munit:set-event doc:name="Set to 7" doc:id="f38fd131-b605-420d-8c6d-ff56542a313d" >
+				<munit:attributes value="#[{ method : 'GET', queryParams :{dotw : 7}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow Reference" doc:id="a1ada976-0eac-4e4f-af04-93643c78cf40" name="Get:QuantityofSalesofPrevMonthbyDoTW"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="de5d7205-fc06-4dbe-8073-fb514ba5a530" actual="#[vars.dayWeek]" expected="#[7]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

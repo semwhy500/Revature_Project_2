@@ -72,4 +72,27 @@ type auto_235fbbbc_b2b6_4e20_951c_092d4aaad35a_Output_Variables_ProductJSON = An
       </types:output-event>
     </types:processor-declaration>
   </types:enrichment>
+  <types:enrichment select="#711ae5d9-623f-480e-9bb3-efd9ae54e785">
+    <types:processor-declaration>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Order[]"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#aeb75f7b-6fc4-4611-9f55-3e4a8b417551">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="APIorder[]"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="Order[]"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
 </types:mule>
