@@ -104,14 +104,14 @@ Guide to the available endpoints:
 
 ### Historic Sales
 **GET** http://localhost:8081/api/api/historicSalesByStore?id=4  
-**Returns:** ???
+**Returns:** individual sales in ascending order by StoreID parameter as JSON array.
 
 **GET** http://localhost:8081/api/api/historicSalesByProduct?id=a6693ab3-e4c1-4335-999b-a02349c8b8c9  
-**Returns:** ???
+**Returns:** individual sales in ascending order by ProductID parameter as JSON array.
 
 ### Historic Income
 **GET** http://localhost:8081/api/api/historicIncomeByStore?id=4  
-**Returns:** ???
+**Returns:** total income of individual dates in ascending order by StoreID parameter as JSON array.
 
 ## Contributors
 Here are the people who have contributed to this project.
