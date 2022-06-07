@@ -6,7 +6,7 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
     </http:listener-config>
     <apikit:config name="historicsalesapi-config" api="historicsalesapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
 	<flow name="historicsalesapi-main">
-        <http:listener config-ref="historicsalesapi-httpListenerConfig" path="/api/*">
+        <http:listener config-ref="HTTP_Listener_config" path="/api/*">
             <http:response statusCode="#[vars.httpStatus default 200]">
                 <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
             </http:response>
@@ -125,12 +125,12 @@ output application/json
         </error-handler>
     </flow>
     <flow name="get:\historicIncomeByStore:historicsalesapi-config">
-		<flow-ref doc:name="Flow Reference" doc:id="a215fbec-4a44-46a7-9d78-61db889f1cc6" name="historicIncomeByStoreFlow"/>
+		<flow-ref doc:name="Flow Reference" doc:id="6212e187-c40f-4519-bf5a-62a7216114e7" name="historicIncomeByStoreFlow"/>
     </flow>
     <flow name="get:\historicSalesByProduct:historicsalesapi-config">
-        <flow-ref doc:name="Flow Reference" doc:id="e26d2d64-4f8e-4b8a-8f90-fbf0c19b7b72" name="historicSalesByProductFlow"/>
+        <flow-ref doc:name="Flow Reference" doc:id="3b840682-e112-4352-90c9-d36bd4f5826a" name="historicSalesByProductFlow"/>
     </flow>
     <flow name="get:\historicSalesByStore:historicsalesapi-config">
-        <flow-ref doc:name="Flow Reference" doc:id="c985db7f-1718-40e8-9642-de01fb50eb52" name="historicSalesByStoreFlow"/>
+        <flow-ref doc:name="Flow Reference" doc:id="840f235c-ff8b-4f0a-a70f-302f45c6d1de" name="historicSalesByStoreFlow"/>
     </flow>
 </mule>

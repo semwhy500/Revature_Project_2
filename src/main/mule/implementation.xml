@@ -7,37 +7,81 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
-	<file:config name="File_Config1" doc:name="File Config" doc:id="0746effc-df32-47be-bde2-87912d1da8bc" >
+	<file:config name="File_Config1" doc:name="File Config" doc:id="9005c2cb-93d6-4141-ac80-3cfc17003035" >
 	</file:config>
-	<flow name="getECommerceDataFlow" doc:id="a9019162-1df3-4886-a53c-95879904e104" >
-		<http:request method="GET" doc:name="Request" doc:id="1843d55d-5940-462c-91c6-d3cb9c303096" path="/order" config-ref="HTTP_Request_configuration"/>
-		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="ecbcb93c-2431-4a55-a4c8-2a2d802a79f1" />
-		<ee:transform doc:name="Transform Message" doc:id="e0b68f18-7dbe-4615-b51d-f91fcef8fadc">
-			<ee:message>
-				<ee:set-payload><![CDATA[%dw 2.0
+	<flow name="getCSVDataFlow" doc:id="536b355d-86d0-45ab-84f1-7d3ce5dd3eed" >
+		<scatter-gather doc:name="Scatter-Gather" doc:id="09052532-d6d9-4cea-b66c-ccf9cd56ba00" >
+			<route >
+				<file:read doc:name="Read Orders CSV" doc:id="a1a37083-5c4f-442c-a093-e98ff9e77549" path='${file.orders}' config-ref="File_Config"/>
+				<ee:transform doc:name="Transform Message" doc:id="3265e704-f069-40de-a6db-7e1c23fbc0be" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-payload map (value) -> {
-	store_id : value.storeId,
-	datetime : value.date,
-	price : value.product.price,
-	qty : value.quantity,
-	product_id : value.product.id,
-	total_sales_of_day : value.product.price * value.quantity,
-	payment_txn_success : value.transaction.success
-}  
-
-
-
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="b7291438-d797-43a1-a098-40639d305b05" variableName="OrderJSON"/>
+			</route>
+			<route >
+				<file:read doc:name="Read Products CSV" doc:id="a5d3cc75-5298-43ce-b486-bf565b4d0530" config-ref="File_Config" path="${file.products}" />
+				<ee:transform doc:name="Transform Message" doc:id="7714d06b-9f0e-4f9a-a389-9781af9b9981" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="c97cc7d4-ec1f-498e-aaa5-a2b5b59eb11b" variableName="ProductJSON"/>
+			</route>
+			<route >
+				<file:read doc:name="Read Transactions CSV" doc:id="67f5686a-fda5-462d-ae91-ec2ebbcaf29e" config-ref="File_Config" path="${file.transactions}" />
+				<ee:transform doc:name="Transform Message" doc:id="58705b2c-a5c8-4702-b8bd-d428cce61cb2" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="bb16bb4a-5b0b-4ed1-b3d8-286d2cf67d63" variableName="TransactionJSON"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="6787ee43-23da-417c-a689-64bd6a828d64" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var firstInput = vars.OrderJSON
+var secondInput = vars.ProductJSON
+var thirdInput = vars.TransactionJSON
+---
+firstInput map (firstInputValue) ->
+{
+  	store_id : firstInputValue.store_id as Number,
+  	datetime: firstInputValue.datetime,
+  	(secondInput filter ($.*product_id contains firstInputValue.product_id) map (secondInputValue) -> {
+      price : (secondInputValue.price as String replace /[$]/ with("")) as Number
+    }),
+    qty : firstInputValue.qty as Number,
+    product_id : firstInputValue.product_id,
+    (secondInput filter ($.*product_id contains firstInputValue.product_id) map (secondInputValue) -> {
+      total_sales_of_day : (firstInputValue.qty * (secondInputValue.price as String replace /[$]/ with("")) as Number) 
+    }),
+    (thirdInput filter ($.*payment_txn_id contains firstInputValue.txn_id) map (thirdInputValue) -> {
+      payment_txn_success : thirdInputValue.payment_txn_success as Boolean
+    })
+} 
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="064a3252-90a7-4f2e-90d8-a9841dc18ff4" />
 	</flow>
-	<flow name="getCSVDataFlow" doc:id="81f78a90-4b5e-4ea3-8b61-29a7dbbf224b" >
-		<scatter-gather doc:name="Scatter-Gather" doc:id="c4604a66-ce54-46dc-80dd-f32bd3038703" >
+	<flow name="getECommerceDataFlow" doc:id="235fbbbc-b2b6-4e20-951c-092d4aaad35a">
+		<scatter-gather doc:name="Scatter-Gather" doc:id="98470221-9e7b-40ec-a1b9-dfdadc97c969" >
 			<route >
-				<file:read doc:name="Read Orders CSV" doc:id="6be2fc08-2af4-489d-9001-0d02bef96e0d" path="C:\Users\blear\Documents\mulebasics\team5\src\main\resources\data\csvs for p3\Orders.csv" />
-				<ee:transform doc:name="Transform Message" doc:id="35f182cc-6acd-44fd-841a-51191fedd88c" >
+				<http:request method="GET" doc:name="RequestOrders" doc:id="ff5e0905-3be8-4f5e-a4c8-8c96f475ac6a" path="/order" config-ref="HTTP_Request_configuration" />
+				<ee:transform doc:name="Transform Message" doc:id="6b35e9fb-832d-4af8-b2fc-8b1fe19e9d82" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -45,11 +89,11 @@ output application/json
 payload]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="aafc224f-bcc7-483d-bca3-82148dd9ed74" variableName="OrderJSON"/>
+				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="35f82601-1c08-4761-b10c-e499670aaaca" variableName="OrderJSON" />
 			</route>
 			<route >
-				<file:read doc:name="Read Products CSV" doc:id="424ff791-42e6-4d36-9af8-b90cb82437ad" config-ref="File_Config1" path="C:\Users\blear\Documents\mulebasics\team5\src\main\resources\data\csvs for p3\Products.csv" />
-				<ee:transform doc:name="Transform Message" doc:id="3646258c-4412-41b9-bbdc-9d4636bbc2b8" >
+				<http:request method="GET" doc:name="RequestProducts" doc:id="fc7c5448-7403-4455-b118-2d40642be3d1" config-ref="HTTP_Request_configuration" path="/product" />
+				<ee:transform doc:name="Transform Message" doc:id="c11b6668-cadf-48a2-b175-4f4daa88e500" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -57,11 +101,11 @@ output application/json
 payload]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="b7d0a932-7d6e-4d78-809b-f90413ae3d0f" variableName="ProductJSON"/>
+				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="ce378fa6-4aa4-44a1-9ae6-dd5933ba770e" variableName="ProductJSON" />
 			</route>
 			<route >
-				<file:read doc:name="Read Transactions CSV" doc:id="970a7cc2-f45c-434f-8d77-b9a65e04ff85" config-ref="File_Config1" path="C:\Users\blear\Documents\mulebasics\team5\src\main\resources\data\csvs for p3\Transactions.csv" />
-				<ee:transform doc:name="Transform Message" doc:id="1fb42086-64b5-4a1d-9e8b-ade378ae84b3" >
+				<http:request method="GET" doc:name="Copy_of_Request" doc:id="4ce9f97d-4196-4ec8-8b3f-edbafba58e3c" config-ref="HTTP_Request_configuration" path="/transaction" />
+				<ee:transform doc:name="Transform Message" doc:id="12bea379-2083-4e74-8014-c0e4df772441" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -69,12 +113,12 @@ output application/json
 payload]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="381f5bbd-a888-472c-abcd-b3b0d6c7d262" variableName="TransactionJSON"/>
+				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="a94f7fc0-879c-4e47-b730-44073ea463fc" variableName="TransactionJSON" />
 			</route>
 		</scatter-gather>
-		<ee:transform doc:name="Transform Message" doc:id="356c9e24-70ab-4c3f-9421-8c5115c7183f" >
-			<ee:message >
-				<ee:set-payload ><![CDATA[%dw 2.0
+		<ee:transform doc:name="Transform Message" doc:id="9af36297-c21c-4086-87e3-ebb7a5170998">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 var firstInput = vars.OrderJSON
 var secondInput = vars.ProductJSON
@@ -100,22 +144,21 @@ firstInput map (firstInputValue) ->
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="7b9bf6d0-4207-48a2-b817-297f0949f247" />
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="0a80a558-ab70-4e13-b825-f13c942b339f" />
 	</flow>
-	<flow name="historicSalesByStoreFlow" doc:id="2fa108b3-8d95-4c2b-a11b-7adbda6b3032" >
-		<set-variable value="#[message.attributes.queryParams.id]" doc:name="Set Variable" doc:id="245b4775-9c5e-439f-8351-6312a03ba240" variableName="store_id" />
-		<scatter-gather doc:name="Scatter-Gather" doc:id="f8fe1bf1-70a7-4f76-8962-1c4897bf5cb4" >
+	<flow name="historicSalesByStoreFlow" doc:id="bfaf32fa-8c08-4f84-8c80-bbe3f4dc3a7a" >
+		<set-variable value="#[message.attributes.queryParams.id]" doc:name="Set Variable" doc:id="be9bfa08-7767-473b-aaf0-acdd763d0ade" variableName="store_id" />
+		<scatter-gather doc:name="Scatter-Gather" doc:id="8e1c4368-411c-433d-84c9-545bf5cc8934" >
 			<route >
-				<db:select doc:name="Select * from RDB" doc:id="4e80a04b-a838-4ffe-9451-92f7b2862e54" config-ref="Database_Config">
+				<db:select doc:name="Select * from RDB" doc:id="3a622462-909a-4415-802e-62033137b5e7" config-ref="Database_Config">
 			<db:sql><![CDATA[select orders.store_id, orders.datetime, orders.qty, product.product_id, product.price, transactions.payment_txn_success, round(product.price::numeric * orders.qty, 2) as total_sales_of_day
 from orders
 join product on orders.product_id = product.product_id
 join transactions on orders.txn_id = transactions.payment_txn_id
-where (transactions.payment_txn_success = true)
-order by datetime asc;]]></db:sql>
+where (transactions.payment_txn_success = true);]]></db:sql>
 			<db:input-parameters><![CDATA[#[{'store_id':vars.store_id}]]]></db:input-parameters>
 		</db:select>
-				<ee:transform doc:name="Transform to JSON" doc:id="41a14e99-f0d2-4a00-b16e-a37a1b5e08dd">
+				<ee:transform doc:name="Transform to JSON" doc:id="5fcbcf38-7991-410d-b724-320f02e0b940">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json	
@@ -123,11 +166,11 @@ output application/json
 payload ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="4c77741b-2357-450f-a0ab-bf74159db30a" variableName="RDBObject"/>
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="896da478-c609-4abc-b71b-6e6e3ceee5c1" />
 			</route>
 			<route >
-				<flow-ref doc:name="Flow Reference" doc:id="e2da9c1b-5790-472d-93b7-fa98bf322447" name="getCSVDataFlow"/>
-				<ee:transform doc:name="Transform to JSON" doc:id="38415682-2f24-4f1e-b5c2-aa1dbc5dd287" >
+				<flow-ref doc:name="Flow Reference" doc:id="cdfb3b1f-650e-4627-9847-07e9c62e3a71" name="getCSVDataFlow"/>
+				<ee:transform doc:name="Transform to JSON" doc:id="467cdadc-27fe-4426-9860-1e9669bf1f00" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -135,11 +178,18 @@ output application/json
 payload]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="7e528e3e-ea3e-4c3e-8b5c-60d3ac8435ed" variableName="CSVObject"/>
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="9589a4b9-6d60-41ca-a25e-7d06d93bc11f" />
 			</route>
 			<route >
-				<flow-ref doc:name="Flow Reference" doc:id="480a5e7b-fa9a-44ac-83c8-c37167c221b2" name="getECommerceDataFlow"/>
-				<ee:transform doc:name="Transform to JSON" doc:id="5a743b7e-3a26-46a5-a57d-8c8fb43f701b" >
+				<try doc:name="Try" doc:id="d7d09104-addd-4c3d-ac75-b832c3231fd5" >
+					<flow-ref doc:name="Flow Reference" doc:id="b3d87127-f414-4bc9-b9d6-0ccdd05ca01c" name="getECommerceDataFlow" />
+					<error-handler >
+						<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="1272bf9d-b97f-4224-a131-57ceebd0a659" type="ANY">
+							<set-payload value="#[[]]" doc:name="Set Payload" doc:id="5dda96d1-f865-474a-8e40-c224b4f5bfac" />
+						</on-error-continue>
+					</error-handler>
+				</try>
+				<ee:transform doc:name="Transform to JSON" doc:id="1fc559a5-d5ce-4100-817a-fa2e38a85afd" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -147,20 +197,20 @@ output application/json
 payload]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="1011f8e0-08f5-4572-8ac7-87930dabd575" variableName="ECommerceObject"/>
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="52e66276-70c6-4320-a5d0-81245d8b0982" />
 			</route>
 		</scatter-gather>
-		<ee:transform doc:name="Transform Message" doc:id="d800c8ce-f01c-447a-88ea-0237bc606f4a" >
+		<ee:transform doc:name="Transform Message" doc:id="84882c28-b29a-4e03-a839-ee781970369f" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
 ---
-vars.CSVObject ++ vars.RDBObject ++ vars.ECommerceObject
+flatten(payload..payload)
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="344f17a3-403a-43f0-86e3-cc6aceb6fb1e" />
-		<ee:transform doc:name="Transform Message" doc:id="36036600-1848-42d5-a6be-b83d52351216" >
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="f596b9d2-fa98-41ff-b1e6-6c7fee4a9fea" />
+		<ee:transform doc:name="Transform Message" doc:id="54353e00-89d1-4035-a12d-fb58d665b6ca" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -172,31 +222,30 @@ and ($.payment_txn_success == true)
 and ($.datetime < dateYear)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="59c02e9f-900f-4939-974c-db60f6c368ea" message="salesByStoreSuccessfullyInvoked" />
+		<logger level="INFO" doc:name="Logger" doc:id="8f1d9b82-ae96-4693-8443-a436d2cfbb26" message="salesByStoreSuccessfullyInvoked" />
 		<error-handler >
-            <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="a259f149-6833-440a-83b3-408664f657c6" type="DB:QUERY_EXECUTION">
-                <set-payload value="#['Please enter a valid store filter in the URL (For example, &quot;?storeID=1&quot;)']" doc:name="Set Payload" doc:id="6d520b11-6596-4c12-90a1-b54ad54ea193" />
+            <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="e2e2a397-f304-4c6c-8b9a-fc6b52370c0f" type="DB:QUERY_EXECUTION">
+                <set-payload value="#['Please enter a valid store filter in the URL (For example, &quot;?storeID=1&quot;)']" doc:name="Set Payload" doc:id="12a5fb06-5ac4-405b-baca-33680bb4fa8d" />
             </on-error-continue>
-            <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="72b19558-2f7d-4ee2-8180-d6bda12d9b80" type="MULE:EXPRESSION">
-                <set-payload value="#['Please enter a valid URL (For example, &quot;/historicIncomeByStore?storeID=1&quot;)']" doc:name="Set Payload" doc:id="2c645ca1-2e47-4372-985f-0329086333a6" />
+            <on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="4cb9248f-6491-476f-af77-265ea776ef0a" type="MULE:EXPRESSION">
+                <set-payload value="#['Please enter a valid URL (For example, &quot;/historicIncomeByStore?storeID=1&quot;)']" doc:name="Set Payload" doc:id="2c0ace62-46f5-4fe1-9532-e0a352d66fe5" />
             </on-error-continue>
         </error-handler>
 		
 	</flow>
-	<flow name="historicSalesByProductFlow" doc:id="13751da0-ecf4-4837-9911-c1689b00a837">
-		<set-variable value="#[attributes.queryParams.id]" doc:name="Set Variable" doc:id="e3334151-3b92-47ae-9d72-e9326e8e92ca" variableName="product_id" />
-		<scatter-gather doc:name="Scatter-Gather" doc:id="b902839f-c8a2-4e9e-8ea2-d594c948f729">
+	<flow name="historicSalesByProductFlow" doc:id="4af4e5b3-d173-425a-87b7-4f9cb3e187de">
+		<set-variable value="#[message.attributes.queryParams.id]" doc:name="Set Variable" doc:id="d1242468-9ce9-4aab-8e32-0dd1625ff21a" variableName="product_id" />
+		<scatter-gather doc:name="Scatter-Gather" doc:id="22604228-2415-469c-9c9d-27addc82b265">
 			<route>
-				<db:select doc:name="Select * from RDB" doc:id="3e3d0b9d-81e8-4e17-8176-9ada7244c40d" config-ref="Database_Config">
+				<db:select doc:name="Select * from RDB" doc:id="ebbe9e74-f944-4abe-80f9-f639d49606c5" config-ref="Database_Config">
 					<db:sql><![CDATA[select orders.store_id, orders.datetime, orders.qty, product.product_id, product.price, transactions.payment_txn_success, round(product.price::numeric * orders.qty, 2) as total_sales_of_day
 from orders
 join product on orders.product_id = product.product_id
 join transactions on orders.txn_id = transactions.payment_txn_id
-where (transactions.payment_txn_success = true)
-order by datetime asc;]]></db:sql>
+where (transactions.payment_txn_success = true);]]></db:sql>
 					<db:input-parameters><![CDATA[#[{'store_id':vars.store_id}]]]></db:input-parameters>
 				</db:select>
-				<ee:transform doc:name="Transform to JSON" doc:id="9cef2474-10e6-41c5-9de1-ccb14677f70b">
+				<ee:transform doc:name="Transform to JSON" doc:id="4dcb0f2e-a4b7-4ab4-a8ce-0eb79e518062">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json	
@@ -204,11 +253,11 @@ output application/json
 payload ]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="d2728b61-2cc9-4aee-b136-af9124ca2940" variableName="RDBObject" />
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="47b7c37f-d2a3-471d-99f6-cdbef814cc00" />
 			</route>
 			<route>
-				<flow-ref doc:name="Flow Reference" doc:id="105224e0-f35b-40a1-80a1-816ff1ef812e" name="getCSVDataFlow" />
-				<ee:transform doc:name="Transform to JSON" doc:id="f26f6037-f849-48b6-b228-0957db9247a6">
+				<flow-ref doc:name="Flow Reference" doc:id="0cf36579-04db-4178-9370-47879ecbe777" name="getCSVDataFlow" />
+				<ee:transform doc:name="Transform to JSON" doc:id="a04ed5ba-b635-42d1-9849-378ead9a6823">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -216,11 +265,18 @@ output application/json
 payload]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="3014fdb0-df92-4a3d-b3b2-4b862a7deadf" variableName="CSVObject" />
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="194ea825-6dd7-4023-929d-d42ebe2b51a5" />
 			</route>
 			<route>
-				<flow-ref doc:name="Flow Reference" doc:id="4fd55692-e378-4ece-a937-8b3b5268e399" name="getECommerceDataFlow" />
-				<ee:transform doc:name="Transform to JSON" doc:id="37bb6194-6968-462d-87f9-bb5fa902dd21">
+				<try doc:name="Try" doc:id="cdadc299-6f64-4b52-878b-2ce1d8efc946">
+			<flow-ref doc:name="Flow Reference" doc:id="5307cd8b-7477-4ffc-ba34-fe7d253f647c" name="getECommerceDataFlow" />
+			<error-handler>
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="dbe6b680-4713-4ca6-a0ba-4ec26be5dd3c" type="ANY">
+					<set-payload value="#[[]]" doc:name="Set Payload" doc:id="a4a4e4a2-7227-4352-837e-b1f2e35fd561" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+				<ee:transform doc:name="Transform to JSON" doc:id="e108a607-21a2-448b-bc61-efe8bd2087bd">
 					<ee:message>
 						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
@@ -228,55 +284,53 @@ output application/json
 payload]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="71ec891b-1fe8-4984-9346-4873d7331931" variableName="ECommerceObject" />
+				<set-payload value="#[payload]" doc:name="Set Payload" doc:id="1377e517-ff6d-4059-9cc7-8cefccfb2781" />
 			</route>
 		</scatter-gather>
-		<ee:transform doc:name="Transform Message" doc:id="dac65094-58e1-4297-9256-a4fe3a93a96b">
+		<ee:transform doc:name="Transform Message" doc:id="43578023-d679-4ad9-a126-95943fba653f">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
-vars.CSVObject ++ vars.RDBObject ++ vars.ECommerceObject
-]]></ee:set-payload>
+flatten(payload..payload)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="00927430-0cc2-4606-b58e-553ce129ed0e" />
-		<ee:transform doc:name="Transform Message" doc:id="0e161109-ae3b-4530-b3b0-17b23ee2db4f">
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="a82c98cc-f4f4-4c36-bbdc-3d10450241dc" />
+		<ee:transform doc:name="Transform Message" doc:id="133cfc79-3b4c-4eda-a81b-df5453d5d632">
 			<ee:message>
 				<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 var dateYear = now().year ++ "-0" ++ now().month
 ---
 payload orderBy($.datetime) 
-filter($.product_id==(vars.product_id as Number)) 
+filter($.product_id==(vars.product_id as String)) 
 and ($.payment_txn_success == true)
 and ($.datetime < dateYear)]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="27370e29-5c7f-4286-a8bb-de2bc50ccecc" message="salesByStoreSuccessfullyInvoked" />
+		<logger level="INFO" doc:name="Copy_of_Logger" doc:id="90f995e5-373d-4724-90f7-a34d94f4b305" message="salesByStoreSuccessfullyInvoked" />
 		<error-handler>
-			<on-error-continue enableNotifications="true" logException="true" doc:name="Copy_of_On Error Continue" doc:id="ea2b0bb2-0205-4e48-a6d8-4fabbeb748fd" type="DB:QUERY_EXECUTION">
-				<set-payload value="#['Please enter a valid store filter in the URL (For example, &quot;?id=2e784144-aad6-49ba-ad86-c6d39ebac593&quot;)']" doc:name="Copy_of_Set Payload" doc:id="cda164bc-f334-45f4-b030-e651f582525b" />
+			<on-error-continue enableNotifications="true" logException="true" doc:name="Copy_of_On Error Continue" doc:id="813b7971-343a-4775-a2bf-414a760f6d4e" type="DB:QUERY_EXECUTION">
+				<set-payload value="#['Please enter a valid store filter in the URL (For example, &quot;?id=2e784144-aad6-49ba-ad86-c6d39ebac593&quot;)']" doc:name="Copy_of_Set Payload" doc:id="3d819183-000a-421b-b3ec-02a5ae3fe8a8" />
 			</on-error-continue>
-			<on-error-continue enableNotifications="true" logException="true" doc:name="Copy_of_On Error Continue" doc:id="1632c29f-4515-44f5-8eb6-ef45910b8586" type="MULE:EXPRESSION">
-				<set-payload value="#['Please enter a valid URL (For example, &quot;/historicSalesByProduct?id=2e784144-aad6-49ba-ad86-c6d39ebac593&quot;)']" doc:name="Copy_of_Set Payload" doc:id="b93e5243-9702-4562-826c-787d78fe0fac" />
+			<on-error-continue enableNotifications="true" logException="true" doc:name="Copy_of_On Error Continue" doc:id="e1f95372-13d6-496f-859b-43457e986bf4" type="MULE:EXPRESSION">
+				<set-payload value="#['Please enter a valid URL (For example, &quot;/historicSalesByProduct?id=2e784144-aad6-49ba-ad86-c6d39ebac593&quot;)']" doc:name="Copy_of_Set Payload" doc:id="f1caab22-617c-4a54-836e-90500f6a63a9" />
 			</on-error-continue>
 		</error-handler>
 	</flow>
-	<flow name="historicIncomeByStoreFlow" doc:id="b5f34c9f-c590-4c51-ba7b-b1bf57511a94" >
-		<set-variable value="#[message.attributes.queryParams.id]" doc:name="Set Variable" doc:id="2e72f148-ba9f-4ad4-a420-5c229af39ba6" variableName="store_id" />
-		<scatter-gather doc:name="Scatter-Gather" doc:id="82fcf0cf-00c7-448b-9b05-3d37a9196a1e" >
+	<flow name="historicIncomeByStoreFlow" doc:id="d6dc4184-e020-446e-b728-722eaaab6bf8" >
+		<set-variable value="#[message.attributes.queryParams.id]" doc:name="Set Variable" doc:id="9963c151-9c9f-45fd-a80f-7ec60df3e8bc" variableName="store_id" />
+		<scatter-gather doc:name="Scatter-Gather" doc:id="bafd240a-1fcf-4268-8486-faab8c5401b1" >
 			<route >
-				<db:select doc:name="Select * from RDB" doc:id="be4d4111-365b-48fb-84ed-f9b355d25963" config-ref="Database_Config" >
+				<db:select doc:name="Select * from RDB" doc:id="c710d747-e3d3-4760-a607-2773c5763553" config-ref="Database_Config" >
 					<db:sql ><![CDATA[select orders.store_id, orders.datetime, orders.qty, product.product_id, product.price, transactions.payment_txn_success, round(product.price::numeric * orders.qty, 2) as total_sales_of_day
 from orders
 join product on orders.product_id = product.product_id
 join transactions on orders.txn_id = transactions.payment_txn_id
-where (transactions.payment_txn_success = true)
-order by datetime asc;]]></db:sql>
+where (transactions.payment_txn_success = true);]]></db:sql>
 					<db:input-parameters ><![CDATA[#[{'store_id':vars.store_id}]]]></db:input-parameters>
 				</db:select>
-				<ee:transform doc:name="Transform to JSON" doc:id="7c94f37b-a6bf-47c8-bd50-24cb374c2331" >
+				<ee:transform doc:name="Transform to JSON" doc:id="ff08cb26-d074-42a4-93a5-dbdd0b37fcbc" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json	
@@ -284,11 +338,11 @@ output application/json
 payload ]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="3a001d5d-63f7-4c06-abf4-1de695971924" variableName="RDBObject" />
+				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="117d1986-fac6-4201-b5ff-3782130ec991" variableName="RDBObject" />
 			</route>
 			<route >
-				<flow-ref doc:name="Flow Reference" doc:id="3dda048f-a399-4d14-b7aa-64c31a1d5ffc" name="getCSVDataFlow" />
-				<ee:transform doc:name="Transform to JSON" doc:id="f74e99f2-7479-4c5f-b429-1162b371c3d3" >
+				<flow-ref doc:name="Flow Reference" doc:id="2a9f3045-97d1-48a4-b20d-7cf4af591e2a" name="getCSVDataFlow" />
+				<ee:transform doc:name="Transform to JSON" doc:id="79326fb4-b788-4255-8fb9-abdc931ab2b2" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -296,11 +350,18 @@ output application/json
 payload]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="07115a02-4c58-4e41-9735-a4f5e488e9fe" variableName="CSVObject" />
+				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="0ea7de2f-45a9-499c-b05d-7f7820263fe4" variableName="CSVObject" />
 			</route>
 			<route >
-				<flow-ref doc:name="Flow Reference" doc:id="77f101fc-ed7b-4210-877a-5257f1e0a5b0" name="getECommerceDataFlow" />
-				<ee:transform doc:name="Transform to JSON" doc:id="97c58b43-0fff-469a-b0b7-1c73407ac4ac" >
+				<try doc:name="Try" doc:id="3063c696-66a3-44fa-b922-0d002c55f5a6">
+			<flow-ref doc:name="Flow Reference" doc:id="35883031-a1dd-4107-8da3-d0b81b2c8c47" name="getECommerceDataFlow" />
+			<error-handler>
+				<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5db6fc01-4d74-45a3-ad14-b684fd156a1b" type="ANY">
+					<set-payload value="#[[]]" doc:name="Set Payload" doc:id="139f5b88-2552-4234-b300-c7d47bf04947" />
+				</on-error-continue>
+			</error-handler>
+		</try>
+				<ee:transform doc:name="Transform to JSON" doc:id="c7bd9937-227a-45cf-8bbb-16e0a3e4e21d" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -308,10 +369,10 @@ output application/json
 payload]]></ee:set-payload>
 					</ee:message>
 				</ee:transform>
-				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="44add6e2-4192-4b98-b09a-f9efe478e57e" variableName="ECommerceObject" />
+				<set-variable value="#[payload]" doc:name="Set Variable" doc:id="434bb216-3b20-49b7-9967-cf2247ba604c" variableName="ECommerceObject" />
 			</route>
 		</scatter-gather>
-		<ee:transform doc:name="Transform Message" doc:id="0efbb840-30d7-482b-a80f-860e473bdbe1" >
+		<ee:transform doc:name="Transform Message" doc:id="2f3c89d1-86f7-4ee2-9191-aca8f9f642aa" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -328,8 +389,8 @@ array map (value) -> {
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="62201c70-b724-429f-9da8-b863693522e2" />
-		<ee:transform doc:name="Transform Message" doc:id="7d196cf6-07ca-4337-88ff-9f33b8e71080" >
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="d12de09c-51fd-47a7-8b92-829e80813c42" />
+		<ee:transform doc:name="Transform Message" doc:id="4b243a52-a209-4efb-a1c4-04db1bed530d" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -340,8 +401,8 @@ and ($.payment_txn_success == true)
 groupBy($.datetime) pluck $]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="a8542b2b-c1de-4680-ac48-60ddaba95e0c" />
-		<ee:transform doc:name="Transform Message" doc:id="43d5c373-f493-48ad-accf-58f83f55a0d6" >
+		<set-payload value="#[payload]" doc:name="Set Payload" doc:id="b90a123e-c99c-4836-9583-6dc6b94f03c5" />
+		<ee:transform doc:name="Transform Message" doc:id="86fd8981-6bfd-4150-9feb-ec82c8a277ac" >
 			<ee:message >
 				<ee:set-payload ><![CDATA[%dw 2.0
 output application/json
@@ -353,13 +414,13 @@ payload map (value, index) -> {
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
-		<logger level="INFO" doc:name="Logger" doc:id="fae92130-e073-4135-8769-b5a41b05168e" message="salesByStoreSuccessfullyInvoked" />
+		<logger level="INFO" doc:name="Logger" doc:id="cd2c126b-17df-4490-a412-4cecfed72a0c" message="salesByStoreSuccessfullyInvoked" />
 		<error-handler >
-			<on-error-continue enableNotifications="true" logException="true" doc:name="Copy_of_On Error Continue" doc:id="d2dd1b7f-366b-4c6a-87cf-784c0bc89564" type="DB:QUERY_EXECUTION" >
-				<set-payload value="#['Please enter a valid store filter in the URL (For example, &quot;?storeID=1&quot;)']" doc:name="Copy_of_Set Payload" doc:id="1dfdca4e-1f29-4275-a413-573ccee6bda5" />
+			<on-error-continue enableNotifications="true" logException="true" doc:name="Copy_of_On Error Continue" doc:id="e2d43293-0155-4db5-b4e8-136de649f11c" type="DB:QUERY_EXECUTION" >
+				<set-payload value="#['Please enter a valid store filter in the URL (For example, &quot;?storeID=1&quot;)']" doc:name="Copy_of_Set Payload" doc:id="9797ae7e-af07-4881-bb39-a3ae022132f9" />
 			</on-error-continue>
-			<on-error-continue enableNotifications="true" logException="true" doc:name="Copy_of_On Error Continue" doc:id="fe216023-1c64-4d9f-8737-44bce6c14c72" type="MULE:EXPRESSION" >
-				<set-payload value="#['Please enter a valid URL (For example, &quot;/historicIncomeByStore?storeID=1&quot;)']" doc:name="Copy_of_Set Payload" doc:id="baf06596-83cd-4749-bd59-0d7655130459" />
+			<on-error-continue enableNotifications="true" logException="true" doc:name="Copy_of_On Error Continue" doc:id="245864e6-1fe5-4fd0-b39c-ecb8763c2155" type="MULE:EXPRESSION" >
+				<set-payload value="#['Please enter a valid URL (For example, &quot;/historicIncomeByStore?storeID=1&quot;)']" doc:name="Copy_of_Set Payload" doc:id="3f7a1e5a-6a0a-45b6-87d4-8872852a3778" />
 			</on-error-continue>
 		</error-handler>
 	</flow>
