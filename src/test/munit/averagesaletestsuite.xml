@@ -1,0 +1,290 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="new-test-suite.xml" />
+	<munit:test name="successfulTransactions_Test" doc:id="fd94421c-2f3c-4276-a06d-9939525e56ad" description="successfulTransactions flow should return only return successful transactions">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when - successfulTransactions - allTransactions" doc:id="c92d3bdf-96cf-4204-bb60-812ba301e3ca" processor="flow-ref">
+			<munit-tools:with-attributes>
+				<munit-tools:with-attribute whereValue="allTransactions" attributeName="doc:name" />
+				<munit-tools:with-attribute whereValue="ac447733-a3cd-4072-8b8f-016c0d974173" attributeName="doc:id" />
+				<munit-tools:with-attribute whereValue="allTransactions" attributeName="name" />
+				<munit-tools:with-attribute whereValue="allTransactions" attributeName="doc:name" />
+				<munit-tools:with-attribute whereValue="ac447733-a3cd-4072-8b8f-016c0d974173" attributeName="doc:id" />
+				<munit-tools:with-attribute whereValue="allTransactions" attributeName="name" />
+			</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[readUrl('classpath://mockTransactionData.dwl')]" />
+				</munit-tools:then-return>
+		</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="successfulTransactions" doc:id="522a53bd-91db-4045-aeb4-519b4266d88c" name="successfulTransactions"/>
+		</munit:execution>
+		<munit:validation>
+			<logger level="INFO" doc:name="Logger" doc:id="ee39b96b-408e-4eb5-8fe6-2ba25cdcef3a" message="#[payload]"/>
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="327b8aff-171d-4299-b9af-d1accdd3a64a" actual="#[payload]" expected='#[readUrl("classpath://mockSuccessfulTransactionReturnData.dwl")]'/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="successfulOrders_Test" doc:id="4d148799-fb70-4254-a5a6-83a22429deb0" description="successfulOrders should return only successful orders">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when - successfulOrders -&gt; allOrders" doc:id="dc3da6e5-4c7d-427e-81fd-874f294c0747" processor="flow-ref">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="allOrders" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="adfd446b-8d7a-4133-bfaa-8f55dfee1c98" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="allOrders" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[readUrl('classpath://mockOrderData.dwl')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when - successfulOrders -&gt; allTransactions" doc:id="c0239747-e479-41d3-8786-3c5833af8053" processor="flow-ref">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="allTransactions" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3fb6a7a4-a423-48f2-8705-e5e40c5e5f8f" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="allTransactions" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[readUrl('classpath://mockTransactionData.dwl')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="successfulOrders" doc:id="70183b48-1dd5-4a2f-a5b3-60c9bc8d75af" name="successfulOrders"/>
+			<logger level="INFO" doc:name="Logger" doc:id="cf748c30-6bdf-4267-8897-733bdba53add" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="e5e2a3c4-fa8e-4e55-8e7a-b791141b57d5" actual="#[payload]" expected='#[readUrl("classpath://mockSuccessfulOrderReturnData.dwl")]'/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="averagesale_Test" doc:id="a74100e1-452d-4b4e-a187-a01fc9cfb593" description="averageSale should return an average of the array successful orders">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when - averageSale -&gt; dbproducts" doc:id="fb2cbf3e-c1a7-4e8e-8cb0-f88ad68a09db" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="dbproducts" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="9a90ccf3-2e69-463e-ae75-9e1d85621959" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="dbproducts" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[readUrl("classpath://mockProductData.dwl")]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when - averageSale -&gt; successfulOrders" doc:id="2c913dd4-1312-4040-986c-e29e687345ab" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="successfulOrders" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="767c9490-70d5-4ff6-b6f1-635c60cc560d" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="successfulOrders" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[readUrl("classpath://mockSuccessfulOrderReturnData.dwl")]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="averagesale" doc:id="9c6b185b-82d8-4cd0-83aa-d0d617289fdd" name="averageSale"/>
+		</munit:execution>
+		<munit:validation >
+			<logger level="INFO" doc:name="Logger" doc:id="75abe75f-aba8-44f2-a0b0-f73d2aedb96d" />
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="b9529009-5adb-44d9-9d85-6de6af204d39" actual="#[payload]" expected='200.76'/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="transactionSuccessMetrics_Test_No_Variable" doc:id="8db51d03-dd56-4581-9774-d3e581b791c3" description="transactionSuccessMetrics using no query parameters">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when - transactionSuccessMetrics -&gt; allTransactions" doc:id="c0902d64-802c-4ca9-95b9-3f916683eeb5" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="allTransactions" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="bf931c32-b2b5-4c97-a637-15ab1fedb00e" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="allTransactions" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://mockTransactionData.dwl')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="transactionSuccessMetrics" doc:id="e1f8fc02-b6d2-44ec-b796-e44a0b8c15cf" name="transactionSuccessMetrics"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="05185e9c-05f4-47ee-bd54-69c9b709f563" actual="#[payload]" expected='#["33.33%"]'/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="transactionSuccessMetrics_Test_Correct_Variable" doc:id="dba734c4-e0af-4daf-9f18-74b21f5b5c23" description="transactionSuccessMetrics using a valid parameter">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when - transactionSuccessMetrics -&gt; allTransactions" doc:id="b31c234b-9110-4a7a-8ea9-d0fdfa29f332" processor="flow-ref">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="allTransactions" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="bf931c32-b2b5-4c97-a637-15ab1fedb00e" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="allTransactions" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[readUrl('classpath://mockTransactionData.dwl')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="queryParams" doc:id="67ffce45-6a99-4a73-8107-a243060275e8">
+				<munit:attributes value='#[ { queryParams: {"payment_type": "mastercard"}}]' />
+			</munit:set-event>
+			<flow-ref doc:name="transactionSuccessMetrics" doc:id="7c7a5458-f3df-4e5e-b6c5-884802cbd52e" name="transactionSuccessMetrics" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="578bb9c9-2ee1-4f91-b95d-af2b283bc242" actual="#[payload]" expected='#["66.67%"]' />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="transactionSuccessMetrics_Test_Blank_String_Variable" doc:id="230f0c43-ac6a-444d-9cb5-9be13e4707b2" expectedErrorType="VALIDATION:BLANK_STRING" expectedErrorDescription="payment_type cannot be blank" description="transactionSuccessMetrics using a blank string as the parameter">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when - transactionSuccessMetrics -&gt; allTransactions" doc:id="15e10aff-6b45-43da-b71f-e7258d53cde4" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="allTransactions" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="bf931c32-b2b5-4c97-a637-15ab1fedb00e" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="allTransactions" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://mockTransactionData.dwl')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="queryParams" doc:id="2c837a01-a3a5-4079-91d1-043729726caf" >
+				<munit:attributes value='#[ { queryParams: {"payment_type": ""}}]' />
+			</munit:set-event>
+			<flow-ref doc:name="transactionSuccessMetrics" doc:id="4c6e4c58-3a60-427d-be96-c6d94f90130d" name="transactionSuccessMetrics" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="913188b7-aee2-452c-9748-5e7c26651826" actual="#[payload]" expected="payment_type cannot be blank"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="transactionSuccessMetrics_Test_Incorrect_Variable" doc:id="60532b4b-d53f-4873-a328-682e6ce29ebe" description="transactionSuccessMetrics when using an invalid parameter">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when - transactionSuccessMetrics -&gt; allTransactions" doc:id="db5f3cd9-cfb9-41ab-82c0-3348dcd2ca17" processor="flow-ref">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="allTransactions" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="bf931c32-b2b5-4c97-a637-15ab1fedb00e" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="allTransactions" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:payload value="#[readUrl('classpath://mockTransactionData.dwl')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="queryParams" doc:id="c0b96bff-94f9-465f-9da0-f52567d5bd41">
+				<munit:attributes value='#[ { queryParams: {"payment_type": "mustardcard"}}]' />
+			</munit:set-event>
+			<flow-ref doc:name="transactionSuccessMetrics" doc:id="ba50698c-a6ec-4f3b-b267-caa0e65069e3" name="transactionSuccessMetrics" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="49766688-c78c-4034-83d7-4a1618c67d3a" actual="#[payload]" expected="No payment type: mustardcard exists in our system" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="averagesale_Test_Store_id_Only" doc:id="b62e2209-475a-47cd-b876-50a9b2fa7a69" description="averageSale using store_id parameter only">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when - averageSale -&gt; dbproducts" doc:id="365e2cc6-7f2a-4c02-acfa-ecee490dbccc" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="dbproducts" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="9a90ccf3-2e69-463e-ae75-9e1d85621959" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="dbproducts" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[readUrl("classpath://mockProductData.dwl")]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when - averageSale -&gt; successfulOrders" doc:id="7013b63f-fc9e-4cfd-815a-b0e4b6743941" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="successfulOrders" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="767c9490-70d5-4ff6-b6f1-635c60cc560d" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="successfulOrders" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[readUrl("classpath://mockSuccessfulOrderReturnData.dwl")]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="da3142ee-35ec-4fa9-b559-2571f23ab80f" >
+				<munit:attributes value='#[ { queryParams: {"store_id": "4"}}]' />
+			</munit:set-event>
+			<flow-ref doc:name="averagesale" doc:id="d389476c-a0b2-4c23-9f29-28a7319fabde" name="averageSale" />
+		</munit:execution>
+		<munit:validation >
+			<logger level="INFO" doc:name="Logger" doc:id="1fc09a6a-93a5-4f35-90d2-308919ad862b" />
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="270fc870-91b2-42c6-ac01-4519fd78e551" actual="#[payload]" expected="200.76" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="averagesale_Test_Day_Only" doc:id="09b10ccc-0140-453a-bc4f-0543fee6e53c" description="averageSale using day parameter only">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when - averageSale -&gt; dbproducts" doc:id="aa38cdca-493e-4f96-aa1c-25654404c1ad" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="dbproducts" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="9a90ccf3-2e69-463e-ae75-9e1d85621959" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="dbproducts" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[readUrl("classpath://mockProductData.dwl")]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when - averageSale -&gt; successfulOrders" doc:id="dbf492e8-876d-4b37-93ac-f68b5ab5e5bd" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="successfulOrders" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="767c9490-70d5-4ff6-b6f1-635c60cc560d" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="successfulOrders" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[readUrl("classpath://mockSuccessfulOrderReturnData.dwl")]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="6bf805d3-6921-4cb0-8ab1-74b0d4dd59f0" >
+				<munit:attributes value='#[ { queryParams: {"day": "Sat"}}]' />
+			</munit:set-event>
+			<flow-ref doc:name="averagesale" doc:id="a1dd1ead-23dd-47bb-b329-bdabb78cc747" name="averageSale" />
+		</munit:execution>
+		<munit:validation >
+			<logger level="INFO" doc:name="Logger" doc:id="56adca7c-f627-435c-b57d-d97d1e985ab8" />
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="30780228-def1-426d-97fa-3273a7e849d8" actual="#[payload]" expected="200.76" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="averagesale_Test_Store_id_And_Day" doc:id="7f3dd2f1-ebf8-44a3-b3bb-53a27f8fa3e4" description="averageSale using both store_id and day as parameters">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when - averageSale -&gt; dbproducts" doc:id="750edf2d-a125-4632-9260-54d552d90d64" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="dbproducts" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="9a90ccf3-2e69-463e-ae75-9e1d85621959" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="dbproducts" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[readUrl("classpath://mockProductData.dwl")]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Mock when - averageSale -&gt; successfulOrders" doc:id="5f1e253a-d203-4789-99e4-3df99b8b39e6" processor="flow-ref" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="successfulOrders" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="767c9490-70d5-4ff6-b6f1-635c60cc560d" attributeName="doc:id" />
+					<munit-tools:with-attribute whereValue="successfulOrders" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value='#[readUrl("classpath://mockSuccessfulOrderReturnData.dwl")]' />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="d4028f34-d535-4585-841e-68f1d1beb881" >
+				<munit:attributes value='#[ { queryParams: {"store_id": "4","day":"Sat"}}]' />
+			</munit:set-event>
+			<flow-ref doc:name="averagesale" doc:id="03eead4c-6937-4a2c-aaf0-4d0481b62717" name="averageSale" />
+		</munit:execution>
+		<munit:validation >
+			<logger level="INFO" doc:name="Logger" doc:id="fee4ff9c-7f15-4a0d-927e-c60ef482ed61" />
+			<munit-tools:assert-equals doc:name="Assert equals" doc:id="5637868a-9e41-4ed7-a5a3-0d1b8e97d389" actual="#[payload]" expected="200.76" />
+		</munit:validation>
+	</munit:test>
+
+
+</mule>
