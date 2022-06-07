@@ -8,17 +8,46 @@
 		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
 		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
 	<munit:config name="orderfeature-test-suite.xml" />
-	<munit:test name="orderfeature-test-suite-Get:QuantityofSalesofPrevMonthbyProductIdTest" doc:id="3c2723de-874a-4910-942e-43ff028394e3" description="Test">
-		<munit:execution >
-			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthbyProductId" doc:id="fae491d2-42fb-4d30-91b9-4e27da4021b3" name="Get:QuantityofSalesofPrevMonthbyProductId"/>
+	<munit:test name="ByProductIdTest01-QuantityValue" doc:id="366d45a3-9013-41c4-8489-756dfa0d9b62" description="Test">
+		<munit:behavior>
+			<munit:set-event doc:name='Set GET | id="475ee4e3-95ae-44ac-9ae3-21080e710a1c"' doc:id="8ca02632-056c-46b7-bb15-44048efb1184">
+				<munit:attributes value="#[{ method : 'GET', queryParams : { id : &quot;475ee4e3-95ae-44ac-9ae3-21080e710a1c&quot;}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution>
+			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthbyProductId" doc:id="3ba4969b-29d5-49f8-9341-fec214d82fba" name="Get:QuantityofSalesofPrevMonthbyProductId" />
 		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-equals doc:name="Checks if Quantity of Salesis 3 as expected" doc:id="3767e8db-1369-4721-b76b-89df9c4b2ec8" actual='#[payload."Quantity of Sales"]' expected="3" message="The Quantity of Product should be 3 for product id '475ee4e3-95ae-44ac-9ae3-21080e710a1c'" />
+		</munit:validation>
 	</munit:test>
-	<munit:test name="orderfeature-test-suite-Get:QuantityofSalesofPrevMonthAllTest" doc:id="bee862c9-66ac-405f-a776-a06116ab7494" description="Test">
-		<munit:execution >
-			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthAll" doc:id="7a866583-e11c-487a-8ee2-e88969b25831" name="Get:QuantityofSalesofPrevMonthAll"/>
+	<munit:test name="ByProductIdTest02-QuantityNotNull" doc:id="1e76b8fe-d146-47de-8ef7-86a366a54a64" description="Test">
+		<munit:behavior>
+			<munit:set-event doc:name='Set GET | id="475ee4e3-95ae-44ac-9ae3-21080e710a1c"' doc:id="215da26e-4d40-4e9e-98e2-0886222dfee2" >
+				<munit:attributes value="#[{ method : 'GET', queryParams : { id : &quot;475ee4e3-95ae-44ac-9ae3-21080e710a1c&quot;}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution>
+			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthbyProductId" doc:id="a1d7fa40-80ce-4f97-a148-d76034c8bd05" name="Get:QuantityofSalesofPrevMonthbyProductId" />
 		</munit:execution>
+		<munit:validation>
+			<munit-tools:assert-that doc:name="Checks if Quantity of Product is NOT Null" doc:id="670b7f23-6bf6-40d4-b5cd-fd9f4edd78db" is="#[MunitTools::notNullValue()]" expression='#[payload."Quantity of Product"]'/>
+		</munit:validation>
 	</munit:test>
-	<munit:test name="orderfeature-test-suite-Get:QuantityofSalesofPrevMonthbyStoreIdTest" doc:id="7827898d-a137-472b-8cd3-2ad0eae63d26" description="Test">
+	<munit:test name="ByProductIdTest03-QuantityOfProductNotNull" doc:id="39075c9f-fa5b-4e9a-ae1f-2a282b5c3a1a" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name='Set GET | id="475ee4e3-95ae-44ac-9ae3-21080e710a1c"' doc:id="2e41554c-c459-4045-97c0-f755d31ead4c" >
+				<munit:attributes value="#[{ method : 'GET', queryParams : { id : &quot;475ee4e3-95ae-44ac-9ae3-21080e710a1c&quot;}}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthbyProductId" doc:id="9b46bf77-f85d-45a7-9763-704dac2005ea" name="Get:QuantityofSalesofPrevMonthbyProductId"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Checks if Quantity of Product is NOT Null" doc:id="948acdc4-d043-4000-a2f2-8482fec9be24" is="#[MunitTools::notNullValue()]" expression='#[payload."Quantity of Product"]' />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ByStoreIdTest01-QuantityValue" doc:id="7827898d-a137-472b-8cd3-2ad0eae63d26" description="Test">
 		<munit:behavior >
 			<munit:set-event doc:name="Set GET | id=3" doc:id="539f43a0-9c29-4a70-845b-37182fd784c9" >
 				<munit:attributes value="#[{ method : 'GET', queryParams : { id : '3'}}]" />
@@ -31,7 +60,7 @@
 			<munit-tools:assert-equals doc:name="Checks if Quantity of Sales is 49 when id = 3" doc:id="139b49f3-7c05-48d6-ac6a-16b2d6432b3d" actual='#[payload."Quantity of Sales"]' expected="49" message="The Quantity of Sales should be 49 for storeID '3'" />
 		</munit:validation>
 	</munit:test>
-	<munit:test name="orderfeature-test-suite-Get:QuantityofSalesofPrevMonthbyStoreIdTest1" doc:id="bae17b57-52a9-46e6-b21a-e70a82994384" description="Test">
+	<munit:test name="ByStoreIdTest02-QuantityIsNotNull" doc:id="bae17b57-52a9-46e6-b21a-e70a82994384" description="Test">
 		<munit:behavior >
 			<munit:set-event doc:name="Set GET | id=3" doc:id="e5ceac30-ba7f-4fae-937c-6b75cd8ac9d9" >
 				<munit:attributes value="#[{ method : 'GET', queryParams : { id : '3'}}]" />
@@ -44,7 +73,7 @@
 			<munit-tools:assert-that doc:name="Checks if Quantity of Sales is NOT NULL" doc:id="c0f4ff8b-a04c-483e-9472-c9a2b0ac2384" message='"Quantity of Sales" is null value' is="#[MunitTools::notNullValue()]" expression='#[payload."Quantity of Sales"]' />
 		</munit:validation>
 	</munit:test>
-	<munit:test name="orderfeature-test-suite-Get:QuantityofSalesofPrevMonthbyStoreIdTest2" doc:id="ac26f969-cc80-45b2-985c-bcc85309410c" description="Test">
+	<munit:test name="ByStoreIdTest03-StoreIdNotNull" doc:id="ac26f969-cc80-45b2-985c-bcc85309410c" description="Test">
 		<munit:behavior >
 			<munit:set-event doc:name="Set GET | id=3" doc:id="ee4f3bfc-6c2a-44c1-945a-09a84fc29754" >
 				<munit:attributes value="#[{ method : 'GET', queryParams : { id : '3'}}]" />
@@ -55,6 +84,32 @@
 		</munit:execution>
 		<munit:validation>
 			<munit-tools:assert-that doc:name="Checks if Store ID is NOT NULL" doc:id="4acb58cd-783e-40d8-be77-baa84b4f6832" expression='#[payload."Store ID"]' is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="BaseTest01-QuantityValue" doc:id="bee862c9-66ac-405f-a776-a06116ab7494" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set GET" doc:id="cccc4224-bf11-4296-a9ef-da737be9fa38" >
+				<munit:attributes value="#[{ method : 'GET'}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution>
+			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthAll" doc:id="7a866583-e11c-487a-8ee2-e88969b25831" name="Get:QuantityofSalesofPrevMonthAll" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-equals doc:name="Checks if Quantity of Sales is 326" doc:id="3b55d4c4-4456-456d-88e7-e5ce7d200f0e" actual='#[payload."Quantity of Sales"]' expected="326" message="The Quantity of Sales should be 326" />
+		</munit:validation>
+	</munit:test>
+	<munit:test name="BaseTest02-QuantityValueNotNull" doc:id="3bd555bb-37f0-47ae-a02f-fbbbc2fbe0d9" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set GET" doc:id="7aad8d91-f8e8-46d7-a9a2-08a1a41f44da" >
+				<munit:attributes value="#[{ method : 'GET'}]" />
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to Get:QuantityofSalesofPrevMonthAll" doc:id="04f2551b-5a57-4cdf-92c4-593bfa1373a7" name="Get:QuantityofSalesofPrevMonthAll"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="954a34cd-52b1-49c8-86f8-c25a722c5dee" is="#[MunitTools::notNullValue()]" expression='#[payload."Quantity of Sales"]'/>
 		</munit:validation>
 	</munit:test>
 
