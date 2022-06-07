@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
 	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
-http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
-	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="50443993-b888-4fa2-b3ae-8207797261c3">
-		<http:request-connection host="grocery-api-2131013402.us-east-1.elb.amazonaws.com" />
-	</http:request-config>
-	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="b4cc428f-f047-4dc8-b537-bcba02d6a593" basePath="/api">
-		<http:listener-connection host="0.0.0.0" port="8081" />
+  
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="bfad4151-7db3-41ca-9d09-e9f50d77ac79" basePath="/api">
+		<http:listener-connection host="0.0.0.0" port="${http.port}" />
 	</http:listener-config>
-	
-	<file:config name="File_Config" doc:name="File Config" doc:id="f0c692f2-6150-4b4b-b0c4-28a1a720c8e3">
-		<file:connection workingDir="C:\Users\blee1\Documents\rev_p3\mulesoft_cohort_project\src\main\resources\p3_data" />
+	<file:config name="File_Config" doc:name="File Config" doc:id="40dd52a6-aa48-4dd7-8540-ed558bc05a8b" >
+		<file:connection workingDir="${file.directory}" />
 	</file:config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="25996541-7add-4d96-818b-a44307ac523e" >
+		<db:generic-connection url="${db.url}" driverClassName="org.postgresql.Driver" user="${db.username}" password="${db.password}" />
+	</db:config>
+
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="50443993-b888-4fa2-b3ae-8207797261c3">
+		<http:request-connection host="${http.host}" />
+	</http:request-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="3f0dc74a-bdce-4a49-b9ca-88c356b45f22" file="config.yaml" />
 </mule>
