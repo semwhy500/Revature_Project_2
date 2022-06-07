@@ -806,7 +806,7 @@ var total_income_of_prev_month = payload reduce ((item, acc=0) -> acc +
     else 0
 )
 ---
-"total_income_of_prev_month": total_income_of_prev_month
+"Total Income Of Previous Month": total_income_of_prev_month
 ]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
@@ -855,8 +855,8 @@ payload map (item, index) -> {
 output application/json
 ---
 {
-	"store_id": vars.queryParamsStoreId,
-	"total_income": sum(payload.data)
+	"Store Id": vars.queryParamsStoreId,
+	"Total Income": sum(payload.data)
 }
 //data: "store_id: " ++ vars.queryParamsStoreId ++ ", total_income: " ++ sum(payload.data)]]></ee:set-payload>
 			</ee:message>
@@ -906,8 +906,8 @@ payload map (item, index) -> {
 output application/json
 ---
 {
-	product_id: vars.queryParamsProductId,
-	total_income: sum(payload.data)
+	"Product Id": vars.queryParamsProductId,
+	"Total Income": sum(payload.data)
 }
 //data: "product_id: " ++ vars.queryParamsProductId ++ ", total_income: " ++ sum(payload.data)]]></ee:set-payload>
 			</ee:message>
@@ -1057,8 +1057,8 @@ payload map {
 output application/json
 ---
 {
-	day_of_the_week: vars.queryParamsDayWeek,
-	total_income: sum(payload.data)
+	"Day Of The Week": vars.queryParamsDayWeek,
+	"Total Income": sum(payload.data)
 }
 //data: "day_of_the_week: " ++ vars.queryParamsDayWeek ++ ", total_income: " ++ sum(payload.data)]]></ee:set-payload>
 			</ee:message>
