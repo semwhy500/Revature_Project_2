@@ -5,6 +5,9 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
         <http:listener-connection host="0.0.0.0" port="8082" />
     </http:listener-config>
     <apikit:config name="historicsalesapi-config" api="historicsalesapi.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+	<flow name="changeInterfaceFlowtoRouter" doc:id="d9908bd6-dc38-4f2a-8a15-fd7dba410b8d" >
+		<set-variable value="" doc:name="changeInterfaceFlowtoRouter" doc:id="537fa533-fd85-4215-9c3e-d20cbc6ec0e5" variableName="changeInterfaceFlowtoRouter"/>
+	</flow>
 	<flow name="interfaceFlow" doc:id="fd1594f6-1cb9-4d5a-978b-ea64591e386a" >
 		<apikit:router doc:name="APIkit Router" doc:id="c97a592b-4c5b-4af6-b85d-99fcd85d6752" config-ref="Router"/>
 	</flow>
