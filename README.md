@@ -113,11 +113,11 @@ Guide to the available endpoints:
 ## Contributors
 Here are the people who have contributed to this project.
 
-- Ben Ortiz (Team lead & Cohort lead)
-- Abby Sowalla (Team lead)
-- Brian Lee (Team lead)
-- Brandon Learned (Team lead)
-- Jake Varney (Team lead)
+- Ben Ortiz
+- Abby Sowalla
+- Brian Lee
+- Brandon Learned
+- Jake Varney
 - Holly Anderson
 - Anthony Baraja
 - Ethan Shura
